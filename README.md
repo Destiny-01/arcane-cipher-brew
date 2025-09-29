@@ -1,73 +1,224 @@
-# Welcome to your Lovable project
+# 🧙‍♂️ Private Potion Brewing Simulator
 
-## Project info
+An enchanted, gamified learning experience that teaches Fully Homomorphic Encryption (FHE) concepts through mystical alchemy and potion brewing metaphors.
 
-**URL**: https://lovable.dev/projects/60141a99-feba-472a-a43a-45db0c086110
+Built for the **Zama Hello FHEVM Bounty** 🌟
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+- **Mystical Design**: Dark enchanted forest theme with purple, green, and gold color palette
+- **Gamified Learning**: Progress through 10 sections by completing interactive quizzes
+- **Beautiful Animations**: Framer Motion transitions, particle effects, glowing elements
+- **Interactive Quizzes**: Multiple question types (MCQ, True/False, Fill-in-the-blank)
+- **Progress Tracking**: LocalStorage-based system tracks completed sections and quiz attempts
+- **Responsive Layout**: Fixed header with mana bar, scrollable sidebar with locked/unlocked sections
+- **Reusable Components**: Modular architecture with themed content blocks
 
-**Use Lovable**
+## 🎨 Design System
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/60141a99-feba-472a-a43a-45db0c086110) and start prompting.
+- **Fonts**: 
+  - Titles: Cinzel (serif)
+  - Body: Crimson Text (serif)
+- **Colors**:
+  - Primary: Mystical Purple (`#a78bfa`)
+  - Secondary: Emerald Green (`#6ee7b7`)
+  - Accent: Golden (`#fbbf24`)
+- **Effects**: Glow shadows, particle animations, portal swirls, parchment scrolls
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🏗️ Architecture
 
-**Use your preferred IDE**
+### Component Structure
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```
+src/
+├── components/
+│   ├── layout/
+│   │   ├── Header.tsx          # Fixed header with mana bar
+│   │   ├── Sidebar.tsx         # Scrollable TOC with lock states
+│   │   └── Footer.tsx          # Credits and resources
+│   ├── content/
+│   │   ├── SectionHeader.tsx   # Animated section titles
+│   │   ├── LearningObjectives.tsx
+│   │   ├── SubHeader.tsx
+│   │   ├── ContentBlock.tsx
+│   │   ├── CodeBlock.tsx       # Syntax-highlighted code
+│   │   ├── NoteBlock.tsx       # Parchment-style notes
+│   │   ├── TipBlock.tsx        # Glowing tip boxes
+│   │   └── ResourceList.tsx    # External links
+│   ├── quiz/
+│   │   └── QuizModal.tsx       # Full-screen quiz interface
+│   ├── ParticleBackground.tsx  # Canvas-based particle system
+│   └── SectionTemplate.tsx     # Main section renderer
+├── hooks/
+│   └── useProgress.ts          # LocalStorage progress management
+├── data/
+│   └── sections.json           # Content & quiz data
+└── pages/
+    └── Index.tsx               # Main application page
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Key Technologies
 
-Follow these steps:
+- **React 18** + **TypeScript**
+- **Vite** (build tool)
+- **Tailwind CSS** (styling)
+- **Framer Motion** (animations)
+- **React Syntax Highlighter** (code blocks)
+- **React Confetti** (celebration effects)
+- **LocalStorage** (progress persistence)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Node.js 18+ and npm
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Installation
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd private-potion-brewing
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Building for Production
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+npm run preview  # Preview production build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📚 Content Structure
 
-## What technologies are used for this project?
+### Section Data Format (sections.json)
 
-This project is built with:
+```json
+{
+  "sections": [
+    {
+      "id": 1,
+      "title": "Section Title",
+      "subtitle": "Subtitle",
+      "description": "Introduction text",
+      "learningObjectives": ["Objective 1", "Objective 2"],
+      "content": [
+        { "type": "subheader", "text": "Subheading" },
+        { "type": "text", "content": "Paragraph text" },
+        { "type": "code", "language": "typescript", "code": "...", "title": "..." },
+        { "type": "note", "icon": "scroll", "title": "...", "content": "..." },
+        { "type": "tip", "icon": "sparkles", "title": "...", "content": "..." }
+      ],
+      "resources": [
+        { "title": "Resource Name", "url": "https://..." }
+      ]
+    }
+  ],
+  "quizzes": [
+    {
+      "sectionId": 1,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "Question text?",
+          "options": ["A", "B", "C", "D"],
+          "correctAnswer": 2,
+          "explanation": "Why this is correct"
+        }
+      ]
+    }
+  ]
+}
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Quiz Question Types
 
-## How can I deploy this project?
+1. **Multiple Choice (mcq)**
+   - `correctAnswer`: index of correct option (0-based)
 
-Simply open [Lovable](https://lovable.dev/projects/60141a99-feba-472a-a43a-45db0c086110) and click on Share -> Publish.
+2. **True/False (true-false)**
+   - `correctAnswer`: boolean
 
-## Can I connect a custom domain to my Lovable project?
+3. **Fill in the Blank (fill-blank)**
+   - `correctAnswer`: string (case-insensitive comparison)
 
-Yes, you can!
+## 🎮 How to Use
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. **Start Learning**: Begin with Section 1 (unlocked by default)
+2. **Read Content**: Explore the mystical content blocks and code examples
+3. **Take Quiz**: Click the "Enter the Portal of Trials" button
+4. **Master Section**: Score 100% to unlock the next section
+5. **Track Progress**: Watch your mana bar fill as you complete sections
+6. **Reset Anytime**: Use the Reset button in the header to start over
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🔮 Features Explained
+
+### Progress System
+- Sections unlock sequentially after completing previous quiz
+- Progress persists in LocalStorage
+- Mana bar shows overall completion (10% per section)
+- Quiz attempts and scores are tracked
+
+### Quiz Modal
+- Full-screen overlay with mystical cauldron theme
+- Real-time feedback per question
+- Confetti celebration on completion
+- Unlimited retries until 100% score
+- Smooth transitions between questions
+
+### Animations
+- Particle effects (80 floating particles)
+- Glowing text effects on titles
+- Portal swirl animation
+- Fade-in animations on scroll
+- Shake effect on wrong answers
+- Confetti on quiz completion
+
+## 🎨 Customization
+
+### Adding New Sections
+
+1. Add section data to `src/data/sections.json`
+2. Add corresponding quiz questions
+3. Sections automatically appear in sidebar
+4. No code changes required!
+
+### Styling
+
+- Modify `src/index.css` for global theme tokens
+- Update `tailwind.config.ts` for design system
+- Use semantic CSS classes like `.glow-purple`, `.btn-enchanted`
+
+## 📖 Resources
+
+- [Zama Documentation](https://docs.zama.ai/)
+- [fhEVM Documentation](https://docs.zama.ai/fhevm)
+- [Introduction to FHE](https://www.zama.ai/introduction-to-homomorphic-encryption)
+
+## 🤝 Contributing
+
+This project was built for the Zama Hello FHEVM Bounty. Feel free to fork and adapt for your own educational purposes!
+
+## 📝 License
+
+MIT License - feel free to use this project as a template for other educational content.
+
+## 🙏 Acknowledgments
+
+- **Zama** for pioneering FHE technology and the fhEVM
+- Design inspiration from mystical alchemy and fantasy RPGs
+- Community FHE resources and documentation
+
+---
+
+**Built with 💜 for the Zama Community**
+
+*May your potions brew privately, and your encryptions remain unbroken!* 🧪✨

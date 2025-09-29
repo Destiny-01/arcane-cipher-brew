@@ -8,35 +8,64 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Mystical Dark Theme - Enchanted Forest Alchemy */
+    --background: 260 35% 8%;
+    --foreground: 280 20% 92%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 260 30% 12%;
+    --card-foreground: 280 20% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 260 35% 10%;
+    --popover-foreground: 280 20% 92%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Purple mystical primary */
+    --primary: 270 60% 55%;
+    --primary-foreground: 280 20% 98%;
+    --primary-glow: 270 80% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Emerald green secondary */
+    --secondary: 150 50% 45%;
+    --secondary-foreground: 150 20% 98%;
+    --secondary-glow: 150 70% 55%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted purples */
+    --muted: 260 25% 18%;
+    --muted-foreground: 280 15% 60%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Golden accent */
+    --accent: 45 90% 60%;
+    --accent-foreground: 45 20% 10%;
+    --accent-glow: 45 95% 70%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 260 25% 22%;
+    --input: 260 30% 16%;
+    --ring: 270 60% 55%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    
+    /* Custom mystical tokens */
+    --potion-purple: 270 60% 55%;
+    --potion-green: 150 50% 45%;
+    --potion-gold: 45 90% 60%;
+    --enchanted-mist: 260 40% 15%;
+    
+    /* Gradients */
+    --gradient-mystical: linear-gradient(135deg, hsl(260 35% 8%) 0%, hsl(270 40% 12%) 50%, hsl(260 35% 8%) 100%);
+    --gradient-glow: linear-gradient(135deg, hsl(270 60% 55%) 0%, hsl(150 50% 45%) 100%);
+    --gradient-portal: radial-gradient(circle, hsl(270 80% 65%) 0%, hsl(260 60% 35%) 100%);
+    
+    /* Shadows and glows */
+    --shadow-mystical: 0 8px 32px -8px hsl(270 60% 25% / 0.5);
+    --shadow-glow-purple: 0 0 20px hsl(270 80% 65% / 0.4), 0 0 40px hsl(270 80% 65% / 0.2);
+    --shadow-glow-green: 0 0 20px hsl(150 70% 55% / 0.4), 0 0 40px hsl(150 70% 55% / 0.2);
+    --shadow-glow-gold: 0 0 20px hsl(45 95% 70% / 0.4), 0 0 40px hsl(45 95% 70% / 0.2);
+    
+    /* Animations */
+    --transition-mystical: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-glow: all 0.3s ease-in-out;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +85,9 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark mode uses same mystical theme */
+    --background: 260 35% 8%;
+    --foreground: 280 20% 92%;
   }
 }
 
@@ -100,6 +97,115 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-serif;
+    font-family: 'Crimson Text', serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+  }
+}
+
+@layer components {
+  /* Mystical glow effects */
+  .glow-purple {
+    text-shadow: 0 0 10px hsl(var(--primary-glow) / 0.6), 0 0 20px hsl(var(--primary-glow) / 0.4);
+  }
+  
+  .glow-green {
+    text-shadow: 0 0 10px hsl(var(--secondary-glow) / 0.6), 0 0 20px hsl(var(--secondary-glow) / 0.4);
+  }
+  
+  .glow-gold {
+    text-shadow: 0 0 10px hsl(var(--accent-glow) / 0.6), 0 0 20px hsl(var(--accent-glow) / 0.4);
+  }
+  
+  .box-glow-purple {
+    box-shadow: var(--shadow-glow-purple);
+  }
+  
+  .box-glow-green {
+    box-shadow: var(--shadow-glow-green);
+  }
+  
+  .box-glow-gold {
+    box-shadow: var(--shadow-glow-gold);
+  }
+  
+  /* Enchanted button */
+  .btn-enchanted {
+    @apply bg-primary text-primary-foreground rounded-lg px-6 py-3 font-semibold;
+    @apply transition-all duration-300 hover:scale-105;
+    box-shadow: var(--shadow-glow-purple);
+  }
+  
+  .btn-enchanted:hover {
+    @apply brightness-110;
+  }
+  
+  /* Portal effect */
+  .portal-swirl {
+    background: var(--gradient-portal);
+    animation: portal-spin 3s linear infinite;
+  }
+  
+  @keyframes portal-spin {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Particle container */
+  .particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Scroll indicator */
+  .scroll-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Locked section style */
+  .section-locked {
+    @apply opacity-50 cursor-not-allowed;
+    filter: grayscale(0.7);
+  }
+  
+  /* Mana bar animation */
+  .mana-fill {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Code block mystical theme */
+  .code-mystical {
+    @apply bg-muted border border-primary/30 rounded-lg;
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.2);
+  }
+  
+  /* Parchment scroll effect */
+  .parchment-scroll {
+    @apply bg-card border-2 border-accent/40 rounded-lg p-4;
+    background-image: 
+      linear-gradient(to bottom, 
+        hsl(var(--card)) 0%, 
+        hsl(var(--muted)) 100%);
+    box-shadow: inset 0 2px 8px hsl(0 0% 0% / 0.3);
   }
 }

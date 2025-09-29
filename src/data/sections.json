@@ -1,0 +1,241 @@
+{
+  "sections": [
+    {
+      "id": 1,
+      "title": "The Alchemist's Introduction",
+      "subtitle": "Your First Steps into the Mystical Arts",
+      "description": "Welcome, apprentice alchemist! In this enchanted laboratory, you'll learn the ancient art of Private Potion Brewing—a magical parallel to Fully Homomorphic Encryption (FHE). Just as alchemists can transform ingredients without revealing their secrets, FHE allows computations on encrypted data without exposing the underlying information. This mystical journey will teach you how to brew potions (process data) while keeping your recipes (encryption) completely private.",
+      "learningObjectives": [
+        "Understand what FHE (Fully Homomorphic Encryption) is and why it matters",
+        "Learn the basic principles of computing on encrypted data",
+        "Discover real-world applications of FHE technology",
+        "Master the fundamental terminology of homomorphic encryption"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "What is Fully Homomorphic Encryption?"
+        },
+        {
+          "type": "text",
+          "content": "Imagine a magical cauldron where you can add ingredients in sealed bottles, stir them together, and produce a new sealed bottle—without ever opening any container. That's the essence of Fully Homomorphic Encryption! FHE is a form of encryption that allows computations to be performed directly on encrypted data, producing an encrypted result that, when decrypted, matches the result of operations performed on the plaintext."
+        },
+        {
+          "type": "note",
+          "icon": "scroll",
+          "title": "Historical Lore",
+          "content": "The concept of FHE was first proposed by Rivest, Adleman, and Dattner in 1978, just a year after RSA encryption was invented. However, it remained a theoretical dream for over 30 years until Craig Gentry's breakthrough in 2009!"
+        },
+        {
+          "type": "subheader",
+          "text": "Why Does This Magic Matter?"
+        },
+        {
+          "type": "text",
+          "content": "In our increasingly digital world, we face a fundamental problem: how do we process sensitive data in the cloud without exposing it? Traditional encryption requires decryption before computation, creating a vulnerability window. FHE eliminates this risk entirely—the data remains encrypted throughout the entire computational process."
+        },
+        {
+          "type": "tip",
+          "icon": "sparkles",
+          "title": "Real-World Enchantments",
+          "content": "FHE enables: private medical diagnosis (analyze health data without exposing patient records), secure financial analysis (process transactions without revealing account details), and confidential AI inference (run machine learning models on encrypted inputs)."
+        },
+        {
+          "type": "subheader",
+          "text": "The Three Types of Homomorphic Spells"
+        },
+        {
+          "type": "text",
+          "content": "Not all homomorphic encryption is created equal. There are three levels of magical power:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Partially Homomorphic Encryption (PHE)**: Can perform one type of operation (either addition OR multiplication) unlimited times. Like a cauldron that only stirs.",
+            "**Somewhat Homomorphic Encryption (SHE)**: Can perform both operations but only a limited number of times. The magic weakens with each use.",
+            "**Fully Homomorphic Encryption (FHE)**: Can perform any combination of operations unlimited times. True alchemical mastery!"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Conceptual Example: Brewing Without Revealing",
+          "code": "// Traditional approach (INSECURE)\nconst secretIngredient = decrypt(encryptedData); // Exposed!\nconst potion = brew(secretIngredient);\nconst result = encrypt(potion);\n\n// FHE approach (SECURE)\nconst encryptedPotion = brewOnEncrypted(encryptedData); // Never exposed!\nconst result = decrypt(encryptedPotion); // Only final result revealed"
+        },
+        {
+          "type": "subheader",
+          "text": "The Magic of Zama and fhEVM"
+        },
+        {
+          "type": "text",
+          "content": "Zama is pioneering FHE for blockchain technology with fhEVM (Fully Homomorphic Ethereum Virtual Machine). This allows smart contracts to process encrypted data directly on the blockchain, opening up entirely new possibilities for private DeFi, confidential voting, sealed-bid auctions, and more."
+        },
+        {
+          "type": "note",
+          "icon": "lock",
+          "title": "The Privacy Revolution",
+          "content": "With fhEVM, your smart contracts can compute on encrypted balances, encrypted votes, and encrypted bids—all while maintaining complete privacy and leveraging the security of the Ethereum blockchain."
+        }
+      ],
+      "resources": [
+        {
+          "title": "Zama Official Documentation",
+          "url": "https://docs.zama.ai/"
+        },
+        {
+          "title": "fhEVM Documentation",
+          "url": "https://docs.zama.ai/fhevm"
+        },
+        {
+          "title": "Introduction to FHE",
+          "url": "https://www.zama.ai/introduction-to-homomorphic-encryption"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Sealed Scroll II",
+      "subtitle": "Understanding Encryption Schemes",
+      "description": "Unlock this section by completing the previous challenge.",
+      "learningObjectives": [
+        "Master different FHE schemes",
+        "Understand lattice-based cryptography",
+        "Learn about BGV, BFV, and CKKS schemes"
+      ],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 3,
+      "title": "Sealed Scroll III",
+      "subtitle": "Noise Management & Bootstrapping",
+      "description": "The art of maintaining encryption through complex operations.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 4,
+      "title": "Sealed Scroll IV",
+      "subtitle": "TFHE Deep Dive",
+      "description": "Fast Fully Homomorphic Encryption over the Torus.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 5,
+      "title": "Sealed Scroll V",
+      "subtitle": "fhEVM Architecture",
+      "description": "Building private smart contracts on Ethereum.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 6,
+      "title": "Sealed Scroll VI",
+      "subtitle": "Writing Confidential Smart Contracts",
+      "description": "Practical development with Zama's tools.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 7,
+      "title": "Sealed Scroll VII",
+      "subtitle": "Access Control & Key Management",
+      "description": "Securing your encrypted computations.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 8,
+      "title": "Sealed Scroll VIII",
+      "subtitle": "Performance Optimization",
+      "description": "Making FHE computations practical.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 9,
+      "title": "Sealed Scroll IX",
+      "subtitle": "Real-World Applications",
+      "description": "Building privacy-preserving DApps.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    },
+    {
+      "id": 10,
+      "title": "Sealed Scroll X",
+      "subtitle": "The Future of Private Computation",
+      "description": "What's next in FHE technology.",
+      "learningObjectives": [],
+      "content": [],
+      "resources": []
+    }
+  ],
+  "quizzes": [
+    {
+      "sectionId": 1,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "What is the primary advantage of Fully Homomorphic Encryption?",
+          "options": [
+            "It's faster than traditional encryption",
+            "It allows computation on encrypted data without decryption",
+            "It uses less storage space",
+            "It's easier to implement"
+          ],
+          "correctAnswer": 1,
+          "explanation": "FHE's revolutionary feature is enabling computations directly on encrypted data, maintaining privacy throughout the entire process."
+        },
+        {
+          "id": 2,
+          "type": "true-false",
+          "question": "Craig Gentry created the first practical FHE scheme in 2009.",
+          "correctAnswer": true,
+          "explanation": "Gentry's 2009 breakthrough was the first practical construction of FHE after 30+ years of theoretical work."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Which type of homomorphic encryption can perform unlimited operations of any kind?",
+          "options": [
+            "Partially Homomorphic Encryption (PHE)",
+            "Somewhat Homomorphic Encryption (SHE)",
+            "Fully Homomorphic Encryption (FHE)",
+            "Semi Homomorphic Encryption"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Only Fully Homomorphic Encryption (FHE) supports unlimited operations of any type on encrypted data."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Zama's _____ enables Ethereum smart contracts to compute on encrypted data.",
+          "correctAnswer": "fhEVM",
+          "explanation": "fhEVM (Fully Homomorphic Ethereum Virtual Machine) is Zama's solution for private smart contract computation."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "What is a real-world application of FHE?",
+          "options": [
+            "Faster web browsing",
+            "Private medical diagnosis on encrypted health data",
+            "Reducing file sizes",
+            "Improving video quality"
+          ],
+          "correctAnswer": 1,
+          "explanation": "FHE enables privacy-preserving computations like analyzing medical data without exposing sensitive patient information."
+        }
+      ]
+    }
+  ]
+}
