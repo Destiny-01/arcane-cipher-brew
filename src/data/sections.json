@@ -143,43 +143,478 @@
     },
     {
       "id": 2,
-      "title": "Sealed Scroll II",
-      "subtitle": "Understanding Encryption Schemes",
-      "description": "Unlock this section by completing the previous challenge.",
+      "title": "Entering the FHEVM Realm",
+      "subtitle": "Basics, Cryptography, Data Types, and Operations",
+      "description": "Hello again, privacy pioneers! We're stepping into the fhEVM realm – Zama's clever twist on the Ethereum Virtual Machine that lets you cast confidential spells on the blockchain. Picture it as an enchanted EVM where data stays hidden in ciphertexts, yet computations hum along seamlessly. No more exposing secrets during smart contract executions! This section builds on FHE basics, breaking down fhEVM's nuts and bolts in a straightforward way, with real examples to make it stick. We'll keep the magic light but engaging, focusing on clear explanations so you can confidently build privacy-preserving dApps like our Private Potion Guesser.",
       "learningObjectives": [
-        "Master different FHE schemes",
-        "Understand lattice-based cryptography",
-        "Learn about BGV, BFV, and CKKS schemes"
+        "Explain what fhEVM is and how it integrates FHE into Ethereum-compatible smart contracts",
+        "Describe key cryptography concepts like keys, ciphertexts, the TFHE scheme, and noise management",
+        "Identify fhEVM's encrypted data types and how they differ from standard Solidity ones",
+        "Perform basic operations on encrypted data, understanding examples, limitations, and best practices"
       ],
-      "content": [],
-      "resources": []
+      "content": [
+        {
+          "type": "subheader",
+          "text": "fhEVM Overview: The Confidential Blockchain Engine"
+        },
+        {
+          "type": "text",
+          "content": "fhEVM is Zama's open-source framework that extends the standard EVM to support Fully Homomorphic Encryption. It's essentially an EVM fork with built-in FHE capabilities, allowing smart contracts to compute on encrypted data without decryption. This means your dApps can handle sensitive info – like private guesses in our game – while keeping everything confidential onchain."
+        },
+        {
+          "type": "text",
+          "content": "How does it work? fhEVM uses symbolic execution: Instead of computing values directly, it handles 'ciphertext handles' (references to encrypted data). Heavy computations are offloaded to a coprocessor, making it efficient for blockchains. It's compatible with EVM tools like Hardhat and deploys to networks like Sepolia. The magic? Data privacy without sacrificing verifiability – perfect for DeFi, voting, or our potion guessing where the target number stays secret."
+        },
+        {
+          "type": "note",
+          "icon": "sparkles",
+          "title": "Web3 Connection",
+          "content": "If you're familiar with Solidity, fhEVM adds a library (tfhe.sol) to your contracts, letting you mix encrypted ops with regular code. It's production-ready, quantum-resistant, and open-source on GitHub."
+        },
+        {
+          "type": "subheader",
+          "text": "Cryptography Concepts: The Building Blocks of Privacy"
+        },
+        {
+          "type": "text",
+          "content": "Let's demystify the crypto behind fhEVM – no deep math required, just the essentials for building."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Public and Private Keys**: fhEVM uses a global public key (fetched via frontend libraries) for encrypting data client-side. The private key is split across a decentralized Key Management System (KMS) using threshold MPC – no single entity holds the full key. This ensures secure decryption only when authorized, with zero-knowledge proofs verifying inputs.",
+            "**Ciphertexts**: Your encrypted data! Operations produce new ciphertexts without revealing plaintext. In contracts, they're handled as opaque references to prevent leaks.",
+            "**TFHE Scheme**: fhEVM is powered by Zama's TFHE (Threshold Fully Homomorphic Encryption), a lattice-based scheme that's fast for Boolean ops and supports unlimited computations. It's quantum-safe and handles integers up to 256 bits.",
+            "**Noise Management**: FHE adds 'noise' to ciphertexts during ops to maintain security. Too much noise? Data becomes undecryptable. TFHE uses programmable bootstrapping to 'refresh' ciphertexts, reducing noise and enabling deep computations without limits."
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "lock",
+          "title": "Privacy Guarantee",
+          "content": "These concepts ensure your dApp's privacy: Encrypt once, compute forever, decrypt only at the end."
+        },
+        {
+          "type": "subheader",
+          "text": "Data Types in fhEVM: Encrypted Twins of Solidity Staples"
+        },
+        {
+          "type": "text",
+          "content": "fhEVM introduces prefixed 'e' types for encrypted data, mirroring Solidity's but with privacy superpowers. They store ciphertexts, not values, so you can't peek inside – that's the point!"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**ebool**: Encrypted boolean for true/false decisions",
+            "**euintX**: Encrypted unsigned integers (e.g., euint8 for 8-bit, up to euint256 for big numbers). Use smaller bits for efficiency",
+            "**eaddress**: Encrypted Ethereum addresses",
+            "**External Types**: Like externalEuint8 for handling frontend-encrypted inputs"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Difference from standard? Regular uint is plaintext; euint is ciphertext. Cast with FHE.asEuintX(value) for plaintext to encrypted, or handle external inputs directly."
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Data Types Example",
+          "code": "import \"fhevm/lib/TFHE.sol\";\n\n// Encrypt plaintext as euint8\neuint8 secretNumber = TFHE.asEuint8(42);\n\n// Start with euint8/16 for efficiency"
+        },
+        {
+          "type": "subheader",
+          "text": "Supported Operations: Casting Spells on Ciphertexts"
+        },
+        {
+          "type": "text",
+          "content": "Using the TFHE.sol library (imported as tfhe.sol or TFHE.sol), fhEVM supports ops via TFHE functions. They're like Solidity ops but privacy-preserving."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Arithmetic**: Add (TFHE.add), subtract (TFHE.sub), multiply (TFHE.mul), divide (TFHE.div – plaintext divisor only), remainder (TFHE.rem – plaintext only), negate (TFHE.neg), min/max (TFHE.min/max)",
+            "**Bitwise**: AND (TFHE.and), OR (TFHE.or), XOR (TFHE.xor), NOT (TFHE.not), shifts (TFHE.shl/shr), rotates (TFHE.rotl/rotr)",
+            "**Comparisons**: Equal (TFHE.eq), not equal (TFHE.ne), less than (TFHE.lt), greater than (TFHE.gt), etc.",
+            "**Advanced**: Select (TFHE.select for if-else on encrypted conditions), random (TFHE.randEuint8 for onchain randomness)"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Operation Examples",
+          "code": "// Arithmetic: Add two encrypted integers\neuint32 sum = TFHE.add(a, b);\n\n// Bitwise: XOR encrypted values\neuint16 result = TFHE.xor(x, y);\n\n// Comparison: Check equality\nebool isEqual = TFHE.eq(guess, target);\n\n// Advanced: Conditional select\neuint64 choice = TFHE.select(condition, optionA, optionB);"
+        },
+        {
+          "type": "tip",
+          "icon": "zap",
+          "title": "Performance Tips",
+          "content": "Limitations: No arbitrary loops (use bounded ones); div/rem need plaintext divisors; ops are gas-heavy (100-1000x standard). Test locally first!"
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Import Errors**: Always import 'fhevm/lib/TFHE.sol'; missing it causes 'TFHE not found'",
+            "**Gas Overruns**: FHE ops cost more – optimize by using smaller euint types and test on local nodes",
+            "**Type Mismatches**: Ops need matching types; cast with TFHE.asEuintX",
+            "**Noise Issues**: TFHE handles it automatically, but deep chains? Monitor in tests"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "fhEVM brings FHE to EVM via TFHE, using symbolic execution for private computations",
+            "Crypto essentials: Global keys, ciphertexts, noise refreshed via bootstrapping",
+            "Data types like euintX enable encrypted logic; operations mirror Solidity but secure",
+            "Master these for dApps where privacy wins – with awareness of gas and limits"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "fhEVM Solidity Guides",
+          "url": "https://docs.zama.ai/protocol/solidity-guides"
+        },
+        {
+          "title": "TFHE Library Documentation",
+          "url": "https://docs.zama.ai/fhevm/fundamentals/types"
+        }
+      ]
     },
     {
       "id": 3,
-      "title": "Sealed Scroll III",
-      "subtitle": "Noise Management & Bootstrapping",
-      "description": "The art of maintaining encryption through complex operations.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
+      "title": "Brewing Our First Confidential Potion",
+      "subtitle": "Project Overview, Tools, and Prerequisites",
+      "description": "Excited yet? Let's outline our star project: the Private Potion Guesser dApp! It's a fun, hands-on way to apply fhEVM – users guess an encrypted potion's 'strength' (a secret number), and the contract checks it privately without spilling secrets. Think of it as a magical lockbox: Your guess goes in encrypted, computation happens inside, and only the 'yes/no' peeks out. This section previews the build, lists tools, and checks prereqs, keeping things simple and motivating so you're geared up to code.",
+      "learningObjectives": [
+        "Describe the dApp's mechanics and how fhEVM ensures privacy in the guessing process",
+        "List key tools and their roles in the full-stack build",
+        "Verify prerequisites like software versions and setups",
+        "Grasp the end-to-end workflow to build excitement for coding"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "Project Overview: A Private Guessing Adventure"
+        },
+        {
+          "type": "text",
+          "content": "In the Private Potion Guesser:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "The smart contract holds an encrypted target number (set by the deployer)",
+            "On the frontend, users encrypt their guess using the public key",
+            "The contract compares (e.g., TFHE.eq) on ciphertexts, returning an encrypted result",
+            "User decrypts offchain via threshold KMS, seeing 'Correct!' or hints without exposing data"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "lock",
+          "title": "Privacy Win",
+          "content": "Blockchain sees only ciphertexts – no leaks! It's simple yet demonstrates the full FHE loop: Encrypt → Compute → Decrypt. We'll build it end-to-end, deploying to Sepolia for real-world feel."
+        },
+        {
+          "type": "text",
+          "content": "Why this project? It's beginner-accessible, creative (inspired by Zama's secret number ideas), and teaches core fhEVM without overwhelm."
+        },
+        {
+          "type": "subheader",
+          "text": "Required Tools: Your Builder's Toolkit"
+        },
+        {
+          "type": "text",
+          "content": "Here's what we'll use – all free and Web3-standard:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Hardhat**: Compiles, tests, deploys contracts. Great for local sims",
+            "**fhevmjs**: Frontend JS lib for encryption/decryption with fhEVM's keys",
+            "**Wagmi/Viem**: Handles wallet connections and contract calls (e.g., MetaMask integration)",
+            "**React/Next.js**: Builds the UI – inputs, buttons, results display",
+            "**Sepolia Testnet**: Safe Ethereum playground; use Alchemy/Infura for RPC",
+            "**MetaMask**: Wallet for testing interactions and funding"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "sparkles",
+          "title": "Tool Integration",
+          "content": "These snap together: Hardhat for backend, React for frontend, fhevmjs bridging encryption."
+        },
+        {
+          "type": "subheader",
+          "text": "Prerequisites: Check Your Setup"
+        },
+        {
+          "type": "text",
+          "content": "Before brewing:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Node.js**: v18+ (LTS recommended; check with `node -v`)",
+            "**Package Manager**: NPM or Yarn",
+            "**Git**: For cloning templates",
+            "**MetaMask**: Add Sepolia (Chain ID 11155111), fund via faucet",
+            "**Basic Skills**: Solidity basics, React hooks; no FHE needed – we'll teach that!"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Quick Verify",
+          "code": "# Check your versions\nnode -v && npm -v\n\n# Should show compatible versions (Node 18+)"
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Node Version Mismatch**: If <18, update via nvm or official site",
+            "**Wallet Funding**: No ETH? Transactions fail – use faucets daily",
+            "**Editor Setup**: VS Code + Solidity/React extensions for auto-complete and errors"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "The dApp uses fhEVM for private guesses, showcasing encrypt-compute-decrypt",
+            "Tools cover full stack; prereqs are straightforward Web3 basics",
+            "This sets a fun foundation – ready to clone and code!"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "Sepolia Faucet",
+          "url": "https://sepolia-faucet.com"
+        },
+        {
+          "title": "Node.js Download",
+          "url": "https://nodejs.org/"
+        }
+      ]
     },
     {
       "id": 4,
-      "title": "Sealed Scroll IV",
-      "subtitle": "TFHE Deep Dive",
-      "description": "Fast Fully Homomorphic Encryption over the Torus.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
+      "title": "Gathering Your Alchemy Kit",
+      "subtitle": "Cloning and Exploring the Boilerplate Repo",
+      "description": "Welcome back, fellow privacy alchemists! In this step, we'll summon our essential tools by cloning a boilerplate repository – think of it as pulling a pre-stocked cauldron from the ether, ready for brewing confidential potions. This template from Zama makes starting with fhEVM a breeze, blending React for the frontend with hooks for encrypted magic. We'll walk through cloning it, exploring its structure, and understanding how it sets the stage for our Private Potion Guesser dApp. A bit of enchantment here: imagine the repo as your spellbook, with folders as chapters revealing the secrets of secure blockchain apps.",
+      "learningObjectives": [
+        "Clone the boilerplate repo and set up your local environment step-by-step",
+        "Navigate and explain the key folders and files, especially in the packages directory",
+        "Understand how the template integrates frontend tools with fhEVM for privacy-focused dApps",
+        "Identify how to adapt it for our guessing game, including linking to smart contracts"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "Setting Up: Cloning and Installation"
+        },
+        {
+          "type": "text",
+          "content": "Start by opening your terminal – your modern wand for commanding code. We'll use Zama's official fhEVM React template as our base, which is frontend-focused but pairs perfectly with their Hardhat template for contracts."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Clone and Setup",
+          "code": "# 1. Clone the repository\ngit clone https://github.com/zama-ai/fhevm-react-template.git\n\n# 2. Navigate inside\ncd fhevm-react-template\n\n# 3. Install dependencies\nnpm install"
+        },
+        {
+          "type": "note",
+          "icon": "sparkles",
+          "title": "Why This Template?",
+          "content": "It's beginner-friendly, pre-configured for fhEVM interactions, and uses a monorepo structure to manage packages efficiently. No need to start from scratch; it's optimized for dApps like our private guesser, where the frontend encrypts user inputs before sending them to the contract."
+        },
+        {
+          "type": "subheader",
+          "text": "Exploring the Repo Structure"
+        },
+        {
+          "type": "text",
+          "content": "This repo is structured as a monorepo, meaning multiple 'packages' live under one roof for easier management. The star of the show is the packages folder, which houses the core frontend application. Think of this as touring your alchemy workshop: each folder has tools for specific tasks in building secure, interactive dApps."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Root Level Files**: package.json (master manifest with dependencies like @zama.ai/fhevmjs), README.md (your guidebook), and config files for linting and styling",
+            "**packages/site/**: The heart of the frontend app. Your React/Next.js project directory where you'll build the UI for users to input guesses and see results",
+            "**packages/site/fhevm/**: Contains essential hooks for interacting with fhEVM-enabled smart contracts. These are the spells that let your app encrypt data, send it to the blockchain, and handle responses privately",
+            "**packages/site/hooks/**: Custom React hooks for reusable logic, including useFHECounter.tsx (demo hook) and metamask/ (wallet connection hooks following EIP-6963 standards)"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Example: Encrypting a Guess",
+          "code": "import { getPublicKey } from 'fhevmjs';\n\n// Fetch the global public key\nconst publicKey = await getPublicKey();\n\n// Encrypt the user's guess\nconst encryptedGuess = await instance.encrypt8(guessValue, publicKey);\n\n// This ensures the guess stays secret during onchain comparison"
+        },
+        {
+          "type": "tip",
+          "icon": "sparkles",
+          "title": "Integration Tip",
+          "content": "The template integrates with Hardhat (from https://github.com/zama-ai/fhevm-hardhat-template) for contracts. Clone that separately for PotionGuesser.sol, deploy it, then update addresses in this frontend."
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Git or NPM Issues**: If git clone fails, ensure Git is installed. For install errors, try `npm cache clean --force`",
+            "**Missing Companion Repo**: This template is frontend-only; for contracts, clone the Hardhat one and run `npm run hardhat-node`",
+            "**Environment Vars**: Set MNEMONIC and INFURA_API_KEY in a .env file for deployments",
+            "**Wallet Woes**: Ensure MetaMask is on the right network; check console logs for provider errors"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Cloning and installing the boilerplate gives you a ready fhEVM React foundation, with packages/site as the frontend hub",
+            "Folders like fhevm and hooks provide modular tools for encryption, wallet connections, and contract interactions",
+            "Integrate with Hardhat for full-stack magic; this setup teaches monorepo best practices",
+            "You're now equipped to customize for our Potion Guesser – next sections will build on this!"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "fhEVM React Template",
+          "url": "https://github.com/zama-ai/fhevm-react-template"
+        },
+        {
+          "title": "fhEVM Hardhat Template",
+          "url": "https://github.com/zama-ai/fhevm-hardhat-template"
+        }
+      ]
     },
     {
       "id": 5,
-      "title": "Sealed Scroll V",
-      "subtitle": "fhEVM Architecture",
-      "description": "Building private smart contracts on Ethereum.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
+      "title": "Igniting the Cauldron",
+      "subtitle": "Setting Up Hardhat, React, and Environment",
+      "description": "Time to light the fire! With our repo cloned, we'll ignite the setup – configuring Hardhat for fhEVM contracts, starting the React app, and handling environment vars. Think of this as fueling your cauldron: Get it right, and your potions (dApps) brew smoothly. We'll go step-by-step, with commands and tips to make it engaging and error-free. By the end, you'll have a running local environment for testing our Private Potion Guesser.",
+      "learningObjectives": [
+        "Configure Hardhat for fhEVM, including plugins and networks",
+        "Launch the React frontend and connect it to your environment",
+        "Manage .env vars securely for keys and APIs",
+        "Run basic commands like compile and local node for quick testing"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "Hardhat Setup: Your Contract Forge"
+        },
+        {
+          "type": "text",
+          "content": "Hardhat is our blacksmith for Solidity – it compiles, tests, and deploys with fhEVM support."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Hardhat Configuration Steps",
+          "code": "# 1. Install plugins and dependencies\nnpm install\n\n# 2. Set environment variables\nnpx hardhat vars set MNEMONIC\nnpx hardhat vars set INFURA_API_KEY\n\n# 3. Compile contracts\nnpm run compile\n# or\nnpx hardhat compile\n\n# 4. Start local node (fhEVM-ready)\nnpx hardhat node\n# RPC: http://127.0.0.1:8545\n# Chain ID: 31337\n\n# 5. Deploy to local network\nnpx hardhat deploy --network localhost"
+        },
+        {
+          "type": "note",
+          "icon": "sparkles",
+          "title": "Network Configuration",
+          "content": "Edit hardhat.config.ts to add Sepolia with your RPC URL (from Infura/Alchemy). This gets your backend humming!"
+        },
+        {
+          "type": "subheader",
+          "text": "React Frontend Start: Bringing the UI to Life"
+        },
+        {
+          "type": "text",
+          "content": "Now, fire up the frontend from the react-template (packages/site)."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Frontend Setup",
+          "code": "# 1. Navigate and install\ncd packages/site && npm install\n\n# 2. Start dev server\nnpm run dev\n# Launches at localhost:3000\n\n# 3. Test: Open browser, connect MetaMask"
+        },
+        {
+          "type": "tip",
+          "icon": "zap",
+          "title": "Connection Tip",
+          "content": "Update configs with contract addresses post-deploy. fhevmjs hooks fetch public keys automatically."
+        },
+        {
+          "type": "subheader",
+          "text": "Other Boilerplate Tasks: Securing the Setup"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**.env Management**: Create .env in root with MNEMONIC and INFURA_API_KEY. Use dotenv to load securely – never commit!",
+            "**Clean Slate**: For fresh start, run `npm run clean` to remove artifacts",
+            "**Test Connectivity**: Run `npm run test` to ensure fhEVM ops work locally"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Missing API Key**: Deployment fails? Sign up at Infura, set via hardhat vars",
+            "**Node Version**: Need 20+; use nvm to switch",
+            "**Gas Errors**: Local node has unlimited gas – real nets don't; optimize early",
+            "Use `npm run lint` for code checks; refer to Zama's quickstart if stuck"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Hardhat handles fhEVM backend with easy compile/deploy; React powers interactive frontend",
+            "Env vars keep secrets safe; local node speeds testing",
+            "Setup bridges tools for seamless dev – now code flows!"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "Hardhat Documentation",
+          "url": "https://hardhat.org/docs"
+        },
+        {
+          "title": "Infura Dashboard",
+          "url": "https://infura.io/"
+        },
+        {
+          "title": "Zama Quickstart Guide",
+          "url": "https://docs.zama.ai/fhevm/getting-started"
+        }
+      ]
     },
     {
       "id": 6,
@@ -283,6 +718,206 @@
           ],
           "correctAnswer": 2,
           "explanation": "Zama is the groundbreaking company behind fhEVM (Fully Homomorphic Ethereum Virtual Machine), bringing FHE to blockchain and enabling private computation in smart contracts."
+        }
+      ]
+    },
+    {
+      "sectionId": 2,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "What tool fetches the global public key for frontend encryption?",
+          "options": [
+            "Hardhat",
+            "fhevmjs",
+            "MetaMask",
+            "TFHE.sol"
+          ],
+          "correctAnswer": 1,
+          "explanation": "fhevmjs is the frontend JavaScript library that provides the getPublicKey() function and other encryption utilities for fhEVM dApps."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "fhEVM data types are prefixed with 'e' – for example, euint8 is an encrypted _____.",
+          "correctAnswer": "uint",
+          "explanation": "The 'e' prefix stands for 'encrypted', so euint8 is an encrypted unsigned integer (uint) with 8 bits. Accepted answers: uint, integer, or number."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Which TFHE function checks if two encrypted values are equal?",
+          "options": [
+            "TFHE.compare",
+            "TFHE.eq",
+            "TFHE.equal",
+            "TFHE.check"
+          ],
+          "correctAnswer": 1,
+          "explanation": "TFHE.eq(a, b) performs equality comparison on encrypted values, returning an encrypted boolean (ebool)."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "True or False: TFHE.div supports encrypted divisors.",
+          "options": [
+            "True",
+            "False"
+          ],
+          "correctAnswer": 1,
+          "explanation": "False! TFHE.div only supports plaintext divisors. Division by encrypted values is not currently supported due to computational complexity."
+        }
+      ]
+    },
+    {
+      "sectionId": 3,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "In the Private Potion Guesser, where does encryption happen?",
+          "options": [
+            "On the blockchain",
+            "In the smart contract",
+            "On the frontend/client-side",
+            "In the backend server"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Encryption happens client-side on the frontend using the public key, ensuring data is already encrypted before being sent to the blockchain."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "The minimum recommended Node.js version for this project is _____.",
+          "correctAnswer": "18",
+          "explanation": "Node.js version 18 or higher (LTS) is required for compatibility with modern Web3 tools and libraries."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "What does the dApp do with the encrypted guess and target?",
+          "options": [
+            "Decrypts both and compares",
+            "Sends them to a server",
+            "Compares them while encrypted using TFHE",
+            "Stores them for later"
+          ],
+          "correctAnswer": 2,
+          "explanation": "The magic of FHE! The contract uses TFHE.eq to compare the encrypted guess and target without ever decrypting them."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Which testnet will we deploy to?",
+          "options": [
+            "Goerli",
+            "Sepolia",
+            "Rinkeby",
+            "Mainnet"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Sepolia is the recommended Ethereum testnet for this project, providing a safe environment for testing fhEVM contracts."
+        }
+      ]
+    },
+    {
+      "sectionId": 4,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "Command to clone a repository: git _____ [url]",
+          "correctAnswer": "clone",
+          "explanation": "The git clone command is used to create a local copy of a remote repository."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "True or False: The fhEVM React template includes smart contracts like PotionGuesser.sol.",
+          "options": [
+            "True",
+            "False"
+          ],
+          "correctAnswer": 1,
+          "explanation": "False! The React template is frontend-only. You need the separate Hardhat companion template for smart contracts."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Which folder contains the fhEVM encryption hooks?",
+          "options": [
+            "packages/contracts",
+            "packages/site/fhevm",
+            "src/components",
+            "lib/encryption"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The packages/site/fhevm folder contains essential hooks for encrypting data, fetching public keys, and interacting with fhEVM contracts."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "What does the useFHECounter.tsx hook demonstrate?",
+          "options": [
+            "Wallet connection",
+            "Basic fhEVM operations",
+            "UI styling",
+            "API calls"
+          ],
+          "correctAnswer": 1,
+          "explanation": "useFHECounter.tsx is a demo hook showing how to perform basic fhEVM operations like incrementing an encrypted counter using the useFhevm hook."
+        }
+      ]
+    },
+    {
+      "sectionId": 5,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "Command to compile Hardhat contracts: npx hardhat _____",
+          "correctAnswer": "compile",
+          "explanation": "The 'npx hardhat compile' command builds your Solidity contracts, including TFHE imports, generating artifacts for deployment."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What stores sensitive data like MNEMONIC and API keys?",
+          "options": [
+            "hardhat.config.ts",
+            ".env file or hardhat vars",
+            "package.json",
+            "Public GitHub repo"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Environment variables should be stored in a .env file or using 'npx hardhat vars set' for security. Never commit secrets to version control!"
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "What is the default RPC URL for Hardhat's local node?",
+          "options": [
+            "http://localhost:3000",
+            "http://127.0.0.1:8545",
+            "http://localhost:8080",
+            "http://127.0.0.1:3000"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Hardhat's local node runs at http://127.0.0.1:8545 (Chain ID: 31337) by default, providing a fast testing environment with unlimited gas."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Why run a local Hardhat node instead of deploying directly to testnet?",
+          "options": [
+            "It's required for production",
+            "For fast, free testing without gas costs",
+            "Testnets don't support fhEVM",
+            "Local nodes are more secure"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Local nodes provide instant, free testing with unlimited gas, perfect for rapid development before deploying to real testnets like Sepolia."
         }
       ]
     }
