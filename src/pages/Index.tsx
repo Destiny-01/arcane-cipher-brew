@@ -8,6 +8,7 @@ import mysticalBackground from '@/assets/mystical-background.jpg';
 
 const Index = () => {
   const [currentSection, setCurrentSection] = useState(1);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen relative">
@@ -31,12 +32,17 @@ const Index = () => {
 
       {/* Content */}
       <div className="relative z-10">
-        <Header />
+        <Header onMenuClick={() => setSidebarOpen(true)} />
         
         <div className="flex">
-          <Sidebar currentSection={currentSection} onSectionClick={setCurrentSection} />
+          <Sidebar 
+            currentSection={currentSection} 
+            onSectionClick={setCurrentSection}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
           
-          <main className="flex-1 ml-80 mt-16 p-8 min-h-screen">
+          <main className="flex-1 md:ml-80 mt-16 p-4 sm:p-6 md:p-8 min-h-screen">
             <SectionTemplate sectionId={currentSection} />
             <Footer />
           </main>
