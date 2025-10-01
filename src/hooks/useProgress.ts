@@ -26,12 +26,44 @@ export const useProgress = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   }, [progress]);
 
+  // Sync progress across components when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        setProgress(JSON.parse(e.newValue));
+      }
+    };
+
+    // Listen for storage events from other tabs/components
+    window.addEventListener('storage', handleStorageChange);
+
+    // Custom event for same-tab updates
+    const handleCustomUpdate = () => {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setProgress(JSON.parse(stored));
+      }
+    };
+
+    window.addEventListener('progressUpdate', handleCustomUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('progressUpdate', handleCustomUpdate);
+    };
+  }, []);
+
   const completeSection = (sectionId: number) => {
-    setProgress((prev) => ({
-      ...prev,
-      completedSections: [...new Set([...prev.completedSections, sectionId])],
-      currentSection: Math.max(prev.currentSection, sectionId + 1),
-    }));
+    setProgress((prev) => {
+      const updated = {
+        ...prev,
+        completedSections: [...new Set([...prev.completedSections, sectionId])],
+        currentSection: Math.max(prev.currentSection, sectionId + 1),
+      };
+      // Trigger custom event for same-tab sync
+      window.dispatchEvent(new Event('progressUpdate'));
+      return updated;
+    });
   };
 
   const recordQuizAttempt = (sectionId: number, score: number) => {

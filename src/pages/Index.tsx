@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ParticleBackground } from '@/components/ParticleBackground';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -9,6 +9,11 @@ import mysticalBackground from '@/assets/mystical-background.jpg';
 const Index = () => {
   const [currentSection, setCurrentSection] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Scroll to top when section changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentSection]);
 
   return (
     <div className="min-h-screen relative">

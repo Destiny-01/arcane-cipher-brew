@@ -615,51 +615,6 @@
           "url": "https://docs.zama.ai/fhevm/getting-started"
         }
       ]
-    },
-    {
-      "id": 6,
-      "title": "Sealed Scroll VI",
-      "subtitle": "Writing Confidential Smart Contracts",
-      "description": "Practical development with Zama's tools.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
-    },
-    {
-      "id": 7,
-      "title": "Sealed Scroll VII",
-      "subtitle": "Access Control & Key Management",
-      "description": "Securing your encrypted computations.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
-    },
-    {
-      "id": 8,
-      "title": "Sealed Scroll VIII",
-      "subtitle": "Performance Optimization",
-      "description": "Making FHE computations practical.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
-    },
-    {
-      "id": 9,
-      "title": "Sealed Scroll IX",
-      "subtitle": "Real-World Applications",
-      "description": "Building privacy-preserving DApps.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
-    },
-    {
-      "id": 10,
-      "title": "Sealed Scroll X",
-      "subtitle": "The Future of Private Computation",
-      "description": "What's next in FHE technology.",
-      "learningObjectives": [],
-      "content": [],
-      "resources": []
     }
   ],
   "quizzes": [
