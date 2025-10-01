@@ -416,62 +416,101 @@
       "id": 4,
       "title": "Gathering Your Alchemy Kit",
       "subtitle": "Cloning and Exploring the Boilerplate Repo",
-      "description": "Welcome back, fellow privacy alchemists! In this step, we'll summon our essential tools by cloning a boilerplate repository – think of it as pulling a pre-stocked cauldron from the ether, ready for brewing confidential potions. This template from Zama makes starting with fhEVM a breeze, blending React for the frontend with hooks for encrypted magic. We'll walk through cloning it, exploring its structure, and understanding how it sets the stage for our Private Potion Guesser dApp. A bit of enchantment here: imagine the repo as your spellbook, with folders as chapters revealing the secrets of secure blockchain apps.",
+      "description": "Welcome back, aspiring privacy alchemists! In this crucial step, we'll summon our development toolkit by cloning a customized boilerplate repository – imagine it as discovering a well-stocked wizard's workshop, complete with enchanted scrolls and potions ready to mix. The repo we'll use is https://github.com/Destiny-01/potion-brew, a tailored version of Zama's fhEVM React template. It's designed specifically for building frontend interfaces that interact with fhEVM smart contracts, making it perfect for our Private Potion Guesser dApp.",
       "learningObjectives": [
-        "Clone the boilerplate repo and set up your local environment step-by-step",
-        "Navigate and explain the key folders and files, especially in the packages directory",
-        "Understand how the template integrates frontend tools with fhEVM for privacy-focused dApps",
-        "Identify how to adapt it for our guessing game, including linking to smart contracts"
+        "Clone the repo, install dependencies, and set up your local environment with clear, beginner-friendly steps",
+        "Understand the overall purpose of the repo as a boilerplate for fhEVM dApps, including how it ties into our Private Potion Guesser",
+        "Navigate key folders and files, with explanations of their roles, contents, and why they're important – focusing on the packages folder",
+        "Grasp supporting concepts like environment variables (e.g., MNEMONIC) and how they fit into secure development"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Setting Up: Cloning and Installation"
+          "text": "Why This Repo? A Quick Overview"
         },
         {
           "type": "text",
-          "content": "Start by opening your terminal – your modern wand for commanding code. We'll use Zama's official fhEVM React template as our base, which is frontend-focused but pairs perfectly with their Hardhat template for contracts."
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Clone and Setup",
-          "code": "# 1. Clone the repository\ngit clone https://github.com/zama-ai/fhevm-react-template.git\n\n# 2. Navigate inside\ncd fhevm-react-template\n\n# 3. Install dependencies\nnpm install"
+          "content": "This repository, named 'FHEVM React Template,' is an ultra-minimal React project optimized for Fully Homomorphic Encryption (FHE)-enabled dApps on Ethereum. It pairs seamlessly with Zama's fhEVM Hardhat template (which we'll cover in later sections for the backend contracts). The focus here is on the frontend: It provides hooks for interacting with fhEVM contracts, wallet management, and basic UI setups."
         },
         {
           "type": "note",
           "icon": "sparkles",
-          "title": "Why This Template?",
-          "content": "It's beginner-friendly, pre-configured for fhEVM interactions, and uses a monorepo structure to manage packages efficiently. No need to start from scratch; it's optimized for dApps like our private guesser, where the frontend encrypts user inputs before sending them to the contract."
-        },
-        {
-          "type": "subheader",
-          "text": "Exploring the Repo Structure"
+          "title": "Perfect for Our Project",
+          "content": "For our Private Potion Guesser, it's customized to handle encrypted inputs (like guesses) and display private results without leaks. Think of it as your starting canvas – we'll paint our guessing game UI on top."
         },
         {
           "type": "text",
-          "content": "This repo is structured as a monorepo, meaning multiple 'packages' live under one roof for easier management. The star of the show is the packages folder, which houses the core frontend application. Think of this as touring your alchemy workshop: each folder has tools for specific tasks in building secure, interactive dApps."
+          "content": "If you're wondering, a 'boilerplate' is like a recipe template: It gives you the basics so you can focus on the fun parts, like adding your own spells (code). This one includes dependencies for React, Next.js (for building dynamic apps), Tailwind CSS (for easy styling), and Zama's libraries for FHE magic."
+        },
+        {
+          "type": "subheader",
+          "text": "Step-by-Step Setup: Cloning and Installation"
+        },
+        {
+          "type": "text",
+          "content": "Let's get hands-on. Open your terminal (that's the command-line interface – on Windows, use Command Prompt or PowerShell; on Mac/Linux, the built-in Terminal app). If you're new to terminals, it's just a text-based way to run commands – no worries, we'll go slow."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Clone and Install",
+          "code": "# 1. Clone the repository\ngit clone https://github.com/Destiny-01/potion-brew.git\n\n# 2. Navigate into the folder\ncd potion-brew\n\n# 3. Install dependencies\nnpm install\n# Or if you prefer Yarn: yarn install"
+        },
+        {
+          "type": "tip",
+          "icon": "zap",
+          "title": "Installation Tips",
+          "content": "If Git isn't installed, download it from https://git-scm.com. If npm install fails, ensure Node.js is installed (download from https://nodejs.org – aim for LTS version 18+). This might take a few minutes as it downloads packages."
+        },
+        {
+          "type": "subheader",
+          "text": "Exploring the Repo Structure: Folders and Files"
+        },
+        {
+          "type": "text",
+          "content": "The repo is organized as a monorepo, meaning everything lives under the root, with the main action in the packages folder. This keeps things modular – you can build and test parts independently. We'll prioritize the most important areas: the packages/site subfolder (the core frontend), root-level configs, and supporting files."
         },
         {
           "type": "list",
           "items": [
-            "**Root Level Files**: package.json (master manifest with dependencies like @zama.ai/fhevmjs), README.md (your guidebook), and config files for linting and styling",
-            "**packages/site/**: The heart of the frontend app. Your React/Next.js project directory where you'll build the UI for users to input guesses and see results",
-            "**packages/site/fhevm/**: Contains essential hooks for interacting with fhEVM-enabled smart contracts. These are the spells that let your app encrypt data, send it to the blockchain, and handle responses privately",
-            "**packages/site/hooks/**: Custom React hooks for reusable logic, including useFHECounter.tsx (demo hook) and metamask/ (wallet connection hooks following EIP-6963 standards)"
+            "**README.md**: Your ultimate guidebook – open this first. It explains the repo's purpose, features (like React integration with fhEVM), requirements (e.g., MetaMask wallet), and quickstart steps. It also covers how to run a local development server and common errors, like 'nonce mismatch' when connecting MetaMask to Hardhat (with fixes)",
+            "**package.json**: The project's blueprint. It lists all dependencies (e.g., @zama.ai/fhevmjs for encryption, react and next for the app, tailwindcss for styling) and scripts (commands you can run). Scripts like `npm run dev` start the frontend server",
+            "**Configuration Files**: Files like .eslintrc (sets rules for JavaScript linting), .prettierrc (auto-formats code), and tailwind.config.js (customizes Tailwind CSS themes) enforce code quality and style. They keep your code clean and professional"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "The packages Folder: Your Frontend Workshop"
+        },
+        {
+          "type": "text",
+          "content": "This is the heart – a sub-package called site houses the actual React app. It's where you'll spend most time adding components for our Potion Guesser (e.g., input fields for guesses, buttons to submit)."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**packages/site/**: The main frontend directory containing the app's entry points and reusable code. It builds the user interface for interacting with fhEVM contracts – encrypting data, connecting wallets, and displaying results privately",
+            "**fhevm/ subfolder**: Contains hooks (reusable functions) for fhEVM interactions. These are the 'spells' that fetch the global public key, handle encryption calls, and manage contract responses. For our dApp, you'll use these to encrypt guesses before sending them to the contract",
+            "**hooks/ subfolder**: Custom React hooks for logic separation, including useFHECounter.tsx (a demo hook showing how to interact with a simple fhEVM contract) and metamask/ (hooks for MetaMask wallet management, following EIP-6963 standard)",
+            "**Other Contents**: Expect src/ or app/ for pages (e.g., main guessing page), components/ for UI bits (like buttons/forms), and styles/ for CSS. These build the interactive parts – add a 'Guess Input' component here for our dApp"
           ]
         },
         {
           "type": "code",
           "language": "typescript",
-          "title": "Example: Encrypting a Guess",
-          "code": "import { getPublicKey } from 'fhevmjs';\n\n// Fetch the global public key\nconst publicKey = await getPublicKey();\n\n// Encrypt the user's guess\nconst encryptedGuess = await instance.encrypt8(guessValue, publicKey);\n\n// This ensures the guess stays secret during onchain comparison"
+          "title": "Example: Using fhEVM Hooks",
+          "code": "// From packages/site/fhevm/\nimport { useFhevm } from './hooks';\n\nconst { instance, publicKey } = useFhevm();\n\n// Encrypt user's guess\nconst encryptedGuess = await instance.encrypt8(guessValue, publicKey);"
         },
         {
-          "type": "tip",
-          "icon": "sparkles",
-          "title": "Integration Tip",
-          "content": "The template integrates with Hardhat (from https://github.com/zama-ai/fhevm-hardhat-template) for contracts. Clone that separately for PotionGuesser.sol, deploy it, then update addresses in this frontend."
+          "type": "subheader",
+          "text": "Key Concepts Explained: Like MNEMONIC"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**MNEMONIC**: This is a 'seed phrase' – a series of 12-24 words (e.g., 'apple banana cat...') that generates your wallet's private keys. In this repo, it's used in environment variables for Hardhat setups. Set it in a .env file (create one in the root: MNEMONIC='your test phrase here'). Never share it – it's like a master key!",
+            "**Environment Variables (.env)**: Secure way to store secrets like API keys or MNEMONIC. The repo might reference INFURA_API_KEY (for connecting to Sepolia via Infura). Add them to .env and load with dotenv – keeps your code safe from leaks"
+          ]
         },
         {
           "type": "subheader",
@@ -480,10 +519,10 @@
         {
           "type": "list",
           "items": [
-            "**Git or NPM Issues**: If git clone fails, ensure Git is installed. For install errors, try `npm cache clean --force`",
-            "**Missing Companion Repo**: This template is frontend-only; for contracts, clone the Hardhat one and run `npm run hardhat-node`",
-            "**Environment Vars**: Set MNEMONIC and INFURA_API_KEY in a .env file for deployments",
-            "**Wallet Woes**: Ensure MetaMask is on the right network; check console logs for provider errors"
+            "**Installation Errors**: If npm install fails, try `npm cache clean --force` or update Node.js",
+            "**Git Issues**: Run `git --version` to confirm Git is installed",
+            "**Missing Files**: If something's absent, pull updates: `git pull origin main`",
+            "**Editor Setup**: Open in VS Code (free from https://code.visualstudio.com) – install extensions for React and Solidity for highlighting"
           ]
         },
         {
@@ -493,21 +532,25 @@
         {
           "type": "list",
           "items": [
-            "Cloning and installing the boilerplate gives you a ready fhEVM React foundation, with packages/site as the frontend hub",
-            "Folders like fhevm and hooks provide modular tools for encryption, wallet connections, and contract interactions",
-            "Integrate with Hardhat for full-stack magic; this setup teaches monorepo best practices",
-            "You're now equipped to customize for our Potion Guesser – next sections will build on this!"
+            "Cloning and installing gives you a ready fhEVM React boilerplate, focused on packages/site for frontend magic",
+            "Files like README.md guide you; hooks in fhevm and metamask handle privacy and wallets",
+            "Concepts like MNEMONIC ensure secure dev – now customize for our Potion Guesser!",
+            "You're set to ignite the cauldron in the next section"
           ]
         }
       ],
       "resources": [
         {
-          "title": "fhEVM React Template",
-          "url": "https://github.com/zama-ai/fhevm-react-template"
+          "title": "Potion Brew Repository",
+          "url": "https://github.com/Destiny-01/potion-brew"
         },
         {
-          "title": "fhEVM Hardhat Template",
-          "url": "https://github.com/zama-ai/fhevm-hardhat-template"
+          "title": "Git Download",
+          "url": "https://git-scm.com"
+        },
+        {
+          "title": "Node.js Download",
+          "url": "https://nodejs.org"
         }
       ]
     },
@@ -515,64 +558,193 @@
       "id": 5,
       "title": "Igniting the Cauldron",
       "subtitle": "Setting Up Hardhat, React, and Environment",
-      "description": "Time to light the fire! With our repo cloned, we'll ignite the setup – configuring Hardhat for fhEVM contracts, starting the React app, and handling environment vars. Think of this as fueling your cauldron: Get it right, and your potions (dApps) brew smoothly. We'll go step-by-step, with commands and tips to make it engaging and error-free. By the end, you'll have a running local environment for testing our Private Potion Guesser.",
+      "description": "Alright, alchemists, let's spark the flames! With our repo cloned, this section guides you through configuring the environment for deployment to Sepolia testnet – Ethereum's safe playground for testing dApps. We'll focus on real-world setup: Adding Sepolia to your wallet, funding it with test ETH, deploying your contract, and interacting with it. No local simulations here – we'll go straight to the testnet for hands-on experience.",
       "learningObjectives": [
-        "Configure Hardhat for fhEVM, including plugins and networks",
-        "Launch the React frontend and connect it to your environment",
-        "Manage .env vars securely for keys and APIs",
-        "Run basic commands like compile and local node for quick testing"
+        "Add and fund the Sepolia testnet in MetaMask for secure interactions",
+        "Configure Hardhat with environment variables for Sepolia deployment",
+        "Deploy a sample contract to Sepolia and verify it works",
+        "Interact with your deployed contract from the frontend, ensuring everything connects smoothly"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Hardhat Setup: Your Contract Forge"
+          "text": "Prerequisites Check: Make Sure You're Ready"
         },
         {
           "type": "text",
-          "content": "Hardhat is our blacksmith for Solidity – it compiles, tests, and deploys with fhEVM support."
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Hardhat Configuration Steps",
-          "code": "# 1. Install plugins and dependencies\nnpm install\n\n# 2. Set environment variables\nnpx hardhat vars set MNEMONIC\nnpx hardhat vars set INFURA_API_KEY\n\n# 3. Compile contracts\nnpm run compile\n# or\nnpx hardhat compile\n\n# 4. Start local node (fhEVM-ready)\nnpx hardhat node\n# RPC: http://127.0.0.1:8545\n# Chain ID: 31337\n\n# 5. Deploy to local network\nnpx hardhat deploy --network localhost"
-        },
-        {
-          "type": "note",
-          "icon": "sparkles",
-          "title": "Network Configuration",
-          "content": "Edit hardhat.config.ts to add Sepolia with your RPC URL (from Infura/Alchemy). This gets your backend humming!"
-        },
-        {
-          "type": "subheader",
-          "text": "React Frontend Start: Bringing the UI to Life"
-        },
-        {
-          "type": "text",
-          "content": "Now, fire up the frontend from the react-template (packages/site)."
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Frontend Setup",
-          "code": "# 1. Navigate and install\ncd packages/site && npm install\n\n# 2. Start dev server\nnpm run dev\n# Launches at localhost:3000\n\n# 3. Test: Open browser, connect MetaMask"
-        },
-        {
-          "type": "tip",
-          "icon": "zap",
-          "title": "Connection Tip",
-          "content": "Update configs with contract addresses post-deploy. fhevmjs hooks fetch public keys automatically."
-        },
-        {
-          "type": "subheader",
-          "text": "Other Boilerplate Tasks: Securing the Setup"
+          "content": "Before diving in, confirm you have:"
         },
         {
           "type": "list",
           "items": [
-            "**.env Management**: Create .env in root with MNEMONIC and INFURA_API_KEY. Use dotenv to load securely – never commit!",
-            "**Clean Slate**: For fresh start, run `npm run clean` to remove artifacts",
-            "**Test Connectivity**: Run `npm run test` to ensure fhEVM ops work locally"
+            "Node.js v18+ installed (run `node -v` in terminal)",
+            "MetaMask browser extension (download from https://metamask.io if needed)",
+            "Your cloned repo open in an editor like VS Code",
+            "An Infura account (free at https://infura.io – sign up for an API key)"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "lock",
+          "title": "Important",
+          "content": "Sepolia is free and forgiving – mistakes won't cost real money. If anything's missing, pause and set it up – we'll use these throughout."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 1: Adding Sepolia to MetaMask"
+        },
+        {
+          "type": "text",
+          "content": "MetaMask is your digital wallet for Ethereum – it holds test ETH and signs transactions."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Open MetaMask in your browser (click the fox icon)",
+            "Click the network dropdown (top center, probably says 'Ethereum Mainnet')",
+            "Select 'Add network' > 'Add a network manually'",
+            "Fill in the details as shown below",
+            "Save – now switch to Sepolia in the dropdown"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "title": "Sepolia Network Configuration",
+          "code": "Network Name: Sepolia\nNew RPC URL: https://sepolia.infura.io/v3/YOUR_INFURA_API_KEY\nChain ID: 11155111\nCurrency Symbol: ETH\nBlock Explorer URL: https://sepolia.etherscan.io"
+        },
+        {
+          "type": "tip",
+          "icon": "sparkles",
+          "title": "Why Sepolia?",
+          "content": "Sepolia mimics mainnet but uses fake ETH, perfect for testing our dApp without risks."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 2: Funding Your Wallet with Test ETH (Faucet)"
+        },
+        {
+          "type": "text",
+          "content": "Deployments need gas (fees), so grab free test ETH from a faucet."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Go to a Sepolia faucet like https://sepoliafaucet.com or https://www.infura.io/faucet/sepolia",
+            "Connect MetaMask (click 'Connect Wallet')",
+            "Enter your wallet address (copy from MetaMask: Click account > Copy)",
+            "Request ETH – usually 0.1-1 ETH per day. Wait a minute; check balance in MetaMask"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "zap",
+          "title": "Troubleshooting",
+          "content": "If denied, try another faucet or wait 24 hours. Aim for at least 0.5 ETH to cover deployments."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 3: Configuring Hardhat for Sepolia"
+        },
+        {
+          "type": "text",
+          "content": "Hardhat is our tool for compiling and deploying Solidity contracts. We'll set it up with env vars for security."
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Create .env File",
+          "code": "# In your repo root, create a .env file\ntouch .env\n\n# Add these lines (replace with your actual values):\nINFURA_API_KEY=your_infura_key_here\nPRIVATE_KEY=your_metamask_private_key"
+        },
+        {
+          "type": "tip",
+          "icon": "lock",
+          "title": "Security Warning",
+          "content": "PRIVATE_KEY is your wallet's secret key – never commit this file to Git! Add .env to .gitignore if not there. Use a test account only!"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Edit hardhat.config.js",
+          "code": "require('@nomicfoundation/hardhat-toolbox');\nrequire('dotenv').config();\n\nmodule.exports = {\n  solidity: '0.8.24',\n  networks: {\n    sepolia: {\n      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,\n      accounts: [process.env.PRIVATE_KEY]\n    }\n  }\n};"
+        },
+        {
+          "type": "text",
+          "content": "This tells Hardhat to use Sepolia with your keys. Install Hardhat plugins if needed:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Install Dependencies",
+          "code": "npm install --save-dev @nomicfoundation/hardhat-toolbox dotenv"
+        },
+        {
+          "type": "subheader",
+          "text": "Step 4: Deploying to Sepolia"
+        },
+        {
+          "type": "text",
+          "content": "Let's deploy a placeholder contract (we'll replace with PotionGuesser later)."
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "contracts/Placeholder.sol",
+          "code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.24;\n\ncontract Placeholder {\n  string public message = \"Hello Sepolia!\";\n}"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Compile Contract",
+          "code": "npx hardhat compile"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "scripts/deploy.js",
+          "code": "async function main() {\n  const Placeholder = await ethers.getContractFactory('Placeholder');\n  const contract = await Placeholder.deploy();\n  await contract.waitForDeployment();\n  console.log('Deployed to:', await contract.getAddress());\n}\n\nmain().catch((error) => {\n  console.error(error);\n  process.exitCode = 1;\n});"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Deploy to Sepolia",
+          "code": "npx hardhat run scripts/deploy.js --network sepolia\n\n# Watch for the transaction hash\n# Check on https://sepolia.etherscan.io (paste address)"
+        },
+        {
+          "type": "subheader",
+          "text": "Step 5: Verifying Deployment"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Install Etherscan Plugin",
+          "code": "npm install --save-dev @nomiclabs/hardhat-etherscan"
+        },
+        {
+          "type": "text",
+          "content": "Add to hardhat.config.js: etherscan: { apiKey: 'your_etherscan_api_key' } (get free from https://etherscan.io/register)"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Verify Contract",
+          "code": "npx hardhat verify --network sepolia YOUR_CONTRACT_ADDRESS"
+        },
+        {
+          "type": "subheader",
+          "text": "Step 6: Interacting with Sepolia from Frontend"
+        },
+        {
+          "type": "text",
+          "content": "Now connect the React app to your deployed contract."
+        },
+        {
+          "type": "list",
+          "items": [
+            "In packages/site, update any contract address placeholders with your deployed address",
+            "Start Frontend: `cd packages/site && npm run dev` – opens at localhost:3000",
+            "In browser, connect MetaMask (ensure on Sepolia). Use demo hooks to call your contract",
+            "If errors: Check console for RPC issues; refresh MetaMask"
           ]
         },
         {
@@ -582,10 +754,11 @@
         {
           "type": "list",
           "items": [
-            "**Missing API Key**: Deployment fails? Sign up at Infura, set via hardhat vars",
-            "**Node Version**: Need 20+; use nvm to switch",
-            "**Gas Errors**: Local node has unlimited gas – real nets don't; optimize early",
-            "Use `npm run lint` for code checks; refer to Zama's quickstart if stuck"
+            "**No ETH**: Faucet again if deployment fails",
+            "**Key Errors**: Double-check .env spelling; restart terminal",
+            "**Gas Limits**: If 'out of gas,' increase in Hardhat config: `gas: 3000000`",
+            "**Network Issues**: Verify Infura API key is correct and active",
+            "Use Etherscan to monitor transactions – search your address"
           ]
         },
         {
@@ -595,24 +768,29 @@
         {
           "type": "list",
           "items": [
-            "Hardhat handles fhEVM backend with easy compile/deploy; React powers interactive frontend",
-            "Env vars keep secrets safe; local node speeds testing",
-            "Setup bridges tools for seamless dev – now code flows!"
+            "Sepolia setup with MetaMask and faucets enables real testnet deploys",
+            "Hardhat with env vars (like PRIVATE_KEY) handles secure deployments",
+            "Interaction confirms frontend-backend link – you're ready for the contract!",
+            "Real-world testing on Sepolia prepares you for production deployment"
           ]
         }
       ],
       "resources": [
         {
-          "title": "Hardhat Documentation",
-          "url": "https://hardhat.org/docs"
+          "title": "MetaMask Download",
+          "url": "https://metamask.io"
+        },
+        {
+          "title": "Sepolia Faucet",
+          "url": "https://sepoliafaucet.com"
         },
         {
           "title": "Infura Dashboard",
-          "url": "https://infura.io/"
+          "url": "https://infura.io"
         },
         {
-          "title": "Zama Quickstart Guide",
-          "url": "https://docs.zama.ai/fhevm/getting-started"
+          "title": "Sepolia Etherscan",
+          "url": "https://sepolia.etherscan.io"
         }
       ]
     }
