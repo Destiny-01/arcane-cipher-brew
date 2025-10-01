@@ -920,6 +920,1331 @@
           "explanation": "Local nodes provide instant, free testing with unlimited gas, perfect for rapid development before deploying to real testnets like Sepolia."
         }
       ]
+    },
+    {
+      "id": 6,
+      "title": "Crafting the Enchanted Contract",
+      "subtitle": "From Plain to Private Potion Guessing",
+      "description": "Hey there, code conjurers! Now we're rolling up our sleeves to craft the heart of our dApp: the smart contract for the Private Potion Guesser. We'll start with a basic non-FHE version to see its flaws, then upgrade it to fhEVM magic, where guesses stay hidden like treasures in a locked chest. This section walks you line-by-line through the code, with clear explanations so you can follow along easily. By the end, you'll have a deployable contract that computes privately – no peeking at the blockchain explorer!",
+      "learningObjectives": [
+        "Compare a standard Solidity guessing contract to its fhEVM-private version",
+        "Build and explain an fhEVM contract using encrypted types and operations",
+        "Write and run tests to verify the contract's logic",
+        "Understand gas implications and optimization strategies for FHE operations"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "The Non-FHE Version: Why It's Leaky"
+        },
+        {
+          "type": "text",
+          "content": "Imagine a simple guessing game without privacy: The contract stores a public target number, users guess, and it checks equality openly. Here's a quick sketch in Solidity:"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Non-FHE Guesser (Insecure!)",
+          "code": "// Non-FHE Guesser - DO NOT USE IN PRODUCTION\npragma solidity ^0.8.20;\n\ncontract PlainGuesser {\n    uint8 private target;\n\n    constructor(uint8 _target) {\n        target = _target;\n    }\n\n    function guess(uint8 _guess) public view returns (bool) {\n        return _guess == target;\n    }\n}"
+        },
+        {
+          "type": "note",
+          "icon": "alert-triangle",
+          "title": "Critical Privacy Flaw",
+          "content": "Everything's plaintext! Blockchain explorers reveal the target and every guess via transaction data. No mystery, no privacy – like brewing potions in a glass cauldron. Anyone can see what you're doing!"
+        },
+        {
+          "type": "subheader",
+          "text": "Upgrading to fhEVM: Privacy-Powered Guessing"
+        },
+        {
+          "type": "text",
+          "content": "With fhEVM, we'll use encrypted types (euint8) and operations from the FHE library. The target and guesses stay ciphertexts onchain. Users encrypt inputs frontend-side, the contract compares privately, and reencrypts the result for user decryption."
+        },
+        {
+          "type": "text",
+          "content": "First, import the library (from Zama's docs):"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Import FHE Library",
+          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\nimport {FHE, euint8, externalEuint8, ebool} from \"@fhevm/solidity/lib/FHE.sol\";"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**FHE**: The core library for operations",
+            "**euint8**: Encrypted 8-bit unsigned int (perfect for small numbers like 0-255 guesses)",
+            "**externalEuint8**: For handling frontend-encrypted inputs",
+            "**ebool**: Encrypted boolean for comparison results"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Now, the full PotionGuesser.sol contract:"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "PotionGuesser.sol - Private Guessing with fhEVM",
+          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\nimport {FHE, euint8, externalEuint8, ebool} from \"@fhevm/solidity/lib/FHE.sol\";\n\ncontract PotionGuesser {\n    euint8 private target;  // Encrypted target number\n\n    // Set the encrypted target (called by deployer)\n    function setTarget(externalEuint8 encryptedTarget, bytes calldata attestation) public {\n        target = FHE.fromExternal(encryptedTarget, attestation);\n    }\n\n    // Guess and get reencrypted result\n    function guess(\n        externalEuint8 encryptedGuess,\n        bytes calldata attestation,\n        bytes32 publicKey\n    ) public view returns (bytes memory) {\n        euint8 guessValue = FHE.fromExternal(encryptedGuess, attestation);\n        ebool isCorrect = FHE.eq(target, guessValue);\n        return FHE.reencrypt(isCorrect, publicKey);\n    }\n}"
+        },
+        {
+          "type": "subheader",
+          "text": "Line-by-Line Breakdown"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**`euint8 private target;`**: Stores the encrypted target – invisible onchain to anyone inspecting transactions",
+            "**`setTarget(...)`**: Takes encrypted input from frontend, uses `FHE.fromExternal` to validate and convert (attestation proves it's valid encryption)",
+            "**`guess(...)` Function**:",
+            "  - Converts encrypted guess using `FHE.fromExternal`",
+            "  - `FHE.eq(target, guessValue)`: Computes equality privately – result is ebool (encrypted bool)",
+            "  - `FHE.reencrypt(isCorrect, publicKey)`: Reencrypts under user's public key for offchain decryption",
+            "**Why this design?**: Keeps computations private; only the caller decrypts their result"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "info",
+          "title": "Gas Considerations",
+          "content": "FHE operations are significantly more expensive than standard EVM operations. Here's a comparison: Deploy costs ~50k gas for non-FHE vs ~100k for fhEVM. A guess call costs ~20k standard vs ~200k with FHE ops. Always test locally first and optimize by using the smallest appropriate encrypted types."
+        },
+        {
+          "type": "subheader",
+          "text": "Testing for Correctness"
+        },
+        {
+          "type": "text",
+          "content": "Use Hardhat tests to verify your contract works correctly. Create test/PotionGuesser.test.js:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Contract Test Example",
+          "code": "const { expect } = require(\"chai\");\nconst { ethers } = require(\"hardhat\");\nconst { createInstance } = require(\"fhevmjs\");\n\ndescribe(\"PotionGuesser\", function () {\n  let contract, instance;\n\n  before(async function () {\n    const PotionGuesser = await ethers.getContractFactory(\"PotionGuesser\");\n    contract = await PotionGuesser.deploy();\n    instance = await createInstance({ chainId: 31337 });\n  });\n\n  it(\"should set and check target privately\", async function () {\n    const publicKey = instance.getPublicKey(31337);\n    const encryptedTarget = instance.encrypt8(42, publicKey);\n    await contract.setTarget(encryptedTarget, \"0x\");\n\n    const userKeys = instance.generateKeypair();\n    const encryptedGuess = instance.encrypt8(42, publicKey);\n    const reencrypted = await contract.guess(encryptedGuess, \"0x\", userKeys.publicKey);\n\n    const result = instance.decrypt(contract.address, reencrypted, userKeys.privateKey);\n    expect(result).to.equal(true);\n  });\n});"
+        },
+        {
+          "type": "tip",
+          "icon": "terminal",
+          "title": "Run Tests",
+          "content": "Execute with: `npx hardhat test`. This simulates encryption, contract calls, and decryption locally, ensuring your privacy logic works before deploying to testnet."
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Type Mismatch**: Use matching euint types; cast if needed with FHE.asEuint8",
+            "**Attestation Errors**: In development, mock with empty bytes; production needs valid proofs from frontend encryption",
+            "**Gas Optimization**: Stick to small types (euint8 for values 0-255) and minimal ops – FHE is compute-heavy",
+            "**Import Path Issues**: Ensure @fhevm/solidity is installed correctly via npm"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "fhEVM upgrades public contracts to private ones with FHE library and encrypted types",
+            "Operations like FHE.eq keep logic hidden; reencrypt enables private reveals to specific users",
+            "Testing with fhevmjs simulates the full privacy flow locally before deployment",
+            "Gas costs are higher but privacy guarantees are worth it for sensitive applications"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "Zama Solidity Documentation",
+          "url": "https://docs.zama.ai/fhevm/fundamentals/write-contract"
+        },
+        {
+          "title": "fhEVM Solidity Library",
+          "url": "https://github.com/zama-ai/fhevm"
+        },
+        {
+          "title": "Testing with fhevmjs",
+          "url": "https://docs.zama.ai/fhevm/guides/frontend"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Launching the Spell",
+      "subtitle": "Deploying the Contract and Integrating Frontend",
+      "description": "Ready to send your creation into the wild? This section covers deploying your PotionGuesser to Sepolia testnet and hooking it up to the React frontend with Wagmi for smooth wallet interactions. It's like launching a spell – prepare, cast, and connect! We'll keep steps simple, with code snippets to copy-paste.",
+      "learningObjectives": [
+        "Deploy an fhEVM contract to Sepolia using Hardhat",
+        "Extract ABI and integrate with Wagmi for contract calls",
+        "Set up frontend to interact with the deployed contract",
+        "Verify contracts on Etherscan for transparency"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "Deployment: Casting to the Chain"
+        },
+        {
+          "type": "text",
+          "content": "First, configure Hardhat for Sepolia deployment. In hardhat.config.js, add the network configuration:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Hardhat Configuration for Sepolia",
+          "code": "require(\"@nomicfoundation/hardhat-toolbox\");\nrequire(\"dotenv\").config();\n\nmodule.exports = {\n  solidity: \"0.8.24\",\n  networks: {\n    sepolia: {\n      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,\n      accounts: [process.env.PRIVATE_KEY]\n    },\n    localhost: {\n      url: \"http://127.0.0.1:8545\",\n      chainId: 31337\n    }\n  }\n};"
+        },
+        {
+          "type": "text",
+          "content": "Create a deployment script in scripts/deploy.js:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Deployment Script",
+          "code": "async function main() {\n  const PotionGuesser = await ethers.getContractFactory(\"PotionGuesser\");\n  const contract = await PotionGuesser.deploy();\n  \n  await contract.deployed();\n  \n  console.log(\"PotionGuesser deployed to:\", contract.address);\n  console.log(\"Save this address for frontend integration!\");\n}\n\nmain()\n  .then(() => process.exit(0))\n  .catch((error) => {\n    console.error(error);\n    process.exit(1);\n  });"
+        },
+        {
+          "type": "tip",
+          "icon": "zap",
+          "title": "Pre-Deployment Checklist",
+          "content": "Before deploying: 1) Fund your wallet with Sepolia ETH from faucets, 2) Set INFURA_API_KEY and PRIVATE_KEY in .env, 3) Test locally first with `npx hardhat node`"
+        },
+        {
+          "type": "text",
+          "content": "Deploy to Sepolia:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Deploy Command",
+          "code": "npx hardhat run scripts/deploy.js --network sepolia"
+        },
+        {
+          "type": "note",
+          "icon": "check-circle",
+          "title": "Verify on Etherscan",
+          "content": "Use hardhat-etherscan plugin for verification. Add your Etherscan API key to hardhat.config.js and run: `npx hardhat verify --network sepolia <CONTRACT_ADDRESS>`. This makes your code publicly viewable and trustworthy."
+        },
+        {
+          "type": "subheader",
+          "text": "Extracting ABI and Wagmi Integration"
+        },
+        {
+          "type": "text",
+          "content": "After compilation, the ABI is in artifacts/contracts/PotionGuesser.sol/PotionGuesser.json. Copy this to your frontend. In the React app (packages/site), install Wagmi and Viem:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Install Frontend Dependencies",
+          "code": "npm install wagmi viem"
+        },
+        {
+          "type": "text",
+          "content": "Configure Wagmi in your App.js or a provider component:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Wagmi Configuration",
+          "code": "import { WagmiConfig, createConfig } from 'wagmi';\nimport { sepolia } from 'viem/chains';\nimport { http } from 'viem';\n\nconst config = createConfig({\n  chains: [sepolia],\n  transports: { \n    [sepolia.id]: http() \n  }\n});\n\nfunction App() {\n  return (\n    <WagmiConfig config={config}>\n      {/* Your components */}\n    </WagmiConfig>\n  );\n}"
+        },
+        {
+          "type": "text",
+          "content": "Use Wagmi hooks for contract interactions in your components:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Contract Interaction with Wagmi",
+          "code": "import { useContractWrite, usePrepareContractWrite } from 'wagmi';\nimport abi from './PotionGuesser.json';\n\nconst contractAddress = '0xYourDeployedAddress';\n\nfunction SubmitGuess({ encryptedGuess, attestation, publicKey }) {\n  const { config } = usePrepareContractWrite({\n    address: contractAddress,\n    abi,\n    functionName: 'guess',\n    args: [encryptedGuess, attestation, publicKey]\n  });\n  \n  const { write } = useContractWrite(config);\n\n  return <button onClick={() => write?.()}>Submit Guess!</button>;\n}"
+        },
+        {
+          "type": "tip",
+          "icon": "wallet",
+          "title": "Wallet Connection",
+          "content": "Use Wagmi's useConnect hook or the ConnectButton component for easy wallet integration. Users need MetaMask or another compatible wallet to interact with your dApp."
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Insufficient Gas**: FHE operations need more gas than standard ops. Use gas estimation: `npx hardhat gas-reporter` plugin",
+            "**Network Errors**: Double-check .env keys are set correctly. Get Infura key from https://infura.io",
+            "**Contract Address Mismatch**: Always update frontend with the new deployed address after each deployment",
+            "**ABI Version Sync**: Recompile and copy the latest ABI after any contract changes"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "book-open",
+          "title": "For Read Operations",
+          "content": "Use useContractRead hook for reading contract state without transactions. Perfect for displaying the encrypted target status or other view functions."
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Deployment with Hardhat makes fhEVM contracts live on Sepolia testnet",
+            "ABI + Wagmi provides a clean interface for frontend-contract interactions",
+            "Frontend can now call encrypted operations securely through wallet signatures",
+            "Verification on Etherscan builds trust and transparency in your dApp"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "Hardhat Deployment Guide",
+          "url": "https://hardhat.org/hardhat-runner/docs/guides/deploying"
+        },
+        {
+          "title": "Wagmi Documentation",
+          "url": "https://wagmi.sh/"
+        },
+        {
+          "title": "Sepolia Faucet",
+          "url": "https://sepoliafaucet.com/"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "The Art of Secret Infusion",
+      "subtitle": "Frontend Encryption and Decryption with FHEVM",
+      "description": "Let's add the secret sauce to the frontend! Using fhevmjs, we'll encrypt guesses client-side and decrypt results – ensuring data never hits the chain unencrypted. It's like sealing a potion vial: Easy steps, big privacy boost. We'll explain why each part matters, with snippets for your React app.",
+      "learningObjectives": [
+        "Encrypt data on frontend with fhevmjs library",
+        "Handle decryption securely with user keypairs",
+        "Understand key management for privacy",
+        "Integrate encryption flow into React components"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "Encryption Journey: Sealing the Guess"
+        },
+        {
+          "type": "text",
+          "content": "Install the fhevmjs library in your frontend project:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Install fhevmjs",
+          "code": "npm install fhevmjs"
+        },
+        {
+          "type": "text",
+          "content": "Initialize fhevmjs and create encryption functions in your component:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Initialize FHEVM Instance",
+          "code": "import { createInstance } from 'fhevmjs';\n\nlet instance;  // Global or context\n\nasync function initFhevm() {\n  instance = await createInstance({ \n    chainId: 11155111  // Sepolia\n  });\n}\n\nfunction encryptGuess(value) {\n  const publicKey = instance.getPublicKey();\n  return instance.encrypt8(value, publicKey);\n}"
+        },
+        {
+          "type": "note",
+          "icon": "shield",
+          "title": "Why Client-Side Encryption?",
+          "content": "Client-side encryption keeps guesses private before sending to the blockchain. The data is encrypted using the network's public key, adding cryptographic noise for security. This means even if someone intercepts the transaction, they can't see the actual guess value."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Network Public Key**: Fetched from the fhEVM network, used to encrypt data before submission",
+            "**Attestation**: For production, generate proof; development can skip with empty bytes ('0x')",
+            "**encrypt8**: Encrypts values as 8-bit unsigned integers (0-255 range)"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Decryption: Unveiling the Result"
+        },
+        {
+          "type": "text",
+          "content": "After the contract processes your guess, decrypt the result client-side:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Decryption Flow",
+          "code": "// Generate user keypair (once per session)\nconst userKeys = instance.generateKeypair();\n\n// In guess function, pass userKeys.publicKey to contract\n\n// After getting reencrypted bytes from contract call\nconst result = instance.decrypt(\n  contractAddress, \n  reencrypted, \n  userKeys.privateKey\n);  // Returns boolean: true/false"
+        },
+        {
+          "type": "note",
+          "icon": "key",
+          "title": "Key Management Security",
+          "content": "Decryption happens offchain with the user's private key – only you see the outcome. Generate keys per session and store in memory or sessionStorage. NEVER use localStorage or send keys to servers – this compromises privacy!"
+        },
+        {
+          "type": "text",
+          "content": "Integrate encryption in your React form component:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "title": "Complete React Component Integration",
+          "code": "import { useState, useEffect } from 'react';\nimport { createInstance } from 'fhevmjs';\nimport { useContractWrite } from 'wagmi';\n\nfunction GuessForm() {\n  const [guess, setGuess] = useState(0);\n  const [instance, setInstance] = useState(null);\n  const [userKeys, setUserKeys] = useState(null);\n\n  useEffect(() => {\n    async function init() {\n      const fhevmInstance = await createInstance({ chainId: 11155111 });\n      setInstance(fhevmInstance);\n      setUserKeys(fhevmInstance.generateKeypair());\n    }\n    init();\n  }, []);\n\n  const handleSubmit = async () => {\n    if (!instance || !userKeys) return;\n    \n    const encrypted = instance.encrypt8(guess, instance.getPublicKey());\n    // Call contract.guess(encrypted, '0x', userKeys.publicKey)\n    // On success, decrypt response\n  };\n\n  return (\n    <div>\n      <input \n        type=\"number\" \n        min=\"0\" \n        max=\"255\"\n        value={guess}\n        onChange={e => setGuess(parseInt(e.target.value))}\n      />\n      <button onClick={handleSubmit}>Submit Guess</button>\n    </div>\n  );\n}"
+        },
+        {
+          "type": "subheader",
+          "text": "Key Flow Diagram"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Step 1**: Fetch network public key from fhEVM instance",
+            "**Step 2**: Generate user keypair (public + private) for session",
+            "**Step 3**: Encrypt guess with network public key → send to contract",
+            "**Step 4**: Contract processes, reencrypts result with user's public key",
+            "**Step 5**: Decrypt result offchain with user's private key"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Troubleshooting"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Key Mismatch**: Always use network public key for initial encryption, user public key for reencryption request",
+            "**Storage Risks**: Never store private keys in localStorage (persists across sessions) – use sessionStorage or in-memory only",
+            "**Async Handling**: Wrap encryption/decryption in try-catch blocks to handle errors gracefully",
+            "**Instance Not Ready**: Always check if instance is initialized before calling encryption functions"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "alert-triangle",
+          "title": "Security Best Practice",
+          "content": "Treat user private keys like passwords. They should never leave the client's browser or be sent to any backend. Loss of the private key means inability to decrypt results for that session."
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "fhevmjs handles encrypt/decrypt operations, completing the FHE workflow on the client side",
+            "Client-side encryption keeps data private end-to-end – from user input to blockchain to result",
+            "Key management is crucial: Network public for encrypt, user keypair for decrypt",
+            "Proper error handling and async management ensure smooth user experience"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "fhevmjs Documentation",
+          "url": "https://docs.zama.ai/fhevm/guides/frontend"
+        },
+        {
+          "title": "fhevmjs GitHub",
+          "url": "https://github.com/zama-ai/fhevmjs"
+        },
+        {
+          "title": "Key Management Best Practices",
+          "url": "https://docs.zama.ai/fhevm/guides/keys"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Reflecting on the Brew",
+      "subtitle": "Recap, Achievements, and Lessons Learned",
+      "description": "Potion complete – time to sip and reflect! This section recaps our journey, celebrates what you've built, and highlights key lessons. Think of it as admiring your finished elixir: What worked, why it matters, and how it sparks bigger ideas.",
+      "learningObjectives": [
+        "Summarize the full dApp workflow from concept to deployment",
+        "Identify your achievements in building with fhEVM",
+        "Reflect on FHE's potential for Web3 applications",
+        "Understand broader implications for privacy in blockchain"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "The Complete Journey: From Theory to Practice"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Section 1 - Intro to FHE/fhEVM**: Learned privacy basics, understood homomorphic encryption types and operations",
+            "**Section 2 - FHEVM Realm**: Explored cryptography concepts, data types, and supported operations",
+            "**Section 3 - Project Overview**: Outlined the Private Potion Guesser concept and verified prerequisites",
+            "**Section 4 - Repo Setup**: Cloned boilerplate templates and explored the project structure",
+            "**Section 5 - Environment Setup**: Configured Hardhat, React, and development tools",
+            "**Section 6 - Contract Creation**: Built the encrypted guessing contract with FHE operations",
+            "**Section 7 - Deployment**: Launched to Sepolia and integrated with frontend via Wagmi",
+            "**Section 8 - Encryption/Decryption**: Added client-side privacy with fhevmjs"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "trophy",
+          "title": "What You've Accomplished",
+          "content": "End result: A live dApp where users guess encrypted targets privately! You've built a full-stack confidential application from scratch, mastering encryption, smart contracts, and frontend integration."
+        },
+        {
+          "type": "subheader",
+          "text": "Key Achievements and Skills Gained"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Built & Deployed**: A complete confidential dApp – from smart contract to interactive UI",
+            "**Privacy Mastery**: Handled the full encrypt-compute-decrypt workflow without data leaks",
+            "**Tools Integration**: Seamlessly combined Hardhat, Wagmi, fhevmjs, and React",
+            "**Blockchain Understanding**: Learned how FHE transforms traditional transparent blockchains into privacy-preserving platforms",
+            "**Testing Skills**: Implemented comprehensive tests for encrypted operations"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Lessons Learned: The Reality of FHE Development"
+        },
+        {
+          "type": "text",
+          "content": "Working with FHE in production taught us several important lessons:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Performance Trade-offs**: FHE adds computational overhead (100-1000x slower) but unlocks trustless privacy – the trade-off is worth it for sensitive data",
+            "**Gas Optimization**: Using smaller encrypted types (euint8 vs euint256) significantly reduces costs",
+            "**Testing is Critical**: Always test thoroughly on local nodes before deploying to testnet – FHE operations can fail in subtle ways",
+            "**Key Management**: Proper handling of encryption keys is paramount – one mistake compromises the entire privacy model",
+            "**Start Simple**: Begin with basic operations before adding complexity – FHE development requires careful planning"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Broader Impact: Real-World Applications"
+        },
+        {
+          "type": "text",
+          "content": "The techniques you've learned apply far beyond guessing games. FHE enables groundbreaking applications:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Private Voting Systems**: Votes are encrypted onchain, tallied without revealing individual choices, ensuring democratic integrity",
+            "**Confidential DeFi**: Trading, lending, and borrowing without exposing positions or wallet balances",
+            "**Healthcare on Blockchain**: Medical records stored encrypted, analyzed for insights without compromising patient privacy",
+            "**Sealed-Bid Auctions**: Bids remain hidden until reveal time, preventing front-running and manipulation",
+            "**Private Gaming**: Game state hidden from players and servers, enabling true fog-of-war mechanics"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "lightbulb",
+          "title": "Innovation Opportunity",
+          "content": "You now have the foundation to build privacy-first dApps that were impossible before FHE. Think about problems in your domain that require both transparency (blockchain) and privacy (encryption) – that's where fhEVM shines!"
+        },
+        {
+          "type": "subheader",
+          "text": "Debugging and Troubleshooting Tips"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Full App Debug**: Simulate complete workflows locally with Hardhat node before testnet deployment",
+            "**Log Encrypted Values**: Display encrypted values as hex strings for verification and debugging",
+            "**Gas Estimation**: Use `hardhat gas-reporter` to identify expensive operations",
+            "**Frontend Errors**: Check browser console for fhevmjs initialization and encryption errors",
+            "**Contract Events**: Emit events for important state changes to track execution flow"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "You've mastered 'Hello fhEVM' – built a complete confidential dApp from scratch",
+            "fhEVM enables innovative, privacy-preserving Web3 applications previously impossible",
+            "The encrypt-compute-decrypt pattern is your blueprint for future projects",
+            "You're ready to tackle more complex privacy-preserving applications",
+            "The future of blockchain includes privacy, and you're now equipped to build it"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "Zama Use Cases",
+          "url": "https://www.zama.ai/use-cases"
+        },
+        {
+          "title": "fhEVM Tutorials",
+          "url": "https://docs.zama.ai/fhevm/tutorials"
+        },
+        {
+          "title": "Privacy in Web3",
+          "url": "https://docs.zama.ai/fhevm/fundamentals/why-privacy"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Sharing the Elixir",
+      "subtitle": "Deploying Your dApp, Next Steps, and FHEVM Advantages",
+      "description": "Bottle up your masterpiece and share it! We'll deploy the frontend to Vercel, suggest extensions, and remind you of fhEVM's superpowers. It's like passing the potion recipe – inspire others while leveling up your skills.",
+      "learningObjectives": [
+        "Deploy the full dApp to Vercel for public access",
+        "Plan next steps and feature extensions",
+        "Share your work with the community",
+        "Articulate fhEVM's advantages for future projects"
+      ],
+      "content": [
+        {
+          "type": "subheader",
+          "text": "Frontend Deployment: Going Live with Vercel"
+        },
+        {
+          "type": "text",
+          "content": "Deploy your React frontend to Vercel for easy sharing and hosting:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Install Vercel CLI",
+          "code": "npm i -g vercel"
+        },
+        {
+          "type": "text",
+          "content": "In your frontend root directory, run the Vercel deployment command:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Deploy to Vercel",
+          "code": "vercel"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Follow the interactive prompts to configure your project",
+            "Set environment variables (e.g., CONTRACT_ADDRESS, CHAIN_ID) in Vercel dashboard",
+            "Vercel automatically handles Next.js builds and optimizations",
+            "Get a production URL to share your dApp with the world"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "rocket",
+          "title": "Post-Deployment Testing",
+          "content": "After deployment, test thoroughly: Visit your URL, connect MetaMask, submit guesses, and verify the entire flow works. Check browser console for any errors."
+        },
+        {
+          "type": "note",
+          "icon": "info",
+          "title": "Advanced Option: Zama Devnet",
+          "content": "For production-ready privacy features, consider deploying to Zama's devnet. It offers enhanced privacy guarantees and is optimized for fhEVM operations. Check Zama's documentation for devnet access."
+        },
+        {
+          "type": "subheader",
+          "text": "Next Steps: Extending Your dApp"
+        },
+        {
+          "type": "text",
+          "content": "Now that you have a working foundation, consider these enhancements:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Add Hints**: Use FHE.gt (greater than) and FHE.lt (less than) to give encrypted hints like 'higher' or 'lower'",
+            "**Multiplayer Mode**: Allow multiple players to guess simultaneously with leaderboards",
+            "**Difficulty Levels**: Add ranges (euint16 for 0-65535) or time limits",
+            "**UI Polish**: Add animations, sound effects, particle effects for correct guesses",
+            "**Score Tracking**: Store encrypted score history onchain",
+            "**NFT Rewards**: Mint NFTs for players who guess correctly within certain attempts"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Sharing Your Work"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**GitHub**: Fork the repo, add comprehensive README with setup instructions and demo video",
+            "**Social Media**: Tweet about your project with #fhEVM #ZamaAI hashtags",
+            "**Community**: Share in Zama Discord or Telegram communities for feedback",
+            "**Bounties**: Check if Zama has open bounty programs for privacy dApps",
+            "**Portfolio**: Add to your developer portfolio as a unique privacy-focused project"
+          ]
+        },
+        {
+          "type": "code",
+          "language": "markdown",
+          "title": "Sample README Section",
+          "code": "# Private Potion Guesser\n\nA privacy-preserving guessing game built with fhEVM.\n\n## Features\n- ✨ Fully encrypted guesses and targets\n- 🔒 Zero-knowledge gameplay\n- 🎮 Interactive React UI\n- 🌐 Deployed on Sepolia testnet\n\n## Tech Stack\n- fhEVM for encrypted computations\n- Hardhat for smart contracts\n- React + Wagmi for frontend\n- fhevmjs for client-side encryption\n\n## Live Demo\n[Your Vercel URL]"
+        },
+        {
+          "type": "subheader",
+          "text": "FHEVM Advantages: Why This Matters"
+        },
+        {
+          "type": "text",
+          "content": "fhEVM provides unique advantages over traditional blockchain and other privacy solutions:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Privacy Without Trust**: No need to trust validators or nodes – cryptography guarantees privacy",
+            "**Quantum-Safe**: TFHE's lattice-based cryptography is resistant to quantum computing attacks",
+            "**Composability**: Encrypted operations compose naturally – build complex privacy-preserving logic",
+            "**Verifiability**: All operations are onchain and verifiable, maintaining blockchain transparency where needed",
+            "**No Trusted Setup**: Unlike some zero-knowledge systems, no trusted ceremony required",
+            "**Native Integration**: Works with existing EVM tooling and Solidity knowledge"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "trophy",
+          "title": "Competitive Edge",
+          "content": "As a developer with fhEVM skills, you're positioned at the forefront of privacy-preserving blockchain development. This is an emerging field with high demand and limited expertise."
+        },
+        {
+          "type": "subheader",
+          "text": "Bounty Program Tips"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Polish your repository with clear documentation and code comments",
+            "Create a demo video (2-3 minutes) showing the dApp in action",
+            "Explain the privacy guarantees and why FHE was necessary for your use case",
+            "Document any challenges faced and how you solved them",
+            "Submit via Zama's official channels when bounty programs are announced"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Common Deployment Issues"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**CORS Issues**: Set appropriate headers in Vercel or app configuration",
+            "**Environment Variables**: Ensure all required vars are set in Vercel dashboard",
+            "**Contract Address**: Update to production contract address before deployment",
+            "**Network Mismatch**: Verify frontend connects to correct chain (Sepolia, mainnet, etc.)"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "git-branch",
+          "title": "Use Staging Environments",
+          "content": "Use Vercel preview deployments for testing before production. Each git branch gets its own preview URL for safe experimentation."
+        },
+        {
+          "type": "subheader",
+          "text": "Keep Building: The Ecosystem Grows"
+        },
+        {
+          "type": "text",
+          "content": "The fhEVM ecosystem is rapidly expanding. Stay connected and keep learning:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Join Zama's Discord for latest updates and community support",
+            "Follow Zama on Twitter for announcements and new features",
+            "Explore advanced tutorials for DeFi, gaming, and identity applications",
+            "Contribute to open-source fhEVM libraries and tools",
+            "Attend Web3 conferences and hackathons focusing on privacy"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "Final Thoughts"
+        },
+        {
+          "type": "text",
+          "content": "You've completed an incredible journey from FHE basics to a deployed privacy-preserving dApp. The skills you've gained – encryption, smart contract development, frontend integration – are foundational for the next generation of blockchain applications. Privacy is not just a feature; it's a fundamental right that blockchain technology can now protect through innovations like fhEVM."
+        },
+        {
+          "type": "note",
+          "icon": "heart",
+          "title": "Thank You",
+          "content": "Congratulations on completing this tutorial! You're now part of an elite group building the future of privacy-first Web3. Keep experimenting, keep building, and most importantly – keep the magic of privacy alive in your code!"
+        },
+        {
+          "type": "subheader",
+          "text": "Key Takeaways"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Your dApp is live – showcase your privacy-preserving skills to the world!",
+            "fhEVM gives you a competitive edge in the confidential Web3 space",
+            "The ecosystem is growing – stay engaged and keep learning",
+            "Privacy + blockchain = the future, and you're building it",
+            "Share your work and inspire others to embrace privacy-first development"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "title": "Vercel Documentation",
+          "url": "https://vercel.com/docs"
+        },
+        {
+          "title": "Zama Community Discord",
+          "url": "https://discord.com/invite/fhe-org"
+        },
+        {
+          "title": "Zama Bounty Programs",
+          "url": "https://www.zama.ai/bounties"
+        },
+        {
+          "title": "Advanced fhEVM Tutorials",
+          "url": "https://docs.zama.ai/fhevm/tutorials"
+        }
+      ]
+    }
+  ],
+  "quizzes": [
+    {
+      "sectionId": 1,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "What does 'homomorphic' mean in the context of FHE?",
+          "options": [
+            "Computing on decrypted data",
+            "Preserving operations between plaintext and ciphertext",
+            "Randomizing data for security",
+            "Compressing files magically"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Homomorphic comes from Greek meaning 'same shape.' It means operations on ciphertexts mirror those on plaintexts, preserving the structure of computations."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "FHE allows __________ on ciphertexts without ever needing to decrypt during the process.",
+          "correctAnswer": "computations",
+          "alternatives": ["operations", "calculations"],
+          "explanation": "FHE enables computations, operations, or calculations on encrypted data without decryption, maintaining privacy throughout."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Which is NOT a real-world application of FHE in blockchain?",
+          "options": [
+            "Private medical diagnosis",
+            "Secure financial analysis",
+            "Public transaction broadcasting",
+            "Confidential voting systems"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Public transaction broadcasting doesn't require FHE as it's intentionally transparent. FHE is for keeping data private while computing."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "What year did Craig Gentry create the first fully homomorphic encryption scheme?",
+          "options": [
+            "1978",
+            "2000",
+            "2009",
+            "2020"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Craig Gentry created the first FHE scheme in 2009 using lattice-based cryptography, turning decades of theory into reality."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "Which type of homomorphic encryption allows unlimited operations?",
+          "options": [
+            "Partially Homomorphic Encryption (PHE)",
+            "Somewhat Homomorphic Encryption (SHE)",
+            "Fully Homomorphic Encryption (FHE)",
+            "Basic Homomorphic Encryption (BHE)"
+          ],
+          "correctAnswer": 2,
+          "explanation": "FHE allows unlimited combinations of operations (additions, multiplications, etc.) enabling any computation on encrypted data."
+        }
+      ]
+    },
+    {
+      "sectionId": 2,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "What tool is used for frontend encryption in fhEVM?",
+          "options": [
+            "Hardhat",
+            "fhevmjs",
+            "MetaMask",
+            "Wagmi"
+          ],
+          "correctAnswer": 1,
+          "explanation": "fhevmjs is the JavaScript library for client-side encryption and decryption in fhEVM applications."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "To check equality of encrypted values, use: TFHE._____(a, b)",
+          "correctAnswer": "eq",
+          "explanation": "TFHE.eq performs equality comparison on encrypted values, returning an encrypted boolean (ebool)."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "What does 'euint8' represent?",
+          "options": [
+            "8 ethereum addresses",
+            "Encrypted 8-bit unsigned integer",
+            "8-byte encryption key",
+            "External unit type 8"
+          ],
+          "correctAnswer": 1,
+          "explanation": "euint8 is an encrypted 8-bit unsigned integer type in fhEVM, capable of storing encrypted values from 0-255."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Why use symbolic execution in fhEVM?",
+          "options": [
+            "To make code look fancy",
+            "To handle operations as references, offloading compute for efficiency",
+            "To encrypt data automatically",
+            "To reduce gas costs to zero"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Symbolic execution handles ciphertext operations as references, offloading heavy computations to coprocessors for blockchain efficiency."
+        }
+      ]
+    },
+    {
+      "sectionId": 3,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "What is the minimum Node.js version required?",
+          "options": [
+            "v14",
+            "v16",
+            "v18",
+            "v20"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Node.js v18 or higher is required for the fhEVM development environment and its dependencies."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "Which testnet is recommended for deployment?",
+          "options": [
+            "Goerli",
+            "Sepolia",
+            "Rinkeby",
+            "Ropsten"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Sepolia is the recommended Ethereum testnet for fhEVM deployments, offering stability and faucet availability."
+        },
+        {
+          "id": 3,
+          "type": "fill-blank",
+          "question": "The dApp uses fhEVM for private guesses, showcasing the _____-compute-_____ pattern.",
+          "correctAnswer": "encrypt-decrypt",
+          "alternatives": ["encrypt, decrypt"],
+          "explanation": "The core FHE pattern is encrypt-compute-decrypt: data is encrypted, operations happen on ciphertext, then results are decrypted."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "How does privacy work in the Private Potion Guesser?",
+          "options": [
+            "Server-side encryption only",
+            "Computations on ciphertexts, decrypt offchain",
+            "Blockchain hides all data automatically",
+            "Using private transactions"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Privacy is achieved through computations on encrypted ciphertexts onchain, with decryption happening offchain by the user."
+        }
+      ]
+    },
+    {
+      "sectionId": 4,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "Which folder contains fhEVM hooks for encryption?",
+          "options": [
+            "packages/contracts",
+            "packages/site/fhevm",
+            "src/components",
+            "lib/encryption"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The packages/site/fhevm folder contains essential hooks for encrypting data, fetching public keys, and interacting with fhEVM contracts."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What does the useFHECounter.tsx hook demonstrate?",
+          "options": [
+            "Wallet connection",
+            "Basic fhEVM operations",
+            "UI styling",
+            "API calls"
+          ],
+          "correctAnswer": 1,
+          "explanation": "useFHECounter.tsx is a demo hook showing how to perform basic fhEVM operations like incrementing an encrypted counter using the useFhevm hook."
+        },
+        {
+          "id": 3,
+          "type": "fill-blank",
+          "question": "Command to clone: git _____ https://github.com/zama-ai/fhevm-react-template.git",
+          "correctAnswer": "clone",
+          "explanation": "The 'git clone' command downloads a copy of the repository to your local machine."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "How does the fhevm folder help in our guessing game?",
+          "options": [
+            "It styles the UI",
+            "It provides hooks to encrypt guesses and decrypt results",
+            "It connects to the database",
+            "It handles wallet connections only"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The fhevm folder provides essential hooks to encrypt guesses client-side and decrypt results, maintaining privacy throughout the game."
+        }
+      ]
+    },
+    {
+      "sectionId": 5,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "Command to compile Hardhat contracts: npx hardhat _____",
+          "correctAnswer": "compile",
+          "explanation": "The 'npx hardhat compile' command builds your Solidity contracts, including TFHE imports, generating artifacts for deployment."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What stores sensitive data like MNEMONIC and API keys?",
+          "options": [
+            "hardhat.config.ts",
+            ".env file or hardhat vars",
+            "package.json",
+            "Public GitHub repo"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Environment variables should be stored in a .env file or using 'npx hardhat vars set' for security. Never commit secrets to version control!"
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "What is the default RPC URL for Hardhat's local node?",
+          "options": [
+            "http://localhost:3000",
+            "http://127.0.0.1:8545",
+            "http://localhost:8080",
+            "http://127.0.0.1:3000"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Hardhat's local node runs at http://127.0.0.1:8545 (Chain ID: 31337) by default, providing a fast testing environment with unlimited gas."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Why run a local Hardhat node instead of deploying directly to testnet?",
+          "options": [
+            "It's required for production",
+            "For fast, free testing without gas costs",
+            "Testnets don't support fhEVM",
+            "Local nodes are more secure"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Local nodes provide instant, free testing with unlimited gas, perfect for rapid development before deploying to real testnets like Sepolia."
+        }
+      ]
+    },
+    {
+      "sectionId": 6,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "Import _____ for FHE operations in Solidity.",
+          "correctAnswer": "@fhevm/solidity/lib/FHE.sol",
+          "alternatives": ["FHE.sol", "fhevm"],
+          "explanation": "The FHE library is imported from @fhevm/solidity/lib/FHE.sol to access encrypted types and operations."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "Why use FHE in smart contracts?",
+          "options": [
+            "To increase gas costs",
+            "To hide computation data and ensure privacy",
+            "To make contracts public",
+            "To slow down transactions"
+          ],
+          "correctAnswer": 1,
+          "explanation": "FHE is used to hide sensitive data and ensure privacy during computations, preventing exposure on the blockchain."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "What does FHE.reencrypt do?",
+          "options": [
+            "Decrypts data permanently",
+            "Encrypts plaintext",
+            "Reencrypts result for specific user's private decryption",
+            "Compresses ciphertext"
+          ],
+          "correctAnswer": 2,
+          "explanation": "FHE.reencrypt transforms the encrypted result so it can be decrypted by a specific user with their private key."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Compared to standard Solidity, fhEVM gas costs are approximately:",
+          "options": [
+            "The same",
+            "2-5x higher",
+            "10-20x higher",
+            "100-1000x higher"
+          ],
+          "correctAnswer": 3,
+          "explanation": "FHE operations are computationally intensive, resulting in gas costs that are 100-1000x higher than standard operations."
+        }
+      ]
+    },
+    {
+      "sectionId": 7,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "Is the ABI needed for frontend calls?",
+          "options": [
+            "No, it's optional",
+            "Yes, it defines the contract interface",
+            "Only for read operations",
+            "Only for write operations"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The ABI (Application Binary Interface) is essential for the frontend to understand and interact with contract functions."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "Deploy command: npx hardhat _____ --network sepolia",
+          "correctAnswer": "run scripts/deploy.js",
+          "alternatives": ["run", "deploy"],
+          "explanation": "The full command 'npx hardhat run scripts/deploy.js --network sepolia' executes the deployment script on Sepolia testnet."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Why verify contracts on Etherscan?",
+          "options": [
+            "It's required for deployment",
+            "For transparency and trust - makes code publicly viewable",
+            "To reduce gas costs",
+            "To encrypt the contract"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Verification makes your contract code publicly viewable on Etherscan, building trust and transparency with users."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Which Wagmi hook is used for contract write operations?",
+          "options": [
+            "useContractRead",
+            "useContractWrite",
+            "useContract",
+            "useWallet"
+          ],
+          "correctAnswer": 1,
+          "explanation": "useContractWrite is the Wagmi hook for executing write operations (transactions) on smart contracts."
+        }
+      ]
+    },
+    {
+      "sectionId": 8,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "When does decryption happen in the FHE workflow?",
+          "options": [
+            "Before computation",
+            "After computation on the client side",
+            "During computation on blockchain",
+            "Never"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Decryption happens after computation, on the client side using the user's private key - never on the blockchain."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "Library for frontend FHE operations: _____",
+          "correctAnswer": "fhevmjs",
+          "explanation": "fhevmjs is the JavaScript library that handles encryption and decryption on the frontend."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Why perform client-side encryption?",
+          "options": [
+            "It's faster",
+            "Prevents onchain data leaks by encrypting before submission",
+            "It's required by browsers",
+            "To reduce bundle size"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Client-side encryption ensures data is already encrypted before it reaches the blockchain, preventing any exposure."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Where should user private keys be stored?",
+          "options": [
+            "localStorage",
+            "Server database",
+            "In-memory or sessionStorage only",
+            "Public GitHub repo"
+          ],
+          "correctAnswer": 2,
+          "explanation": "User private keys should only be stored in-memory or sessionStorage (temporary), never in persistent storage or servers."
+        }
+      ]
+    },
+    {
+      "sectionId": 9,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "The core FHE workflow is: Encrypt, _____, Decrypt",
+          "options": [
+            "Deploy",
+            "Compute",
+            "Test",
+            "Verify"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The core FHE workflow is Encrypt-Compute-Decrypt: data is encrypted, computation happens on ciphertext, then results are decrypted."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "You successfully deployed your dApp to _____ testnet.",
+          "correctAnswer": "Sepolia",
+          "explanation": "Throughout this tutorial, we deployed to the Sepolia Ethereum testnet."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "What is FHE's biggest advantage?",
+          "options": [
+            "Faster transactions",
+            "Lower gas costs",
+            "Private onchain computations without trust",
+            "Simpler code"
+          ],
+          "correctAnswer": 2,
+          "explanation": "FHE's revolutionary advantage is enabling private computations directly on blockchain without requiring trust in any third party."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Which skill did you NOT gain in this tutorial?",
+          "options": [
+            "FHE smart contract development",
+            "Client-side encryption/decryption",
+            "Machine learning model training",
+            "Full-stack dApp deployment"
+          ],
+          "correctAnswer": 2,
+          "explanation": "This tutorial focused on FHE blockchain development, not machine learning. You learned smart contracts, encryption, and deployment."
+        }
+      ]
+    },
+    {
+      "sectionId": 10,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "Does Vercel host smart contracts?",
+          "options": [
+            "Yes, it hosts everything",
+            "No, frontend only",
+            "Only Solidity files",
+            "Yes, but only on paid plans"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Vercel is a frontend hosting platform. Smart contracts are deployed to blockchain networks separately."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What is a key advantage of fhEVM?",
+          "options": [
+            "Slower processing",
+            "Enhanced data privacy with cryptographic guarantees",
+            "Public computation only",
+            "Higher gas costs"
+          ],
+          "correctAnswer": 1,
+          "explanation": "fhEVM's key advantage is enhanced data privacy through cryptographic guarantees, enabling trustless confidential computing."
+        },
+        {
+          "id": 3,
+          "type": "fill-blank",
+          "question": "Command to deploy frontend: _____",
+          "correctAnswer": "vercel",
+          "explanation": "The 'vercel' command initiates the deployment process to Vercel's platform."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Which is a good next step for extending the dApp?",
+          "options": [
+            "Remove all encryption",
+            "Add encrypted hints using FHE.gt/lt comparisons",
+            "Make all data public",
+            "Delete the contract"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Adding encrypted hints using FHE comparison operations (gt/lt) is a great way to extend the dApp's functionality while maintaining privacy."
+        }
+      ]
     }
   ]
 }
