@@ -15,9 +15,10 @@ import sectionsData from '@/data/sections.json';
 
 interface SectionTemplateProps {
   sectionId: number;
+  onSectionComplete?: () => void;
 }
 
-export const SectionTemplate = ({ sectionId }: SectionTemplateProps) => {
+export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplateProps) => {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   
   const section = sectionsData.sections.find((s) => s.id === sectionId);
@@ -175,6 +176,10 @@ export const SectionTemplate = ({ sectionId }: SectionTemplateProps) => {
           onClose={() => setIsQuizOpen(false)}
           sectionId={sectionId}
           questions={quiz.questions as any}
+          onComplete={() => {
+            setIsQuizOpen(false);
+            onSectionComplete?.();
+          }}
         />
       )}
     </motion.div>

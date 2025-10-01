@@ -15,6 +15,7 @@ interface Question {
   question: string;
   options?: string[];
   correctAnswer: number | boolean | string;
+  alternatives?: string[];
   explanation: string;
 }
 
@@ -23,9 +24,10 @@ interface QuizModalProps {
   onClose: () => void;
   sectionId: number;
   questions: Question[];
+  onComplete?: () => void;
 }
 
-export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalProps) => {
+export const QuizModal = ({ isOpen, onClose, sectionId, questions, onComplete }: QuizModalProps) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<(string | number | boolean | null)[]>(
     Array(questions.length).fill(null)
@@ -34,6 +36,7 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
   const [isCorrect, setIsCorrect] = useState(false);
   const [quizComplete, setQuizComplete] = useState(false);
   const [score, setScore] = useState(0);
+  const [showRetryMessage, setShowRetryMessage] = useState(false);
   const { recordQuizAttempt, completeSection } = useProgress();
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -45,6 +48,7 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
       setShowFeedback(false);
       setQuizComplete(false);
       setScore(0);
+      setShowRetryMessage(false);
     }
   }, [isOpen, questions.length]);
 
@@ -57,9 +61,14 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
     } else if (currentQuestion.type === 'true-false') {
       correct = userAnswer === currentQuestion.correctAnswer;
     } else if (currentQuestion.type === 'fill-blank') {
-      correct = 
-        String(userAnswer).toLowerCase().trim() === 
-        String(currentQuestion.correctAnswer).toLowerCase().trim();
+      const userAnswerNormalized = String(userAnswer).toLowerCase().trim();
+      const correctAnswerNormalized = String(currentQuestion.correctAnswer).toLowerCase().trim();
+      
+      // Check if answer matches the correct answer or any alternatives
+      correct = userAnswerNormalized === correctAnswerNormalized || 
+        (currentQuestion.alternatives?.some(
+          alt => alt.toLowerCase().trim() === userAnswerNormalized
+        ) ?? false);
     }
 
     setIsCorrect(correct);
@@ -89,11 +98,16 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
       if (score === questions.length) {
         setQuizComplete(true);
       } else {
-        // Retry quiz
-        setCurrentQuestionIndex(0);
-        setAnswers(Array(questions.length).fill(null));
-        setShowFeedback(false);
-        setScore(0);
+        // Show retry message explaining they need perfect score
+        setShowRetryMessage(true);
+        setTimeout(() => {
+          // Retry quiz
+          setCurrentQuestionIndex(0);
+          setAnswers(Array(questions.length).fill(null));
+          setShowFeedback(false);
+          setScore(0);
+          setShowRetryMessage(false);
+        }, 3000);
       }
     }
   };
@@ -104,6 +118,7 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
     setShowFeedback(false);
     setQuizComplete(false);
     setScore(0);
+    setShowRetryMessage(false);
   };
 
   const handleMCQAnswer = (optionIndex: number) => {
@@ -172,7 +187,24 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
               </h2>
             </div>
 
-            {!quizComplete ? (
+            {showRetryMessage ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-8"
+              >
+                <XCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+                <h3 className="text-2xl font-cinzel font-bold mb-4">
+                  Almost There!
+                </h3>
+                <p className="text-lg mb-2">
+                  You need a perfect score to unlock the next section.
+                </p>
+                <p className="text-muted-foreground">
+                  You scored {score} out of {questions.length}. Let's try again!
+                </p>
+              </motion.div>
+            ) : !quizComplete ? (
               <>
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
@@ -280,7 +312,16 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
                         <h4 className="font-cinzel font-bold mb-2">
                           {isCorrect ? 'Brilliant! ✨' : 'Not quite right'}
                         </h4>
-                        <p className="text-sm">{currentQuestion.explanation}</p>
+                        <p className="text-sm">
+                          {currentQuestion.explanation}
+                          {!isCorrect && currentQuestion.type === 'fill-blank' && currentQuestion.alternatives && (
+                            <span className="block mt-2 text-xs opacity-80">
+                              Acceptable answers: {currentQuestion.correctAnswer}
+                              {currentQuestion.alternatives.length > 0 && 
+                                `, ${currentQuestion.alternatives.join(', ')}`}
+                            </span>
+                          )}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -341,7 +382,7 @@ export const QuizModal = ({ isOpen, onClose, sectionId, questions }: QuizModalPr
                   <Button onClick={handleRetry} variant="outline">
                     Review Questions
                   </Button>
-                  <Button onClick={onClose} className="btn-enchanted">
+                  <Button onClick={onComplete || onClose} className="btn-enchanted">
                     Continue Journey
                   </Button>
                 </div>

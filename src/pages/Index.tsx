@@ -43,7 +43,15 @@ const Index = () => {
           />
           
           <main className="flex-1 md:ml-80 mt-16 p-4 sm:p-6 md:p-8 min-h-screen">
-            <SectionTemplate sectionId={currentSection} />
+            <SectionTemplate 
+              sectionId={currentSection}
+              onSectionComplete={() => {
+                // Move to next section after completing quiz
+                if (currentSection < 10) {
+                  setCurrentSection(currentSection + 1);
+                }
+              }}
+            />
             <Footer />
           </main>
         </div>
