@@ -1108,99 +1108,161 @@
       "id": 7,
       "title": "Launching the Spell",
       "subtitle": "Deploying the Contract and Integrating Frontend",
-      "description": "Ready to send your creation into the wild? This section covers deploying your PotionGuesser to Sepolia testnet and hooking it up to the React frontend with Wagmi for smooth wallet interactions. It's like launching a spell – prepare, cast, and connect! We'll keep steps simple, with code snippets to copy-paste.",
+      "description": "Hey, spellbinders! Now that your PotionGuesser contract is crafted, it's time to deploy it to Sepolia and weave it into the frontend for user interactions. We'll use Hardhat for deployment and integrate with Wagmi and RainbowKit for wallet connections in the React app. Based on the completed demo repo, we've identified removed code sections like deployment scripts, ABI imports, and Wagmi configs – we'll guide you on re-adding them exactly where they belong, with explanations.",
       "learningObjectives": [
-        "Deploy an fhEVM contract to Sepolia using Hardhat",
-        "Extract ABI and integrate with Wagmi for contract calls",
-        "Set up frontend to interact with the deployed contract",
-        "Verify contracts on Etherscan for transparency"
+        "Deploy the PotionGuesser to Sepolia with Hardhat, including verification",
+        "Add the ABI to the frontend for contract interactions",
+        "Configure Wagmi and RainbowKit in App.tsx for chain support and wallet connects",
+        "Use useContractWrite in components for submitting guesses"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Deployment: Casting to the Chain"
+          "text": "Step 1: Preparing Deployment"
         },
         {
           "type": "text",
-          "content": "First, configure Hardhat for Sepolia deployment. In hardhat.config.js, add the network configuration:"
+          "content": "Ensure hardhat.config.js in root includes the toolbox and dotenv for environment variables. This configuration loads secrets and sets up network connections."
         },
         {
           "type": "code",
           "language": "javascript",
-          "title": "Hardhat Configuration for Sepolia",
-          "code": "require(\"@nomicfoundation/hardhat-toolbox\");\nrequire(\"dotenv\").config();\n\nmodule.exports = {\n  solidity: \"0.8.24\",\n  networks: {\n    sepolia: {\n      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,\n      accounts: [process.env.PRIVATE_KEY]\n    },\n    localhost: {\n      url: \"http://127.0.0.1:8545\",\n      chainId: 31337\n    }\n  }\n};"
-        },
-        {
-          "type": "text",
-          "content": "Create a deployment script in scripts/deploy.js:"
-        },
-        {
-          "type": "code",
-          "language": "javascript",
-          "title": "Deployment Script",
-          "code": "async function main() {\n  const PotionGuesser = await ethers.getContractFactory(\"PotionGuesser\");\n  const contract = await PotionGuesser.deploy();\n  \n  await contract.deployed();\n  \n  console.log(\"PotionGuesser deployed to:\", contract.address);\n  console.log(\"Save this address for frontend integration!\");\n}\n\nmain()\n  .then(() => process.exit(0))\n  .catch((error) => {\n    console.error(error);\n    process.exit(1);\n  });"
-        },
-        {
-          "type": "tip",
-          "icon": "zap",
-          "title": "Pre-Deployment Checklist",
-          "content": "Before deploying: 1) Fund your wallet with Sepolia ETH from faucets, 2) Set INFURA_API_KEY and PRIVATE_KEY in .env, 3) Test locally first with `npx hardhat node`"
-        },
-        {
-          "type": "text",
-          "content": "Deploy to Sepolia:"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Deploy Command",
-          "code": "npx hardhat run scripts/deploy.js --network sepolia"
+          "title": "hardhat.config.js - Root Configuration",
+          "code": "require(\"@nomicfoundation/hardhat-toolbox\");\nrequire(\"dotenv\").config();\nrequire(\"@nomiclabs/hardhat-etherscan\");\n\nmodule.exports = {\n  solidity: \"0.8.24\",\n  networks: {\n    sepolia: {\n      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,\n      accounts: [process.env.PRIVATE_KEY]\n    }\n  },\n  etherscan: {\n    apiKey: process.env.ETHERSCAN_API_KEY // From etherscan.io\n  }\n};"
         },
         {
           "type": "note",
-          "icon": "check-circle",
-          "title": "Verify on Etherscan",
-          "content": "Use hardhat-etherscan plugin for verification. Add your Etherscan API key to hardhat.config.js and run: `npx hardhat verify --network sepolia <CONTRACT_ADDRESS>`. This makes your code publicly viewable and trustworthy."
+          "icon": "package",
+          "title": "Install Dependencies",
+          "content": "If not already installed, run: npm install --save-dev @nomiclabs/hardhat-etherscan. This enables contract verification on Etherscan."
         },
         {
           "type": "subheader",
-          "text": "Extracting ABI and Wagmi Integration"
+          "text": "Step 2: Creating the Deployment Script"
         },
         {
           "type": "text",
-          "content": "After compilation, the ABI is in artifacts/contracts/PotionGuesser.sol/PotionGuesser.json. Copy this to your frontend. In the React app (packages/site), install Wagmi and Viem:"
+          "content": "Create a TypeScript deployment script that uses ethers to factory the contract, deploy it, and log the address for frontend use."
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "scripts/deploy.ts",
+          "code": "import { ethers } from \"hardhat\";\n\nasync function main() {\n  const PotionGuesser = await ethers.getContractFactory(\"PotionGuesser\");\n  const potionGuesser = await PotionGuesser.deploy();\n  await potionGuesser.waitForDeployment();\n  const address = await potionGuesser.getAddress();\n  console.log(\"PotionGuesser deployed to:\", address);\n}\n\nmain().catch((error) => {\n  console.error(error);\n  process.exitCode = 1;\n});"
+        },
+        {
+          "type": "tip",
+          "icon": "terminal",
+          "title": "Why TypeScript?",
+          "content": "Using TypeScript provides type safety and better IDE support. The script uses the ethers library to interact with the blockchain and deploy your contract."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 3: Deploying and Verifying"
+        },
+        {
+          "type": "text",
+          "content": "Follow these steps to deploy your contract to Sepolia testnet:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Compile**: Run npx hardhat compile to generate artifacts and ABI",
+            "**Deploy**: Run npx hardhat run scripts/deploy.ts --network sepolia",
+            "**Verify**: Run npx hardhat verify --network sepolia DEPLOYED_ADDRESS"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "save",
+          "title": "Save the Address",
+          "content": "Copy the deployed contract address from the console output. You'll need to paste it in frontend files as CONTRACT_ADDRESS for the app to interact with your contract."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 4: Adding ABI to Frontend"
+        },
+        {
+          "type": "text",
+          "content": "The ABI (Application Binary Interface) defines the contract's function signatures. Create a new folder and file for the ABI."
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "title": "src/abi/PotionGuesserABI.json",
+          "code": "[\n  {\n    \"inputs\": [\n      {\n        \"internalType\": \"bytes\",\n        \"name\": \"encryptedTarget\",\n        \"type\": \"bytes\"\n      }\n    ],\n    \"name\": \"setTarget\",\n    \"outputs\": [],\n    \"stateMutability\": \"nonpayable\",\n    \"type\": \"function\"\n  },\n  {\n    \"inputs\": [\n      {\n        \"internalType\": \"bytes\",\n        \"name\": \"encryptedGuess\",\n        \"type\": \"bytes\"\n      },\n      {\n        \"internalType\": \"bytes32\",\n        \"name\": \"publicKey\",\n        \"type\": \"bytes32\"\n      }\n    ],\n    \"name\": \"guess\",\n    \"outputs\": [\n      {\n        \"internalType\": \"bytes\",\n        \"name\": \"\",\n        \"type\": \"bytes\"\n      }\n    ],\n    \"stateMutability\": \"view\",\n    \"type\": \"function\"\n  }\n]"
+        },
+        {
+          "type": "tip",
+          "icon": "file-json",
+          "title": "Getting the ABI",
+          "content": "Find the complete ABI in artifacts/contracts/PotionGuesser.sol/PotionGuesser.json after compilation. Copy just the 'abi' array into your frontend file."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 5: Integrating Wagmi and RainbowKit"
+        },
+        {
+          "type": "text",
+          "content": "Install the required packages for wallet connection and contract interaction:"
         },
         {
           "type": "code",
           "language": "bash",
           "title": "Install Frontend Dependencies",
-          "code": "npm install wagmi viem"
+          "code": "cd packages/site\nnpm install wagmi viem @rainbow-me/rainbowkit @tanstack/react-query connectkit"
         },
         {
           "type": "text",
-          "content": "Configure Wagmi in your App.js or a provider component:"
+          "content": "Create a Wagmi configuration file that sets up Sepolia chain and wallet connectors:"
         },
         {
           "type": "code",
-          "language": "javascript",
-          "title": "Wagmi Configuration",
-          "code": "import { WagmiConfig, createConfig } from 'wagmi';\nimport { sepolia } from 'viem/chains';\nimport { http } from 'viem';\n\nconst config = createConfig({\n  chains: [sepolia],\n  transports: { \n    [sepolia.id]: http() \n  }\n});\n\nfunction App() {\n  return (\n    <WagmiConfig config={config}>\n      {/* Your components */}\n    </WagmiConfig>\n  );\n}"
+          "language": "typescript",
+          "title": "src/lib/wagmi.ts",
+          "code": "import { getDefaultConfig } from 'connectkit';\nimport { createConfig } from 'wagmi';\nimport { sepolia } from 'viem/chains';\n\nexport const config = createConfig(\n  getDefaultConfig({\n    chains: [sepolia],\n    appName: \"Private Potion Guesser\",\n    walletConnectProjectId: 'your_id_here' // Get from walletconnect.com\n  })\n);"
+        },
+        {
+          "type": "note",
+          "icon": "link",
+          "title": "WalletConnect Project ID",
+          "content": "Sign up at walletconnect.com to get a free project ID. This enables WalletConnect support for mobile wallets and other providers."
         },
         {
           "type": "text",
-          "content": "Use Wagmi hooks for contract interactions in your components:"
+          "content": "Update App.tsx to wrap your application with the necessary providers:"
         },
         {
           "type": "code",
-          "language": "javascript",
-          "title": "Contract Interaction with Wagmi",
-          "code": "import { useContractWrite, usePrepareContractWrite } from 'wagmi';\nimport abi from './PotionGuesser.json';\n\nconst contractAddress = '0xYourDeployedAddress';\n\nfunction SubmitGuess({ encryptedGuess, attestation, publicKey }) {\n  const { config } = usePrepareContractWrite({\n    address: contractAddress,\n    abi,\n    functionName: 'guess',\n    args: [encryptedGuess, attestation, publicKey]\n  });\n  \n  const { write } = useContractWrite(config);\n\n  return <button onClick={() => write?.()}>Submit Guess!</button>;\n}"
+          "language": "typescript",
+          "title": "src/App.tsx - Provider Setup",
+          "code": "import { Toaster } from \"@/components/ui/toaster\";\nimport { Toaster as Sonner } from \"@/components/ui/sonner\";\nimport { TooltipProvider } from \"@/components/ui/tooltip\";\nimport { QueryClient, QueryClientProvider } from \"@tanstack/react-query\";\nimport { WagmiProvider } from \"wagmi\";\nimport { BrowserRouter, Routes, Route } from \"react-router-dom\";\nimport { config } from \"./lib/wagmi\";\nimport { Landing } from \"./pages/Landing\";\nimport { Game } from \"./pages/Game\";\nimport NotFound from \"./pages/NotFound\";\nimport { RainbowKitProvider } from \"@rainbow-me/rainbowkit\";\nimport \"@rainbow-me/rainbowkit/styles.css\";\nimport { useEffect, useState } from \"react\";\nimport { initializeFHE } from \"./lib/fhe\";\n\nconst queryClient = new QueryClient();\n\nconst App = () => {\n  // FHE initialization will be added in Section 8\n  return (\n    <WagmiProvider config={config}>\n      <QueryClientProvider client={queryClient}>\n        <RainbowKitProvider>\n          <TooltipProvider>\n            <Sonner />\n            <Toaster />\n            <BrowserRouter>\n              <Routes>\n                <Route path=\"/\" element={<Landing />} />\n                <Route path=\"/game\" element={<Game />} />\n                <Route path=\"*\" element={<NotFound />} />\n              </Routes>\n            </BrowserRouter>\n          </TooltipProvider>\n        </RainbowKitProvider>\n      </QueryClientProvider>\n    </WagmiProvider>\n  );\n};\n\nexport default App;"
         },
         {
           "type": "tip",
-          "icon": "wallet",
-          "title": "Wallet Connection",
-          "content": "Use Wagmi's useConnect hook or the ConnectButton component for easy wallet integration. Users need MetaMask or another compatible wallet to interact with your dApp."
+          "icon": "layers",
+          "title": "Provider Order Matters",
+          "content": "WagmiProvider must wrap QueryClientProvider, which wraps RainbowKitProvider. This ensures proper context propagation throughout your app."
+        },
+        {
+          "type": "text",
+          "content": "Update your Game page to include the GuessForm component:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "src/pages/Game.tsx",
+          "code": "import GuessForm from \"../components/GuessForm\";\n\nexport const Game = () => {\n  return (\n    <div className=\"container mx-auto p-4\">\n      <h1 className=\"text-4xl font-bold mb-8\">Private Potion Guesser</h1>\n      <GuessForm />\n    </div>\n  );\n};"
+        },
+        {
+          "type": "text",
+          "content": "Create the GuessForm component that uses Wagmi hooks for contract interactions:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "src/components/GuessForm.tsx - Basic Structure",
+          "code": "import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';\nimport PotionGuesserABI from '../abi/PotionGuesserABI.json';\n\nconst CONTRACT_ADDRESS = 'your_deployed_address_here';\n\nfunction GuessForm() {\n  const { isConnected } = useAccount();\n\n  // Encryption logic will be added in Section 8\n  // For now, we'll prepare the contract write\n\n  const { config } = usePrepareContractWrite({\n    address: CONTRACT_ADDRESS,\n    abi: PotionGuesserABI,\n    functionName: 'guess',\n    args: [] // Will add encrypted args in Section 8\n  });\n\n  const { write } = useContractWrite(config);\n\n  if (!isConnected) {\n    return <div>Please connect your wallet</div>;\n  }\n\n  return (\n    <div>\n      <input type=\"number\" min=\"0\" max=\"255\" placeholder=\"Enter your guess\" />\n      <button onClick={() => write?.()}>Submit Guess</button>\n    </div>\n  );\n}\n\nexport default GuessForm;"
         },
         {
           "type": "subheader",
@@ -1209,30 +1271,17 @@
         {
           "type": "list",
           "items": [
-            "**Insufficient Gas**: FHE operations need more gas than standard ops. Use gas estimation: `npx hardhat gas-reporter` plugin",
-            "**Network Errors**: Double-check .env keys are set correctly. Get Infura key from https://infura.io",
-            "**Contract Address Mismatch**: Always update frontend with the new deployed address after each deployment",
-            "**ABI Version Sync**: Recompile and copy the latest ABI after any contract changes"
+            "**Transaction Fails**: Check you have enough Sepolia ETH in your wallet for gas fees",
+            "**Wagmi Not Connecting**: Ensure walletConnectProjectId is set correctly in wagmi.ts",
+            "**ABI Mismatch**: Always recompile and copy the latest ABI after contract changes",
+            "**Wrong Network**: Make sure MetaMask is connected to Sepolia testnet"
           ]
         },
         {
           "type": "tip",
-          "icon": "book-open",
-          "title": "For Read Operations",
-          "content": "Use useContractRead hook for reading contract state without transactions. Perfect for displaying the encrypted target status or other view functions."
-        },
-        {
-          "type": "subheader",
-          "text": "Key Takeaways"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Deployment with Hardhat makes fhEVM contracts live on Sepolia testnet",
-            "ABI + Wagmi provides a clean interface for frontend-contract interactions",
-            "Frontend can now call encrypted operations securely through wallet signatures",
-            "Verification on Etherscan builds trust and transparency in your dApp"
-          ]
+          "icon": "compass",
+          "title": "Testing Locally",
+          "content": "Before deploying to Sepolia, test on a local Hardhat node with: npx hardhat node. Deploy to localhost network first to catch issues early."
         }
       ],
       "resources": [
@@ -1245,8 +1294,70 @@
           "url": "https://wagmi.sh/"
         },
         {
+          "title": "RainbowKit Setup",
+          "url": "https://www.rainbowkit.com/docs/installation"
+        },
+        {
           "title": "Sepolia Faucet",
           "url": "https://sepoliafaucet.com/"
+        }
+      ]
+    },
+    {
+      "sectionId": 7,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "The contract's _____ defines function signatures for frontend interactions.",
+          "correctAnswer": "ABI",
+          "explanation": "ABI (Application Binary Interface) defines the contract's function signatures, allowing the frontend to call contract methods correctly."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What command deploys the contract to Sepolia?",
+          "options": [
+            "npx hardhat deploy",
+            "npx hardhat run scripts/deploy.ts --network sepolia",
+            "npm run deploy-sepolia",
+            "hardhat deploy --sepolia"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct command is 'npx hardhat run scripts/deploy.ts --network sepolia', which executes the deployment script on the Sepolia testnet."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "In the provider hierarchy, which order is correct?",
+          "options": [
+            "RainbowKit → Wagmi → QueryClient",
+            "QueryClient → RainbowKit → Wagmi",
+            "Wagmi → QueryClient → RainbowKit",
+            "Wagmi → RainbowKit → QueryClient"
+          ],
+          "correctAnswer": 2,
+          "explanation": "WagmiProvider wraps QueryClientProvider, which wraps RainbowKitProvider. This order ensures proper context propagation."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Wagmi uses _____ hooks to interact with smart contracts.",
+          "correctAnswer": "useContractWrite",
+          "explanation": "useContractWrite (and usePrepareContractWrite) are Wagmi hooks that enable writing to smart contracts. Accepted answers: useContractWrite, React hooks, or Wagmi hooks."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "Why verify the contract on Etherscan?",
+          "options": [
+            "It's required for deployment",
+            "It makes the code publicly viewable and trustworthy",
+            "It reduces gas costs",
+            "It improves contract performance"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Verification makes your contract's source code publicly viewable on Etherscan, building trust and transparency in your dApp."
         }
       ]
     },
@@ -1254,94 +1365,106 @@
       "id": 8,
       "title": "The Art of Secret Infusion",
       "subtitle": "Frontend Encryption and Decryption with FHEVM",
-      "description": "Let's add the secret sauce to the frontend! Using fhevmjs, we'll encrypt guesses client-side and decrypt results – ensuring data never hits the chain unencrypted. It's like sealing a potion vial: Easy steps, big privacy boost. We'll explain why each part matters, with snippets for your React app.",
+      "description": "Let's seal the secrets! Using fhevmjs, we'll add encryption and decryption to the frontend. From the demo repo, removed code includes FHE init in App, functions in fhe.ts, and logic in GuessForm – we'll add them back with placement and explanations. This completes the privacy circle: encrypt client-side, compute onchain, decrypt client-side.",
       "learningObjectives": [
-        "Encrypt data on frontend with fhevmjs library",
-        "Handle decryption securely with user keypairs",
-        "Understand key management for privacy",
-        "Integrate encryption flow into React components"
+        "Initialize FHE in App.tsx with proper loading states",
+        "Create fhe.ts with functions for initialization, encryption, and decryption",
+        "Add key generation, encryption, and decryption logic in GuessForm",
+        "Understand the complete FHE workflow from user input to result"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Encryption Journey: Sealing the Guess"
+          "text": "Step 1: Creating FHE Library Functions"
         },
         {
           "type": "text",
-          "content": "Install the fhevmjs library in your frontend project:"
+          "content": "Create a dedicated file for FHE operations. This module handles initialization, encryption, and decryption, keeping the logic centralized and reusable."
         },
         {
           "type": "code",
-          "language": "bash",
-          "title": "Install fhevmjs",
-          "code": "npm install fhevmjs"
-        },
-        {
-          "type": "text",
-          "content": "Initialize fhevmjs and create encryption functions in your component:"
-        },
-        {
-          "type": "code",
-          "language": "javascript",
-          "title": "Initialize FHEVM Instance",
-          "code": "import { createInstance } from 'fhevmjs';\n\nlet instance;  // Global or context\n\nasync function initFhevm() {\n  instance = await createInstance({ \n    chainId: 11155111  // Sepolia\n  });\n}\n\nfunction encryptGuess(value) {\n  const publicKey = instance.getPublicKey();\n  return instance.encrypt8(value, publicKey);\n}"
+          "language": "typescript",
+          "title": "src/lib/fhe.ts",
+          "code": "import { createInstance } from 'fhevmjs';\n\nexport const initializeFHE = async () => {\n  const instance = await createInstance({ chainId: 11155111 }); // Sepolia\n  return instance;\n};\n\nexport const encryptGuess = (instance: any, value: number) => {\n  const publicKey = instance.getPublicKey();\n  return instance.encrypt8(value, publicKey);\n};\n\nexport const decryptResult = (\n  instance: any,\n  contractAddress: string,\n  reencrypted: string,\n  privateKey: string\n) => {\n  return instance.decrypt(contractAddress, reencrypted, privateKey);\n};"
         },
         {
           "type": "note",
-          "icon": "shield",
-          "title": "Why Client-Side Encryption?",
-          "content": "Client-side encryption keeps guesses private before sending to the blockchain. The data is encrypted using the network's public key, adding cryptographic noise for security. This means even if someone intercepts the transaction, they can't see the actual guess value."
+          "icon": "code",
+          "title": "What These Functions Do",
+          "content": "initializeFHE creates the FHE instance for the Sepolia chain. encryptGuess encrypts a value (0-255) using the network's public key. decryptResult decrypts the reencrypted response using the user's private key."
         },
         {
-          "type": "list",
-          "items": [
-            "**Network Public Key**: Fetched from the fhEVM network, used to encrypt data before submission",
-            "**Attestation**: For production, generate proof; development can skip with empty bytes ('0x')",
-            "**encrypt8**: Encrypts values as 8-bit unsigned integers (0-255 range)"
-          ]
+          "type": "tip",
+          "icon": "package",
+          "title": "Install fhevmjs",
+          "content": "Don't forget to install the library: npm install fhevmjs. This provides all the cryptographic functions needed for client-side FHE operations."
         },
         {
           "type": "subheader",
-          "text": "Decryption: Unveiling the Result"
+          "text": "Step 2: Initializing FHE in App.tsx"
         },
         {
           "type": "text",
-          "content": "After the contract processes your guess, decrypt the result client-side:"
+          "content": "Add FHE initialization logic to App.tsx. This loads the FHE instance on mount, shows a loading state, and handles errors gracefully."
         },
         {
           "type": "code",
-          "language": "javascript",
-          "title": "Decryption Flow",
-          "code": "// Generate user keypair (once per session)\nconst userKeys = instance.generateKeypair();\n\n// In guess function, pass userKeys.publicKey to contract\n\n// After getting reencrypted bytes from contract call\nconst result = instance.decrypt(\n  contractAddress, \n  reencrypted, \n  userKeys.privateKey\n);  // Returns boolean: true/false"
+          "language": "typescript",
+          "title": "src/App.tsx - FHE Initialization",
+          "code": "import { useEffect, useState } from \"react\";\nimport { initializeFHE } from \"./lib/fhe\";\n// ... other imports\n\nconst App = () => {\n  const [fheReady, setFheReady] = useState(false);\n  const [fheInstance, setFheInstance] = useState<any>(null);\n\n  useEffect(() => {\n    initializeFHE()\n      .then((instance) => {\n        setFheInstance(instance);\n        setFheReady(true);\n        console.log(\"FHE initialized successfully\");\n      })\n      .catch((err) => {\n        console.error(\"FHE initialization failed:\", err);\n      });\n  }, []);\n\n  if (!fheReady) {\n    return (\n      <div className=\"flex items-center justify-center min-h-screen\">\n        <div className=\"text-center\">\n          <h2 className=\"text-2xl font-bold mb-2\">Initializing encryption...</h2>\n          <p className=\"text-muted-foreground\">Loading FHE cryptography</p>\n        </div>\n      </div>\n    );\n  }\n\n  // Pass fheInstance to Game via context or props\n  return (\n    <WagmiProvider config={config}>\n      {/* ... rest of providers */}\n    </WagmiProvider>\n  );\n};"
+        },
+        {
+          "type": "note",
+          "icon": "clock",
+          "title": "Why Loading State?",
+          "content": "FHE initialization can take a few seconds as it loads cryptographic parameters. The loading screen prevents users from interacting before the system is ready, avoiding errors."
+        },
+        {
+          "type": "tip",
+          "icon": "react",
+          "title": "Passing FHE Instance",
+          "content": "For cleaner code, consider using React Context to pass fheInstance to child components instead of prop drilling. Create a FHEContext with createContext and useContext."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 3: Key Generation, Encryption, and Decryption in GuessForm"
+        },
+        {
+          "type": "text",
+          "content": "Now we'll add the complete encryption workflow to the GuessForm component: generate user keypair, encrypt the guess, submit to contract, and decrypt the result."
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "src/components/GuessForm.tsx - Complete Implementation",
+          "code": "import { useEffect, useState } from 'react';\nimport { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';\nimport { encryptGuess, decryptResult } from '../lib/fhe';\nimport PotionGuesserABI from '../abi/PotionGuesserABI.json';\nimport { Button } from '@/components/ui/button';\nimport { Input } from '@/components/ui/input';\nimport { useToast } from '@/hooks/use-toast';\n\nconst CONTRACT_ADDRESS = 'your_deployed_address_here';\n\ninterface GuessFormProps {\n  fheInstance: any;\n}\n\nfunction GuessForm({ fheInstance }: GuessFormProps) {\n  const { isConnected } = useAccount();\n  const { toast } = useToast();\n  \n  const [userKeys, setUserKeys] = useState<any>(null);\n  const [guess, setGuess] = useState(0);\n  const [encryptedGuess, setEncryptedGuess] = useState<any>(null);\n  const [isEncrypting, setIsEncrypting] = useState(false);\n\n  // Generate user keypair on mount\n  useEffect(() => {\n    if (fheInstance) {\n      const keys = fheInstance.generateKeypair();\n      setUserKeys(keys);\n      console.log('User keypair generated');\n    }\n  }, [fheInstance]);\n\n  // Handle encryption\n  const handleEncrypt = async () => {\n    if (!fheInstance || !guess) return;\n    \n    setIsEncrypting(true);\n    try {\n      const encrypted = encryptGuess(fheInstance, guess);\n      setEncryptedGuess(encrypted);\n      toast({\n        title: \"Guess Encrypted\",\n        description: \"Your guess is now encrypted and ready to submit\"\n      });\n    } catch (error) {\n      console.error('Encryption failed:', error);\n      toast({\n        title: \"Encryption Failed\",\n        description: \"Please try again\",\n        variant: \"destructive\"\n      });\n    } finally {\n      setIsEncrypting(false);\n    }\n  };\n\n  // Prepare contract write\n  const { config } = usePrepareContractWrite({\n    address: CONTRACT_ADDRESS,\n    abi: PotionGuesserABI,\n    functionName: 'guess',\n    args: [\n      encryptedGuess,\n      '0x', // Attestation (empty for development)\n      userKeys?.publicKey\n    ],\n    enabled: !!encryptedGuess && !!userKeys\n  });\n\n  const { write, data, isSuccess, isLoading } = useContractWrite(config);\n\n  // Handle successful transaction and decrypt result\n  useEffect(() => {\n    if (isSuccess && data && userKeys) {\n      const reencrypted = data; // Response from contract\n      try {\n        const result = decryptResult(\n          fheInstance,\n          CONTRACT_ADDRESS,\n          reencrypted,\n          userKeys.privateKey\n        );\n        \n        toast({\n          title: result ? \"Correct!\" : \"Wrong!\",\n          description: result \n            ? \"You guessed the potion strength correctly!\" \n            : \"Try again with a different guess\"\n        });\n        \n        // Reset form\n        setEncryptedGuess(null);\n        setGuess(0);\n      } catch (error) {\n        console.error('Decryption failed:', error);\n      }\n    }\n  }, [isSuccess, data, userKeys, fheInstance]);\n\n  if (!isConnected) {\n    return (\n      <div className=\"text-center\">\n        <p>Please connect your wallet to play</p>\n      </div>\n    );\n  }\n\n  return (\n    <div className=\"space-y-4\">\n      <div>\n        <label className=\"block mb-2\">Enter your guess (0-255):</label>\n        <Input\n          type=\"number\"\n          min=\"0\"\n          max=\"255\"\n          value={guess}\n          onChange={(e) => setGuess(parseInt(e.target.value) || 0)}\n          disabled={isEncrypting || isLoading}\n        />\n      </div>\n      \n      <div className=\"flex gap-2\">\n        <Button \n          onClick={handleEncrypt}\n          disabled={!guess || isEncrypting || !!encryptedGuess}\n        >\n          {isEncrypting ? 'Encrypting...' : 'Encrypt Guess'}\n        </Button>\n        \n        <Button\n          onClick={() => write?.()}\n          disabled={!encryptedGuess || isLoading}\n          variant=\"default\"\n        >\n          {isLoading ? 'Submitting...' : 'Submit Guess'}\n        </Button>\n      </div>\n      \n      {encryptedGuess && (\n        <p className=\"text-sm text-muted-foreground\">\n          ✓ Guess encrypted and ready to submit\n        </p>\n      )}\n    </div>\n  );\n}\n\nexport default GuessForm;"
         },
         {
           "type": "note",
           "icon": "key",
-          "title": "Key Management Security",
-          "content": "Decryption happens offchain with the user's private key – only you see the outcome. Generate keys per session and store in memory or sessionStorage. NEVER use localStorage or send keys to servers – this compromises privacy!"
+          "title": "Key Generation Per Session",
+          "content": "User keypairs are generated once per session when the component mounts. The private key stays in memory and is never sent anywhere, ensuring only the user can decrypt their results."
         },
         {
-          "type": "text",
-          "content": "Integrate encryption in your React form component:"
-        },
-        {
-          "type": "code",
-          "language": "javascript",
-          "title": "Complete React Component Integration",
-          "code": "import { useState, useEffect } from 'react';\nimport { createInstance } from 'fhevmjs';\nimport { useContractWrite } from 'wagmi';\n\nfunction GuessForm() {\n  const [guess, setGuess] = useState(0);\n  const [instance, setInstance] = useState(null);\n  const [userKeys, setUserKeys] = useState(null);\n\n  useEffect(() => {\n    async function init() {\n      const fhevmInstance = await createInstance({ chainId: 11155111 });\n      setInstance(fhevmInstance);\n      setUserKeys(fhevmInstance.generateKeypair());\n    }\n    init();\n  }, []);\n\n  const handleSubmit = async () => {\n    if (!instance || !userKeys) return;\n    \n    const encrypted = instance.encrypt8(guess, instance.getPublicKey());\n    // Call contract.guess(encrypted, '0x', userKeys.publicKey)\n    // On success, decrypt response\n  };\n\n  return (\n    <div>\n      <input \n        type=\"number\" \n        min=\"0\" \n        max=\"255\"\n        value={guess}\n        onChange={e => setGuess(parseInt(e.target.value))}\n      />\n      <button onClick={handleSubmit}>Submit Guess</button>\n    </div>\n  );\n}"
+          "type": "tip",
+          "icon": "shield",
+          "title": "Attestation Parameter",
+          "content": "The attestation parameter ('0x' in development) would contain a proof in production environments. For testing on Sepolia, an empty bytes value works fine."
         },
         {
           "type": "subheader",
-          "text": "Key Flow Diagram"
+          "text": "Understanding the Complete FHE Flow"
         },
         {
           "type": "list",
           "items": [
-            "**Step 1**: Fetch network public key from fhEVM instance",
-            "**Step 2**: Generate user keypair (public + private) for session",
-            "**Step 3**: Encrypt guess with network public key → send to contract",
-            "**Step 4**: Contract processes, reencrypts result with user's public key",
-            "**Step 5**: Decrypt result offchain with user's private key"
+            "**Step 1 - Initialize**: Load FHE instance with network parameters on app startup",
+            "**Step 2 - Generate Keys**: Create user keypair (public + private) for the session",
+            "**Step 3 - Encrypt**: User input is encrypted with network public key before leaving the browser",
+            "**Step 4 - Submit**: Encrypted data is sent to the smart contract along with user's public key",
+            "**Step 5 - Compute**: Contract performs homomorphic comparison on encrypted data",
+            "**Step 6 - Reencrypt**: Contract reencrypts result under user's public key",
+            "**Step 7 - Decrypt**: User decrypts the result client-side with their private key"
           ]
         },
         {
@@ -1351,30 +1474,42 @@
         {
           "type": "list",
           "items": [
-            "**Key Mismatch**: Always use network public key for initial encryption, user public key for reencryption request",
-            "**Storage Risks**: Never store private keys in localStorage (persists across sessions) – use sessionStorage or in-memory only",
-            "**Async Handling**: Wrap encryption/decryption in try-catch blocks to handle errors gracefully",
-            "**Instance Not Ready**: Always check if instance is initialized before calling encryption functions"
+            "**FHE Not Ready**: Always check if fheInstance exists before calling encryption functions",
+            "**Key Loss**: Keys are session-based - if user refreshes, they'll need new keys and can't decrypt old results",
+            "**Wrong Key Usage**: Use network public key for initial encryption, user public key for reencryption request",
+            "**Type Mismatches**: encrypt8 expects numbers 0-255; validate input ranges before encrypting"
           ]
         },
         {
           "type": "tip",
-          "icon": "alert-triangle",
-          "title": "Security Best Practice",
-          "content": "Treat user private keys like passwords. They should never leave the client's browser or be sent to any backend. Loss of the private key means inability to decrypt results for that session."
+          "icon": "database",
+          "title": "Key Storage Best Practice",
+          "content": "Never store private keys in localStorage (persists across sessions). Use in-memory state or sessionStorage at most. Private keys should be ephemeral and session-specific."
         },
         {
           "type": "subheader",
-          "text": "Key Takeaways"
+          "text": "Testing the Complete Flow"
+        },
+        {
+          "type": "text",
+          "content": "To test your implementation:"
         },
         {
           "type": "list",
           "items": [
-            "fhevmjs handles encrypt/decrypt operations, completing the FHE workflow on the client side",
-            "Client-side encryption keeps data private end-to-end – from user input to blockchain to result",
-            "Key management is crucial: Network public for encrypt, user keypair for decrypt",
-            "Proper error handling and async management ensure smooth user experience"
+            "**Connect Wallet**: Use MetaMask on Sepolia testnet",
+            "**Wait for Init**: Ensure 'FHE initialized successfully' appears in console",
+            "**Enter Guess**: Input a number between 0-255",
+            "**Encrypt**: Click encrypt button and verify encryption success toast",
+            "**Submit**: Click submit and approve the MetaMask transaction",
+            "**View Result**: After tx confirms, see the decrypted result (correct/wrong)"
           ]
+        },
+        {
+          "type": "note",
+          "icon": "check-circle",
+          "title": "Privacy Verified",
+          "content": "Check the transaction on Etherscan - you'll see encrypted bytes, not the actual guess or result. The blockchain is blind to the plaintext values!"
         }
       ],
       "resources": [
@@ -1383,12 +1518,74 @@
           "url": "https://docs.zama.ai/fhevm/guides/frontend"
         },
         {
-          "title": "fhevmjs GitHub",
+          "title": "fhevmjs GitHub Repository",
           "url": "https://github.com/zama-ai/fhevmjs"
         },
         {
-          "title": "Key Management Best Practices",
+          "title": "Zama Key Management Guide",
           "url": "https://docs.zama.ai/fhevm/guides/keys"
+        },
+        {
+          "title": "React Context API",
+          "url": "https://react.dev/reference/react/useContext"
+        }
+      ]
+    },
+    {
+      "sectionId": 8,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "The fhevmjs function _____ encrypts values as 8-bit unsigned integers.",
+          "correctAnswer": "encrypt8",
+          "explanation": "encrypt8 is the fhevmjs function that encrypts values in the range 0-255 as 8-bit unsigned integers (euint8)."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "Why generate user keypairs on the client side?",
+          "options": [
+            "To save gas costs",
+            "To ensure only the user can decrypt their results",
+            "To speed up encryption",
+            "To reduce server load"
+          ],
+          "correctAnswer": 1,
+          "explanation": "User keypairs ensure that only the user who made the guess can decrypt the result using their private key, maintaining end-to-end privacy."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Arrange the FHE flow steps: (1) Decrypt result (2) Encrypt guess (3) Generate keys (4) Contract computes. What is the correct sequence?",
+          "options": [
+            "1 → 2 → 3 → 4",
+            "3 → 2 → 4 → 1",
+            "2 → 3 → 4 → 1",
+            "3 → 4 → 2 → 1"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct flow is: Generate keys (3), Encrypt guess (2), Contract computes (4), Decrypt result (1). Keys must be generated first, then data is encrypted, processed, and finally decrypted."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Private keys should be stored in _____ to maintain security.",
+          "correctAnswer": "memory",
+          "explanation": "Private keys should stay in memory (React state) or sessionStorage at most, never in localStorage. They should be ephemeral and session-specific. Accepted answers: memory, state, or sessionStorage."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "What does the attestation parameter do?",
+          "options": [
+            "It encrypts the guess",
+            "It provides a proof in production (empty in development)",
+            "It stores the user's address",
+            "It verifies the contract"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The attestation parameter would contain a cryptographic proof in production environments. For testing on Sepolia, an empty bytes value ('0x') works fine."
         }
       ]
     },
