@@ -1593,72 +1593,82 @@
       "id": 9,
       "title": "Reflecting on the Brew",
       "subtitle": "Recap, Achievements, and Lessons Learned",
-      "description": "Potion complete – time to sip and reflect! This section recaps our journey, celebrates what you've built, and highlights key lessons. Think of it as admiring your finished elixir: What worked, why it matters, and how it sparks bigger ideas.",
+      "description": "Well done, master brewers – your confidential potion is bubbling! Let's pause to reflect on the journey through our Private Potion Guesser dApp. This section recaps the full process in clear steps, celebrates your key achievements, and distills the core lessons on fhEVM's privacy magic. Think of it as tasting your elixir: Savor what you've created, note the flavors (learnings), and ponder how to refine future brews.",
       "learningObjectives": [
-        "Summarize the full dApp workflow from concept to deployment",
-        "Identify your achievements in building with fhEVM",
-        "Reflect on FHE's potential for Web3 applications",
-        "Understand broader implications for privacy in blockchain"
+        "Recap the end-to-end dApp development process, from FHE basics to frontend integration",
+        "Recognize your achievements in building a privacy-focused application",
+        "Identify key lessons on fhEVM's strengths, challenges, and real-world applications"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "The Complete Journey: From Theory to Practice"
+          "text": "Run-Through: The Complete Brewing Process"
+        },
+        {
+          "type": "text",
+          "content": "Here's a step-by-step recap of our adventure, like reviewing a spellbook after a successful incantation:"
         },
         {
           "type": "list",
           "items": [
-            "**Section 1 - Intro to FHE/fhEVM**: Learned privacy basics, understood homomorphic encryption types and operations",
-            "**Section 2 - FHEVM Realm**: Explored cryptography concepts, data types, and supported operations",
-            "**Section 3 - Project Overview**: Outlined the Private Potion Guesser concept and verified prerequisites",
-            "**Section 4 - Repo Setup**: Cloned boilerplate templates and explored the project structure",
-            "**Section 5 - Environment Setup**: Configured Hardhat, React, and development tools",
-            "**Section 6 - Contract Creation**: Built the encrypted guessing contract with FHE operations",
-            "**Section 7 - Deployment**: Launched to Sepolia and integrated with frontend via Wagmi",
-            "**Section 8 - Encryption/Decryption**: Added client-side privacy with fhevmjs"
+            "**FHE and fhEVM Foundations (Sections 1-2)**: We unveiled FHE's principles – computing on encrypted data without decryption – and explored fhEVM as Zama's EVM extension for onchain privacy. You learned crypto basics (keys, TFHE scheme), data types (euint8, ebool), and operations (add, eq) with examples.",
+            "**Project Setup and Tools (Sections 3-5)**: We outlined the dApp (private guessing game), gathered tools (Hardhat, React, fhevmjs, Wagmi), cloned the boilerplate repo, and configured environments – adding Sepolia to MetaMask, funding with faucets, and setting .env vars for secure deploys.",
+            "**Contract Crafting (Section 6)**: Built Potion.sol with encrypted target storage and private comparisons using TFHE.eq and reencrypt, testing via Hardhat to verify privacy.",
+            "**Deployment and Integration (Section 7)**: Deployed to Sepolia with scripts/deploy.ts, added ABI to frontend, and integrated Wagmi/RainbowKit in App.tsx for wallet connects and contract writes.",
+            "**Encryption Magic (Section 8)**: Added fhevmjs in lib/fhe.ts for init/encrypt/decrypt, generating user keys and handling client-side privacy in GuessForm.tsx."
           ]
         },
         {
           "type": "note",
           "icon": "trophy",
-          "title": "What You've Accomplished",
-          "content": "End result: A live dApp where users guess encrypted targets privately! You've built a full-stack confidential application from scratch, mastering encryption, smart contracts, and frontend integration."
+          "title": "The Result",
+          "content": "A full dApp where users encrypt guesses, the contract computes privately, and only the caller decrypts the outcome – all on Sepolia for real blockchain feel!"
         },
         {
           "type": "subheader",
-          "text": "Key Achievements and Skills Gained"
-        },
-        {
-          "type": "list",
-          "items": [
-            "**Built & Deployed**: A complete confidential dApp – from smart contract to interactive UI",
-            "**Privacy Mastery**: Handled the full encrypt-compute-decrypt workflow without data leaks",
-            "**Tools Integration**: Seamlessly combined Hardhat, Wagmi, fhevmjs, and React",
-            "**Blockchain Understanding**: Learned how FHE transforms traditional transparent blockchains into privacy-preserving platforms",
-            "**Testing Skills**: Implemented comprehensive tests for encrypted operations"
-          ]
-        },
-        {
-          "type": "subheader",
-          "text": "Lessons Learned: The Reality of FHE Development"
+          "text": "Achievements: What You've Mastered"
         },
         {
           "type": "text",
-          "content": "Working with FHE in production taught us several important lessons:"
+          "content": "Give yourself a pat on the back – here's what you've accomplished:"
         },
         {
           "type": "list",
           "items": [
-            "**Performance Trade-offs**: FHE adds computational overhead (100-1000x slower) but unlocks trustless privacy – the trade-off is worth it for sensitive data",
-            "**Gas Optimization**: Using smaller encrypted types (euint8 vs euint256) significantly reduces costs",
-            "**Testing is Critical**: Always test thoroughly on local nodes before deploying to testnet – FHE operations can fail in subtle ways",
-            "**Key Management**: Proper handling of encryption keys is paramount – one mistake compromises the entire privacy model",
-            "**Start Simple**: Begin with basic operations before adding complexity – FHE development requires careful planning"
+            "**Built a Confidential dApp from Scratch**: Deployed a privacy-preserving guessing game, demonstrating the encrypt-compute-decrypt workflow end-to-end",
+            "**Integrated Key Tools Seamlessly**: Combined Hardhat for backend, React/Next.js for UI, Wagmi for interactions, and fhevmjs for FHE – a full-stack Web3 skillset",
+            "**Ensured True Privacy**: No data leaks; everything stays encrypted onchain, with offchain decryption for users only",
+            "**Tested and Optimized**: Used Hardhat tests to validate logic, aware of gas costs and optimizations like small euint types"
           ]
         },
         {
+          "type": "tip",
+          "icon": "star",
+          "title": "Level Up",
+          "content": "These skills position you to tackle advanced apps, like private voting or confidential auctions. You're now part of the privacy-first Web3 movement!"
+        },
+        {
           "type": "subheader",
-          "text": "Broader Impact: Real-World Applications"
+          "text": "Lessons Learned: Insights from the Cauldron"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Privacy Without Compromise**: fhEVM solves Web3's transparency-privacy tension – computations are verifiable yet secret, ideal for DeFi, health data, or AI inference",
+            "**Challenges and Trade-offs**: FHE ops are gas-heavy (optimize with bounded logic, small types); key management is crucial (user keys for reencrypt prevent leaks)",
+            "**Broader Impact**: This project shows FHE's potential in real dApps – e.g., sealed-bid auctions where bids compute privately, or machine learning on encrypted inputs",
+            "**Best Practices**: Always test locally/Sepolia first; use .env for secrets; modularize with hooks for clean code"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "lightbulb",
+          "title": "Reflection Exercise",
+          "content": "How might you adapt this for a multiplayer version? What other privacy problems could you solve with FHE? Experiment to solidify your knowledge!"
+        },
+        {
+          "type": "subheader",
+          "text": "Real-World Applications Beyond Gaming"
         },
         {
           "type": "text",
@@ -1667,18 +1677,13 @@
         {
           "type": "list",
           "items": [
-            "**Private Voting Systems**: Votes are encrypted onchain, tallied without revealing individual choices, ensuring democratic integrity",
-            "**Confidential DeFi**: Trading, lending, and borrowing without exposing positions or wallet balances",
+            "**Private Voting Systems**: Votes encrypted onchain, tallied without revealing individual choices, ensuring democratic integrity",
+            "**Confidential DeFi**: Trading, lending, borrowing without exposing positions or wallet balances",
             "**Healthcare on Blockchain**: Medical records stored encrypted, analyzed for insights without compromising patient privacy",
             "**Sealed-Bid Auctions**: Bids remain hidden until reveal time, preventing front-running and manipulation",
-            "**Private Gaming**: Game state hidden from players and servers, enabling true fog-of-war mechanics"
+            "**Private Gaming**: Game state hidden from players and servers, enabling true fog-of-war mechanics",
+            "**Encrypted Machine Learning**: Train models on private datasets without exposing training data"
           ]
-        },
-        {
-          "type": "tip",
-          "icon": "lightbulb",
-          "title": "Innovation Opportunity",
-          "content": "You now have the foundation to build privacy-first dApps that were impossible before FHE. Think about problems in your domain that require both transparency (blockchain) and privacy (encryption) – that's where fhEVM shines!"
         },
         {
           "type": "subheader",
@@ -1689,10 +1694,16 @@
           "items": [
             "**Full App Debug**: Simulate complete workflows locally with Hardhat node before testnet deployment",
             "**Log Encrypted Values**: Display encrypted values as hex strings for verification and debugging",
-            "**Gas Estimation**: Use `hardhat gas-reporter` to identify expensive operations",
+            "**Gas Estimation**: Use hardhat gas-reporter plugin to identify expensive operations",
             "**Frontend Errors**: Check browser console for fhevmjs initialization and encryption errors",
             "**Contract Events**: Emit events for important state changes to track execution flow"
           ]
+        },
+        {
+          "type": "tip",
+          "icon": "terminal",
+          "title": "Pro Debugging Tip",
+          "content": "Use Etherscan to monitor transactions on Sepolia. You can see the encrypted bytes being passed around, confirming that plaintext values never touch the blockchain!"
         },
         {
           "type": "subheader",
@@ -1701,11 +1712,11 @@
         {
           "type": "list",
           "items": [
-            "You've mastered 'Hello fhEVM' – built a complete confidential dApp from scratch",
-            "fhEVM enables innovative, privacy-preserving Web3 applications previously impossible",
-            "The encrypt-compute-decrypt pattern is your blueprint for future projects",
-            "You're ready to tackle more complex privacy-preserving applications",
-            "The future of blockchain includes privacy, and you're now equipped to build it"
+            "The workflow – setup, build, deploy, integrate – creates robust private dApps",
+            "Achievements include mastering fhEVM tools for encrypted logic",
+            "Lessons emphasize optimization, security, and FHE's transformative role in Web3",
+            "You're ready to build the next generation of privacy-preserving applications",
+            "The encrypt-compute-decrypt pattern is your blueprint for future projects"
           ]
         }
       ],
@@ -1715,12 +1726,74 @@
           "url": "https://www.zama.ai/use-cases"
         },
         {
-          "title": "fhEVM Tutorials",
+          "title": "fhEVM Advanced Tutorials",
           "url": "https://docs.zama.ai/fhevm/tutorials"
         },
         {
-          "title": "Privacy in Web3",
+          "title": "Privacy in Web3 Research",
           "url": "https://docs.zama.ai/fhevm/fundamentals/why-privacy"
+        },
+        {
+          "title": "FHE Development Best Practices",
+          "url": "https://docs.zama.ai/fhevm/guides/best-practices"
+        }
+      ]
+    },
+    {
+      "sectionId": 9,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "The core FHE workflow is: Encrypt, _____, Decrypt",
+          "options": [
+            "Deploy",
+            "Compute",
+            "Test",
+            "Share"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The FHE workflow is Encrypt → Compute → Decrypt. Data is encrypted, computations happen on ciphertexts, then results are decrypted."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "Achievement: Built a _____ dApp with fhEVM.",
+          "correctAnswer": "privacy-preserving",
+          "explanation": "You built a privacy-preserving (or confidential) dApp that keeps all sensitive data encrypted. Accepted answers: privacy-preserving, confidential, or private."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Arrange these tutorial sections: (1) Encryption Magic (2) Foundations (3) Contract Crafting. What is the correct order?",
+          "options": [
+            "1 → 2 → 3",
+            "2 → 3 → 1",
+            "3 → 1 → 2",
+            "2 → 1 → 3"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct order is: Foundations (sections 1-2), Contract Crafting (section 6), Encryption Magic (section 8)."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Key lesson: FHE ops are _____, so optimize with small types.",
+          "correctAnswer": "gas-intensive",
+          "explanation": "FHE operations are gas-intensive (or gas-heavy/expensive) compared to regular operations. Using smaller encrypted types like euint8 helps optimize costs. Accepted answers: gas-intensive, gas-heavy, or expensive."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "Which real-world application is enabled by FHE?",
+          "options": [
+            "Public transaction logs",
+            "Sealed-bid auctions with private bids",
+            "Unencrypted data storage",
+            "Standard token transfers"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Sealed-bid auctions are a perfect FHE use case – bids remain encrypted and private until the reveal phase, preventing manipulation."
         }
       ]
     },
@@ -1728,21 +1801,24 @@
       "id": 10,
       "title": "Sharing the Elixir",
       "subtitle": "Deploying Your dApp, Next Steps, and FHEVM Advantages",
-      "description": "Bottle up your masterpiece and share it! We'll deploy the frontend to Vercel, suggest extensions, and remind you of fhEVM's superpowers. It's like passing the potion recipe – inspire others while leveling up your skills.",
+      "description": "Your potion is perfected – now bottle it and share with the world! This final section covers deploying the full frontend to Vercel (or similar), suggests extensions, and reiterates fhEVM's standout benefits. It's like distributing your elixir to fellow alchemists: Make it accessible, inspire builds, and highlight why this tech shines.",
       "learningObjectives": [
-        "Deploy the full dApp to Vercel for public access",
-        "Plan next steps and feature extensions",
-        "Share your work with the community",
-        "Articulate fhEVM's advantages for future projects"
+        "Deploy the React frontend to Vercel for public access",
+        "Plan next steps, like extensions and sharing for feedback or bounties",
+        "Explain fhEVM's advantages in privacy, security, and Web3 innovation"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Frontend Deployment: Going Live with Vercel"
+          "text": "Deployment: Bottling for the Masses"
         },
         {
           "type": "text",
-          "content": "Deploy your React frontend to Vercel for easy sharing and hosting:"
+          "content": "Host your frontend on Vercel – it's free, fast, and integrates with GitHub."
+        },
+        {
+          "type": "text",
+          "content": "**Step 1: Install Vercel CLI**"
         },
         {
           "type": "code",
@@ -1751,164 +1827,212 @@
           "code": "npm i -g vercel"
         },
         {
+          "type": "note",
+          "icon": "terminal",
+          "title": "Global Installation",
+          "content": "Installing globally with -g makes the vercel command available throughout your system for easy deployment."
+        },
+        {
           "type": "text",
-          "content": "In your frontend root directory, run the Vercel deployment command:"
+          "content": "**Step 2: Configure Environment Variables**"
+        },
+        {
+          "type": "text",
+          "content": "In packages/site, create .env.production with CONTRACT_ADDRESS (your deployed Potion.sol address). This ensures the live site points to the right contract."
         },
         {
           "type": "code",
           "language": "bash",
-          "title": "Deploy to Vercel",
-          "code": "vercel"
+          "title": ".env.production",
+          "code": "CONTRACT_ADDRESS=0xYourDeployedAddressHere\nCHAIN_ID=11155111"
+        },
+        {
+          "type": "text",
+          "content": "**Step 3: Build and Deploy**"
         },
         {
           "type": "list",
           "items": [
-            "Follow the interactive prompts to configure your project",
-            "Set environment variables (e.g., CONTRACT_ADDRESS, CHAIN_ID) in Vercel dashboard",
-            "Vercel automatically handles Next.js builds and optimizations",
-            "Get a production URL to share your dApp with the world"
+            "Navigate to your frontend folder: cd packages/site",
+            "Login to Vercel: vercel login (follow prompts with email/GitHub)",
+            "Deploy: vercel --prod",
+            "Handle prompts for scope/project name",
+            "Vercel builds your Next.js app, uploads, and assigns a URL (e.g., your-app.vercel.app)"
           ]
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Deployment Commands",
+          "code": "cd packages/site\nvercel login\nvercel --prod"
         },
         {
           "type": "tip",
           "icon": "rocket",
-          "title": "Post-Deployment Testing",
-          "content": "After deployment, test thoroughly: Visit your URL, connect MetaMask, submit guesses, and verify the entire flow works. Check browser console for any errors."
-        },
-        {
-          "type": "note",
-          "icon": "info",
-          "title": "Advanced Option: Zama Devnet",
-          "content": "For production-ready privacy features, consider deploying to Zama's devnet. It offers enhanced privacy guarantees and is optimized for fhEVM operations. Check Zama's documentation for devnet access."
-        },
-        {
-          "type": "subheader",
-          "text": "Next Steps: Extending Your dApp"
+          "title": "Test After Deploy",
+          "content": "Visit your deployed URL, connect MetaMask (Sepolia), submit a guess, and verify decryption works. Check browser console if issues arise."
         },
         {
           "type": "text",
-          "content": "Now that you have a working foundation, consider these enhancements:"
+          "content": "**Advanced: GitHub Integration**"
+        },
+        {
+          "type": "text",
+          "content": "Link your GitHub repo for automatic deployments on pushes. In Vercel dashboard, connect your repository and enable auto-deploys. Each push to main will trigger a new deployment."
+        },
+        {
+          "type": "note",
+          "icon": "github",
+          "title": "Custom Domains",
+          "content": "For a professional touch, add a custom domain in Vercel settings. Point your DNS to Vercel's servers and your dApp will be live on your own domain!"
+        },
+        {
+          "type": "subheader",
+          "text": "Next Steps: Extending and Sharing Your Brew"
+        },
+        {
+          "type": "text",
+          "content": "**Enhance the dApp:**"
         },
         {
           "type": "list",
           "items": [
-            "**Add Hints**: Use FHE.gt (greater than) and FHE.lt (less than) to give encrypted hints like 'higher' or 'lower'",
-            "**Multiplayer Mode**: Allow multiple players to guess simultaneously with leaderboards",
-            "**Difficulty Levels**: Add ranges (euint16 for 0-65535) or time limits",
-            "**UI Polish**: Add animations, sound effects, particle effects for correct guesses",
-            "**Score Tracking**: Store encrypted score history onchain",
+            "**Add Hints**: Use TFHE.gt/lt for 'too high/low' encrypted feedback without revealing the target",
+            "**Multiplayer Guesses**: Store multiple encrypted targets for different players, add leaderboards",
+            "**Difficulty Levels**: Add ranges (euint16 for 0-65535) or time limits for challenges",
+            "**UI Polish**: Add animations with Framer Motion, sound effects, particle effects for correct guesses",
+            "**Score Tracking**: Store encrypted score history onchain for persistent records",
             "**NFT Rewards**: Mint NFTs for players who guess correctly within certain attempts"
           ]
         },
         {
-          "type": "subheader",
-          "text": "Sharing Your Work"
+          "type": "text",
+          "content": "**Share Your Work:**"
         },
         {
           "type": "list",
           "items": [
-            "**GitHub**: Fork the repo, add comprehensive README with setup instructions and demo video",
-            "**Social Media**: Tweet about your project with #fhEVM #ZamaAI hashtags",
-            "**Community**: Share in Zama Discord or Telegram communities for feedback",
-            "**Bounties**: Check if Zama has open bounty programs for privacy dApps",
-            "**Portfolio**: Add to your developer portfolio as a unique privacy-focused project"
+            "**Push to GitHub**: Fork the boilerplate, add a comprehensive README with demo link, setup instructions, and video walkthrough",
+            "**Social Media**: Tweet about your project with #fhEVM #ZamaAI #Web3Privacy hashtags",
+            "**Zama Bounties**: Submit to Zama's bounty program if active (check https://www.zama.ai/bounty) – include repo and demo video",
+            "**Community Engagement**: Join Zama's Discord/GitHub for feedback and collaboration",
+            "**Developer Portfolio**: Showcase this unique privacy-focused project to potential employers or clients"
           ]
         },
         {
           "type": "code",
           "language": "markdown",
-          "title": "Sample README Section",
-          "code": "# Private Potion Guesser\n\nA privacy-preserving guessing game built with fhEVM.\n\n## Features\n- ✨ Fully encrypted guesses and targets\n- 🔒 Zero-knowledge gameplay\n- 🎮 Interactive React UI\n- 🌐 Deployed on Sepolia testnet\n\n## Tech Stack\n- fhEVM for encrypted computations\n- Hardhat for smart contracts\n- React + Wagmi for frontend\n- fhevmjs for client-side encryption\n\n## Live Demo\n[Your Vercel URL]"
+          "title": "Sample README.md",
+          "code": "# Private Potion Guesser 🧪\n\nA privacy-preserving guessing game powered by fhEVM.\n\n## ✨ Features\n- Fully encrypted guesses and targets\n- Zero-knowledge gameplay\n- Interactive React UI with Wagmi\n- Deployed on Sepolia testnet\n\n## 🛠 Tech Stack\n- **Smart Contracts**: Solidity + fhEVM (Zama)\n- **Frontend**: React + Next.js\n- **Web3**: Wagmi + RainbowKit\n- **Encryption**: fhevmjs\n- **Testing**: Hardhat\n\n## 🚀 Live Demo\n[View Demo](https://your-app.vercel.app)\n\n## 📦 Setup\n1. Clone repo: `git clone ...`\n2. Install: `npm install`\n3. Configure .env with CONTRACT_ADDRESS\n4. Run: `npm run dev`\n\n## 🎮 How to Play\n1. Connect MetaMask (Sepolia)\n2. Enter your guess (0-255)\n3. Encrypt and submit\n4. Decrypt result privately!\n\n## 🔐 Privacy Guarantees\nAll guesses and comparisons happen on encrypted data. The blockchain never sees plaintext values – only you can decrypt your results!"
         },
         {
-          "type": "subheader",
-          "text": "FHEVM Advantages: Why This Matters"
+          "type": "tip",
+          "icon": "video",
+          "title": "Demo Video",
+          "content": "Record a 2-3 minute walkthrough showing: MetaMask connection, encrypting a guess, submitting to contract, and decrypting the result. Use Loom or OBS for easy screen recording."
         },
         {
           "type": "text",
-          "content": "fhEVM provides unique advantages over traditional blockchain and other privacy solutions:"
+          "content": "**Dive Deeper:**"
         },
         {
           "type": "list",
           "items": [
-            "**Privacy Without Trust**: No need to trust validators or nodes – cryptography guarantees privacy",
-            "**Quantum-Safe**: TFHE's lattice-based cryptography is resistant to quantum computing attacks",
-            "**Composability**: Encrypted operations compose naturally – build complex privacy-preserving logic",
-            "**Verifiability**: All operations are onchain and verifiable, maintaining blockchain transparency where needed",
-            "**No Trusted Setup**: Unlike some zero-knowledge systems, no trusted ceremony required",
-            "**Native Integration**: Works with existing EVM tooling and Solidity knowledge"
+            "Explore Zama docs for advanced TFHE operations (conditional logic, encrypted comparisons)",
+            "Build a private voting dApp as your next project",
+            "Try confidential DeFi applications with encrypted balances",
+            "Experiment with encrypted machine learning inference"
+          ]
+        },
+        {
+          "type": "subheader",
+          "text": "fhEVM Advantages: Why This Magic Matters"
+        },
+        {
+          "type": "text",
+          "content": "Let's recap why fhEVM stands out in the privacy-tech landscape:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Unmatched Privacy**: Computes on encrypted data onchain – no trusted third parties, unlike some ZK solutions",
+            "**Security and Future-Proofing**: Quantum-resistant TFHE using lattice-based cryptography",
+            "**Decentralized KMS**: Key management system prevents single-point failures",
+            "**Web3 Innovation**: Enables confidential DeFi (private trades), secure AI (encrypted inference), private gaming, and more",
+            "**EVM Composability**: Works seamlessly with existing Solidity knowledge and EVM tools",
+            "**Ease for Developers**: Familiar syntax with TFHE additions; no complex trusted setups",
+            "**Gas Optimizations**: Continuously improving performance makes FHE more practical"
           ]
         },
         {
           "type": "note",
-          "icon": "trophy",
-          "title": "Competitive Edge",
-          "content": "As a developer with fhEVM skills, you're positioned at the forefront of privacy-preserving blockchain development. This is an emerging field with high demand and limited expertise."
+          "icon": "shield",
+          "title": "The Privacy Revolution",
+          "content": "fhEVM turns blockchain from a public ledger into a private computation engine. You're building the infrastructure for a privacy-first Web3 future!"
         },
         {
           "type": "subheader",
-          "text": "Bounty Program Tips"
+          "text": "Bounty Program and Recognition"
+        },
+        {
+          "type": "text",
+          "content": "Zama occasionally runs bounty programs for innovative fhEVM applications. Here's how to stand out:"
         },
         {
           "type": "list",
           "items": [
             "Polish your repository with clear documentation and code comments",
-            "Create a demo video (2-3 minutes) showing the dApp in action",
+            "Create a professional demo video (2-3 minutes) showing the dApp in action",
             "Explain the privacy guarantees and why FHE was necessary for your use case",
-            "Document any challenges faced and how you solved them",
-            "Submit via Zama's official channels when bounty programs are announced"
+            "Document challenges faced and how you solved them",
+            "Highlight innovative use of TFHE operations",
+            "Include comprehensive tests and security considerations"
           ]
         },
         {
           "type": "subheader",
-          "text": "Common Deployment Issues"
+          "text": "Common Deployment Pitfalls"
         },
         {
           "type": "list",
           "items": [
-            "**CORS Issues**: Set appropriate headers in Vercel or app configuration",
-            "**Environment Variables**: Ensure all required vars are set in Vercel dashboard",
-            "**Contract Address**: Update to production contract address before deployment",
-            "**Network Mismatch**: Verify frontend connects to correct chain (Sepolia, mainnet, etc.)"
+            "**Environment Variables**: Set all required vars in Vercel dashboard (Project Settings → Environment Variables), not just in .env",
+            "**CORS Errors**: Add proper headers in next.config.js if making API calls",
+            "**Contract Address**: Always update to production contract address before deploying",
+            "**Network Mismatch**: Verify frontend connects to correct chain in Wagmi config",
+            "**Build Errors**: Test local build (npm run build) before deploying to catch issues early"
           ]
         },
         {
           "type": "tip",
           "icon": "git-branch",
-          "title": "Use Staging Environments",
-          "content": "Use Vercel preview deployments for testing before production. Each git branch gets its own preview URL for safe experimentation."
+          "title": "Preview Deployments",
+          "content": "Use Vercel preview deployments for testing. Each git branch gets its own preview URL for safe experimentation before production."
         },
         {
           "type": "subheader",
-          "text": "Keep Building: The Ecosystem Grows"
+          "text": "Join the Privacy-First Movement"
         },
         {
           "type": "text",
-          "content": "The fhEVM ecosystem is rapidly expanding. Stay connected and keep learning:"
+          "content": "The fhEVM ecosystem is rapidly growing. Stay connected and keep building:"
         },
         {
           "type": "list",
           "items": [
-            "Join Zama's Discord for latest updates and community support",
-            "Follow Zama on Twitter for announcements and new features",
+            "Join Zama's Discord for latest updates, community support, and collaboration",
+            "Follow Zama on Twitter/X for announcements and new features",
             "Explore advanced tutorials for DeFi, gaming, and identity applications",
             "Contribute to open-source fhEVM libraries and tools",
-            "Attend Web3 conferences and hackathons focusing on privacy"
+            "Attend Web3 conferences and hackathons focusing on privacy",
+            "Share your knowledge through blog posts and tutorials"
           ]
-        },
-        {
-          "type": "subheader",
-          "text": "Final Thoughts"
-        },
-        {
-          "type": "text",
-          "content": "You've completed an incredible journey from FHE basics to a deployed privacy-preserving dApp. The skills you've gained – encryption, smart contract development, frontend integration – are foundational for the next generation of blockchain applications. Privacy is not just a feature; it's a fundamental right that blockchain technology can now protect through innovations like fhEVM."
         },
         {
           "type": "note",
           "icon": "heart",
-          "title": "Thank You",
-          "content": "Congratulations on completing this tutorial! You're now part of an elite group building the future of privacy-first Web3. Keep experimenting, keep building, and most importantly – keep the magic of privacy alive in your code!"
+          "title": "Final Congratulations",
+          "content": "You've completed an incredible journey from FHE basics to a deployed privacy-preserving dApp! The skills you've gained are foundational for the next generation of blockchain applications. Privacy is not just a feature; it's a fundamental right that you can now protect through fhEVM. Keep building, keep experimenting, and keep the magic of privacy alive in your code!"
         },
         {
           "type": "subheader",
@@ -1917,11 +2041,11 @@
         {
           "type": "list",
           "items": [
-            "Your dApp is live – showcase your privacy-preserving skills to the world!",
-            "fhEVM gives you a competitive edge in the confidential Web3 space",
-            "The ecosystem is growing – stay engaged and keep learning",
-            "Privacy + blockchain = the future, and you're building it",
-            "Share your work and inspire others to embrace privacy-first development"
+            "Vercel deployment makes your dApp globally accessible with minimal effort",
+            "Extensions and sharing foster growth and community engagement",
+            "fhEVM's privacy advantages unlock secure, innovative Web3 applications",
+            "You're now equipped to build the future of privacy-first blockchain",
+            "The encrypt-compute-decrypt pattern is your superpower for confidential dApps"
           ]
         }
       ],
@@ -1939,8 +2063,70 @@
           "url": "https://www.zama.ai/bounties"
         },
         {
+          "title": "fhEVM Use Cases",
+          "url": "https://www.zama.ai/use-cases"
+        },
+        {
           "title": "Advanced fhEVM Tutorials",
           "url": "https://docs.zama.ai/fhevm/tutorials"
+        }
+      ]
+    },
+    {
+      "sectionId": 10,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "Does Vercel host smart contracts?",
+          "options": [
+            "Yes, it hosts everything",
+            "No, frontend only",
+            "Only Solidity files",
+            "Yes, but only testnet contracts"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Vercel hosts frontends only (React, Next.js apps). Smart contracts are deployed separately to blockchains like Sepolia via Hardhat."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What is a key fhEVM advantage?",
+          "options": [
+            "Public onchain computations",
+            "Confidential onchain computations",
+            "Slower transaction speeds",
+            "Higher gas costs only"
+          ],
+          "correctAnswer": 1,
+          "explanation": "fhEVM's key advantage is enabling confidential computations directly onchain without revealing data, maintaining privacy while using blockchain."
+        },
+        {
+          "id": 3,
+          "type": "fill-blank",
+          "question": "Deploy command: vercel --_____",
+          "correctAnswer": "prod",
+          "explanation": "The command 'vercel --prod' deploys your application to production. Without --prod, it creates a preview deployment."
+        },
+        {
+          "id": 4,
+          "type": "mcq",
+          "question": "Which extension idea uses TFHE comparisons?",
+          "options": [
+            "NFT minting",
+            "Adding private hints with gt/lt",
+            "Changing UI colors",
+            "Social media integration"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Adding private hints using TFHE.gt (greater than) and TFHE.lt (less than) operations would provide encrypted 'too high/low' feedback without revealing the target."
+        },
+        {
+          "id": 5,
+          "type": "fill-blank",
+          "question": "Share your work with hashtag _____",
+          "correctAnswer": "#fhEVM",
+          "explanation": "Using #fhEVM (along with #ZamaAI) helps your project reach the privacy-focused Web3 community. Accepted answers: #fhEVM, #ZamaAI, or #Web3Privacy."
         }
       ]
     }
