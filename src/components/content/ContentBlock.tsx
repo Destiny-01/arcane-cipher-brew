@@ -7,6 +7,10 @@ interface ContentBlockProps {
 }
 
 export const ContentBlock = ({ content, className = '' }: ContentBlockProps) => {
+  const processContent = (text: string) => {
+    return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -15,7 +19,7 @@ export const ContentBlock = ({ content, className = '' }: ContentBlockProps) => 
       className={`my-4 text-foreground leading-relaxed ${className}`}
     >
       {typeof content === 'string' ? (
-        <p dangerouslySetInnerHTML={{ __html: content }} />
+        <p dangerouslySetInnerHTML={{ __html: processContent(content) }} />
       ) : (
         content
       )}
