@@ -858,92 +858,134 @@
       "id": 6,
       "title": "Crafting the Enchanted Contract",
       "subtitle": "From Plain to Private Potion Guessing",
-      "description": "Hey there, code conjurers! Now we're rolling up our sleeves to craft the heart of our dApp: the smart contract for the Private Potion Guesser. We'll start with a basic non-FHE version to see its flaws, then upgrade it to fhEVM magic, where guesses stay hidden like treasures in a locked chest. This section walks you line-by-line through the code, with clear explanations so you can follow along easily. By the end, you'll have a deployable contract that computes privately – no peeking at the blockchain explorer!",
+      "description": "Greetings, code conjurers! In this pivotal section, we'll forge the core of our Private Potion Guesser dApp: the Potion.sol smart contract. We'll begin by examining a basic non-FHE version to highlight its privacy shortcomings, then upgrade it to harness fhEVM's power, ensuring guesses and targets remain shrouded in encryption. Assume you're starting with a skeleton file where the function contents are empty – we'll guide you on filling them line by line, explaining what each line does, why it's there, and where to place it in the file.",
       "learningObjectives": [
-        "Compare a standard Solidity guessing contract to its fhEVM-private version",
-        "Build and explain an fhEVM contract using encrypted types and operations",
-        "Write and run tests to verify the contract's logic",
-        "Understand gas implications and optimization strategies for FHE operations"
+        "Contrast a standard Solidity guessing contract with its privacy-enhanced fhEVM counterpart",
+        "Construct the Potion.sol contract line by line, understanding each component's role in maintaining data privacy",
+        "Test the contract to confirm it handles encrypted operations correctly"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "The Non-FHE Version: Why It's Leaky"
+          "text": "The Non-FHE Version: Exposing the Elixir"
         },
         {
           "type": "text",
-          "content": "Imagine a simple guessing game without privacy: The contract stores a public target number, users guess, and it checks equality openly. Here's a quick sketch in Solidity:"
+          "content": "To appreciate FHE's magic, let's consider a simple non-private guessing contract. Create a temporary file like PlainPotion.sol in your contracts/ folder to experiment (you can delete it later). This version stores and compares values in plaintext, making everything visible on the blockchain."
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "Non-FHE Guesser (Insecure!)",
-          "code": "// Non-FHE Guesser - DO NOT USE IN PRODUCTION\npragma solidity ^0.8.20;\n\ncontract PlainGuesser {\n    uint8 private target;\n\n    constructor(uint8 _target) {\n        target = _target;\n    }\n\n    function guess(uint8 _guess) public view returns (bool) {\n        return _guess == target;\n    }\n}"
+          "title": "PlainPotion.sol - Non-Private Version",
+          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\ncontract PlainPotion {\n    uint8 internal target;\n\n    function setTarget(uint8 _target) public {\n        target = _target;\n    }\n\n    function guess(uint8 _guess) public view returns (bool) {\n        return _guess == target;\n    }\n}"
         },
         {
           "type": "note",
           "icon": "alert-triangle",
-          "title": "Critical Privacy Flaw",
-          "content": "Everything's plaintext! Blockchain explorers reveal the target and every guess via transaction data. No mystery, no privacy – like brewing potions in a glass cauldron. Anyone can see what you're doing!"
+          "title": "Privacy Flaw",
+          "content": "The target and guesses are stored and compared openly. Anyone scanning transaction data or the contract state can see the values – no secrecy, like brewing in an open pot. This defeats our privacy goal for the potion strength guessing game."
         },
         {
           "type": "subheader",
-          "text": "Upgrading to fhEVM: Privacy-Powered Guessing"
+          "text": "Upgrading to fhEVM: Building the Private Version"
         },
         {
           "type": "text",
-          "content": "With fhEVM, we'll use encrypted types (euint8) and operations from the FHE library. The target and guesses stay ciphertexts onchain. Users encrypt inputs frontend-side, the contract compares privately, and reencrypts the result for user decryption."
+          "content": "Now, let's build Potion.sol in the contracts/ folder. Start with an empty file and add lines as instructed. We'll use fhEVM's TFHE library for encrypted types and operations, ensuring computations happen on ciphertexts."
         },
         {
           "type": "text",
-          "content": "First, import the library (from Zama's docs):"
+          "content": "**Step 1: Add the License and Pragma (Top of File)**"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "Import FHE Library",
-          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\nimport {FHE, euint8, externalEuint8, ebool} from \"@fhevm/solidity/lib/FHE.sol\";"
-        },
-        {
-          "type": "list",
-          "items": [
-            "**FHE**: The core library for operations",
-            "**euint8**: Encrypted 8-bit unsigned int (perfect for small numbers like 0-255 guesses)",
-            "**externalEuint8**: For handling frontend-encrypted inputs",
-            "**ebool**: Encrypted boolean for comparison results"
-          ]
-        },
-        {
-          "type": "text",
-          "content": "Now, the full PotionGuesser.sol contract:"
-        },
-        {
-          "type": "code",
-          "language": "solidity",
-          "title": "PotionGuesser.sol - Private Guessing with fhEVM",
-          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\nimport {FHE, euint8, externalEuint8, ebool} from \"@fhevm/solidity/lib/FHE.sol\";\n\ncontract PotionGuesser {\n    euint8 private target;  // Encrypted target number\n\n    // Set the encrypted target (called by deployer)\n    function setTarget(externalEuint8 encryptedTarget, bytes calldata attestation) public {\n        target = FHE.fromExternal(encryptedTarget, attestation);\n    }\n\n    // Guess and get reencrypted result\n    function guess(\n        externalEuint8 encryptedGuess,\n        bytes calldata attestation,\n        bytes32 publicKey\n    ) public view returns (bytes memory) {\n        euint8 guessValue = FHE.fromExternal(encryptedGuess, attestation);\n        ebool isCorrect = FHE.eq(target, guessValue);\n        return FHE.reencrypt(isCorrect, publicKey);\n    }\n}"
-        },
-        {
-          "type": "subheader",
-          "text": "Line-by-Line Breakdown"
-        },
-        {
-          "type": "list",
-          "items": [
-            "**`euint8 private target;`**: Stores the encrypted target – invisible onchain to anyone inspecting transactions",
-            "**`setTarget(...)`**: Takes encrypted input from frontend, uses `FHE.fromExternal` to validate and convert (attestation proves it's valid encryption)",
-            "**`guess(...)` Function**:",
-            "  - Converts encrypted guess using `FHE.fromExternal`",
-            "  - `FHE.eq(target, guessValue)`: Computes equality privately – result is ebool (encrypted bool)",
-            "  - `FHE.reencrypt(isCorrect, publicKey)`: Reencrypts under user's public key for offchain decryption",
-            "**Why this design?**: Keeps computations private; only the caller decrypts their result"
-          ]
+          "title": "License and Pragma",
+          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;"
         },
         {
           "type": "note",
           "icon": "info",
-          "title": "Gas Considerations",
-          "content": "FHE operations are significantly more expensive than standard EVM operations. Here's a comparison: Deploy costs ~50k gas for non-FHE vs ~100k for fhEVM. A guess call costs ~20k standard vs ~200k with FHE ops. Always test locally first and optimize by using the smallest appropriate encrypted types."
+          "title": "Why These Lines?",
+          "content": "The license specifies usage rights (BSD-3 is permissive). Pragma declares the Solidity version for compatibility – ^0.8.24 means 0.8.24 or higher in the 0.8 series."
+        },
+        {
+          "type": "text",
+          "content": "**Step 2: Import the TFHE Library**"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Import Statement",
+          "code": "import \"fhevm/lib/TFHE.sol\";"
+        },
+        {
+          "type": "note",
+          "icon": "sparkles",
+          "title": "Why Import TFHE?",
+          "content": "This brings in Zama's TFHE library, which provides encrypted types (like euint8) and functions (like eq, reencrypt). Place it here to make these available throughout the contract. Without it, you'll get errors about undefined types."
+        },
+        {
+          "type": "text",
+          "content": "**Step 3: Declare the Contract and Target Variable**"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Contract Declaration",
+          "code": "contract Potion {\n    euint8 internal target;"
+        },
+        {
+          "type": "note",
+          "icon": "lock",
+          "title": "Understanding euint8",
+          "content": "This creates a storage variable 'target' as an encrypted 8-bit unsigned integer (euint8 from TFHE). 'internal' means it's accessible within the contract but not publicly readable, keeping the encrypted potion strength hidden. Use euint8 for small numbers (0-255) to save gas; larger guesses could use euint16/32."
+        },
+        {
+          "type": "text",
+          "content": "**Step 4: Add the setTarget Function**"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "setTarget Function",
+          "code": "    function setTarget(bytes calldata encryptedTarget) public {\n        target = TFHE.asEuint8(encryptedTarget);\n    }"
+        },
+        {
+          "type": "note",
+          "icon": "key",
+          "title": "How setTarget Works",
+          "content": "This function takes encrypted input as bytes (calldata for efficiency) and converts it to euint8 using TFHE.asEuint8. Why? The input comes encrypted from the frontend; this safely casts it for onchain storage. The target stays encrypted from the start, allowing the deployer to set the initial secret target post-deployment."
+        },
+        {
+          "type": "text",
+          "content": "**Step 5: Add the guess Function**"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "guess Function",
+          "code": "    function guess(bytes calldata encryptedGuess, bytes32 publicKey) public view returns (bytes memory) {\n        ebool isEqual = TFHE.eq(target, TFHE.asEuint8(encryptedGuess));\n        return TFHE.reencrypt(isEqual, publicKey);\n    }\n}"
+        },
+        {
+          "type": "note",
+          "icon": "zap",
+          "title": "How guess Works",
+          "content": "This view function (no state change, gas-efficient) takes an encrypted guess and user's public key. It uses TFHE.eq to compare the encrypted target and casted guess, storing the result as an encrypted bool (ebool). Then TFHE.reencrypt reencrypts the ebool under the user's public key and returns it as bytes. Why? This allows only the user (with their private key) to decrypt the result offchain, maintaining end-to-end privacy. The comparison happens homomorphically without decryption!"
+        },
+        {
+          "type": "subheader",
+          "text": "Complete Contract: Ready to Deploy"
+        },
+        {
+          "type": "text",
+          "content": "Here's the full Potion.sol contract assembled. Copy this into your contracts/ folder:"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Potion.sol - Complete Private Contract",
+          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\nimport \"fhevm/lib/TFHE.sol\";\n\ncontract Potion {\n    euint8 internal target;\n\n    function setTarget(bytes calldata encryptedTarget) public {\n        target = TFHE.asEuint8(encryptedTarget);\n    }\n\n    function guess(bytes calldata encryptedGuess, bytes32 publicKey) public view returns (bytes memory) {\n        ebool isEqual = TFHE.eq(target, TFHE.asEuint8(encryptedGuess));\n        return TFHE.reencrypt(isEqual, publicKey);\n    }\n}"
         },
         {
           "type": "subheader",
@@ -951,19 +993,19 @@
         },
         {
           "type": "text",
-          "content": "Use Hardhat tests to verify your contract works correctly. Create test/PotionGuesser.test.js:"
+          "content": "To verify your contract works, create test/Potion.test.js in the tests/ folder. This Hardhat test simulates deployment, setting target, guessing, and decrypting:"
         },
         {
           "type": "code",
           "language": "javascript",
-          "title": "Contract Test Example",
-          "code": "const { expect } = require(\"chai\");\nconst { ethers } = require(\"hardhat\");\nconst { createInstance } = require(\"fhevmjs\");\n\ndescribe(\"PotionGuesser\", function () {\n  let contract, instance;\n\n  before(async function () {\n    const PotionGuesser = await ethers.getContractFactory(\"PotionGuesser\");\n    contract = await PotionGuesser.deploy();\n    instance = await createInstance({ chainId: 31337 });\n  });\n\n  it(\"should set and check target privately\", async function () {\n    const publicKey = instance.getPublicKey(31337);\n    const encryptedTarget = instance.encrypt8(42, publicKey);\n    await contract.setTarget(encryptedTarget, \"0x\");\n\n    const userKeys = instance.generateKeypair();\n    const encryptedGuess = instance.encrypt8(42, publicKey);\n    const reencrypted = await contract.guess(encryptedGuess, \"0x\", userKeys.publicKey);\n\n    const result = instance.decrypt(contract.address, reencrypted, userKeys.privateKey);\n    expect(result).to.equal(true);\n  });\n});"
+          "title": "Potion.test.js",
+          "code": "const { expect } = require(\"chai\");\nconst { ethers } = require(\"hardhat\");\nconst { createInstance } = require(\"fhevmjs\");\n\ndescribe(\"Potion\", function () {\n  let potion, instance, deployer;\n\n  before(async function () {\n    [deployer] = await ethers.getSigners();\n    const Potion = await ethers.getContractFactory(\"Potion\");\n    potion = await Potion.deploy();\n    instance = await createInstance({ chainId: 31337 }); // Local or Sepolia ID\n  });\n\n  it(\"should set encrypted target and guess correctly\", async function () {\n    const encryptedTarget = instance.encrypt8(42);\n    await potion.setTarget(encryptedTarget);\n\n    const userKeys = instance.generateKeypair();\n    const encryptedGuess = instance.encrypt8(42);\n    const reencrypted = await potion.guess(encryptedGuess, userKeys.publicKey);\n\n    const result = instance.decrypt(await potion.getAddress(), reencrypted, userKeys.privateKey);\n    expect(result).to.equal(1); // 1 for true in bool\n  });\n});"
         },
         {
           "type": "tip",
           "icon": "terminal",
-          "title": "Run Tests",
-          "content": "Execute with: `npx hardhat test`. This simulates encryption, contract calls, and decryption locally, ensuring your privacy logic works before deploying to testnet."
+          "title": "Running Tests",
+          "content": "Run the test with: npx hardhat test. This confirms the private equality works without leaks. If you see errors, check that fhevmjs is installed and your Hardhat config is correct."
         },
         {
           "type": "subheader",
@@ -972,38 +1014,93 @@
         {
           "type": "list",
           "items": [
-            "**Type Mismatch**: Use matching euint types; cast if needed with FHE.asEuint8",
-            "**Attestation Errors**: In development, mock with empty bytes; production needs valid proofs from frontend encryption",
-            "**Gas Optimization**: Stick to small types (euint8 for values 0-255) and minimal ops – FHE is compute-heavy",
-            "**Import Path Issues**: Ensure @fhevm/solidity is installed correctly via npm"
+            "**Import Errors**: Ensure TFHE.sol is installed via npm or in the right path. Check your remappings.txt if using Foundry/Hardhat.",
+            "**Type Mismatches**: Use bytes for inputs; TFHE.asEuint8 handles conversion from encrypted bytes to euint8.",
+            "**Gas Issues**: Test on Sepolia; optimize by using small euint types. If 'out of gas', increase in Hardhat config: gas: 3000000.",
+            "**Undefined TFHE**: Double-check import path and that fhevm library is installed: npm install fhevm"
           ]
         },
         {
-          "type": "subheader",
-          "text": "Key Takeaways"
-        },
-        {
-          "type": "list",
-          "items": [
-            "fhEVM upgrades public contracts to private ones with FHE library and encrypted types",
-            "Operations like FHE.eq keep logic hidden; reencrypt enables private reveals to specific users",
-            "Testing with fhevmjs simulates the full privacy flow locally before deployment",
-            "Gas costs are higher but privacy guarantees are worth it for sensitive applications"
-          ]
+          "type": "tip",
+          "icon": "lightbulb",
+          "title": "Pro Tip",
+          "content": "Use Etherscan to monitor transactions on Sepolia. Search your contract address to verify deployments and interactions. Remember: even though operations are encrypted, transaction hashes and addresses are still public!"
         }
       ],
       "resources": [
         {
-          "title": "Zama Solidity Documentation",
-          "url": "https://docs.zama.ai/fhevm/fundamentals/write-contract"
+          "title": "Zama TFHE Library Documentation",
+          "url": "https://docs.zama.ai/fhevm"
         },
         {
           "title": "fhEVM Solidity Library",
           "url": "https://github.com/zama-ai/fhevm"
         },
         {
-          "title": "Testing with fhevmjs",
+          "title": "Hardhat Testing Guide",
+          "url": "https://hardhat.org/hardhat-runner/docs/guides/test-contracts"
+        },
+        {
+          "title": "fhevmjs Documentation",
           "url": "https://docs.zama.ai/fhevm/guides/frontend"
+        }
+      ]
+    },
+    {
+      "sectionId": 6,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "Import _____ for FHE operations in your Solidity contract.",
+          "correctAnswer": "fhevm/lib/TFHE.sol",
+          "explanation": "The TFHE library from fhevm provides all the encrypted types (like euint8) and operations (like eq, reencrypt) needed for FHE computations."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "Why use TFHE.reencrypt in the guess function?",
+          "options": [
+            "To decrypt the result onchain",
+            "To allow user-private decryption with their key",
+            "To store the result publicly",
+            "To save gas costs"
+          ],
+          "correctAnswer": 1,
+          "explanation": "TFHE.reencrypt reencrypts the result under the user's public key, allowing only them to decrypt it offchain with their private key. This maintains end-to-end privacy."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "In the private Potion contract, arrange these operations in correct order: (1) Compare encrypted values (2) Receive encrypted guess (3) Return reencrypted result. What is the correct sequence?",
+          "options": [
+            "1 → 2 → 3",
+            "2 → 1 → 3",
+            "3 → 2 → 1",
+            "2 → 3 → 1"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct flow is: First receive the encrypted guess (2), then compare it with the target using TFHE.eq (1), finally return the reencrypted result (3)."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "What is euint8 used for in the Potion contract?",
+          "correctAnswer": "encrypted integers",
+          "explanation": "euint8 represents encrypted 8-bit unsigned integers. It allows the contract to store and compute on encrypted values (0-255) while maintaining privacy. Accepted answers: encrypted integers, encrypted numbers, or encrypted values."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "What is the main privacy flaw in the PlainPotion contract?",
+          "options": [
+            "It uses too much gas",
+            "The target and guesses are visible on the blockchain",
+            "It doesn't have a constructor",
+            "It uses old Solidity syntax"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The PlainPotion contract stores the target and processes guesses in plaintext, making all values visible to anyone scanning the blockchain. This completely defeats the privacy requirement of our guessing game."
         }
       ]
     },
