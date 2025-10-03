@@ -1,3 +1,4 @@
+import { processContent } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Lightbulb, Sparkles, Zap } from "lucide-react";
 
@@ -38,7 +39,10 @@ export const TipBlock = ({
         )}
         <div className="flex-1">
           <h4 className="font-cinzel font-bold text-secondary mb-2">{title}</h4>
-          <p className="text-sm leading-relaxed">{content}</p>
+          <p
+            className="text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: processContent(content) }}
+          />
         </div>
       </div>
     </motion.div>

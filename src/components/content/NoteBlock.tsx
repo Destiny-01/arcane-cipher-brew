@@ -1,3 +1,4 @@
+import { processContent } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Scroll, Lock, Sparkles, AlertCircle } from "lucide-react";
 import { ReactNode } from "react";
@@ -34,7 +35,10 @@ export const NoteBlock = ({
         </div>
         <div className="flex-1">
           <h4 className="font-cinzel font-bold text-accent mb-2">{title}</h4>
-          <p className="text-sm leading-relaxed">{content}</p>
+          <p
+            className="text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: processContent(content) }}
+          />
         </div>
       </div>
     </motion.div>

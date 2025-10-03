@@ -163,7 +163,7 @@ export const SectionTemplate = ({
             <h3 className="text-2xl font-cinzel font-bold glow-purple mb-4">
               Enter the Portal of Trials
             </h3>
-            <p className="text-muted-foreground mb-6">
+            <p className="mb-6">
               Test your newfound knowledge and unlock the next mystical scroll
             </p>
             <Button

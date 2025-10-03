@@ -5,9 +5,15 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
 import { SectionTemplate } from "@/components/SectionTemplate";
 import mysticalBackground from "@/assets/mystical-background.jpg";
+import { STORAGE_KEY } from "@/contexts/ProgressContext";
 
 const Index = () => {
-  const [currentSection, setCurrentSection] = useState(1);
+  const storedData = localStorage.getItem(STORAGE_KEY);
+  const storedSection = storedData
+    ? JSON.parse(storedData)?.currentSection
+    : null;
+
+  const [currentSection, setCurrentSection] = useState(storedSection ?? 1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Scroll to top when section changes

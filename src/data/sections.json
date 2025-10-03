@@ -131,8 +131,8 @@
           "url": "https://docs.zama.ai/"
         },
         {
-          "title": "fhEVM Documentation",
-          "url": "https://docs.zama.ai/fhevm"
+          "title": "fhEVM Solidity Guide",
+          "url": "https://docs.zama.ai/protocol/solidity-guides"
         },
         {
           "title": "Introduction to FHE",
@@ -331,7 +331,7 @@
           "type": "list",
           "items": [
             "**Hardhat**: Compiles, tests, deploys contracts. Great for local sims",
-            "**fhevmjs**: Frontend JS lib for encryption/decryption with fhEVM's keys",
+            "**Zama Relayer SDK**: Frontend JS lib for encryption/decryption with fhEVM's keys",
             "**Wagmi/Viem**: Handles wallet connections and contract calls (e.g., MetaMask integration)",
             "**React/Next.js**: Builds the UI – inputs, buttons, results display",
             "**Sepolia Testnet**: Safe Ethereum playground; use Alchemy/Infura for RPC",
@@ -342,7 +342,7 @@
           "type": "tip",
           "icon": "sparkles",
           "title": "Tool Integration",
-          "content": "These snap together: Hardhat for backend, React for frontend, fhevmjs bridging encryption."
+          "content": "These snap together: Hardhat for backend, React for frontend, relayer-sdk bridging encryption."
         },
         {
           "type": "subheader",
@@ -597,7 +597,7 @@
           "type": "code",
           "language": "text",
           "title": "Sepolia Network Configuration",
-          "code": "Network Name: Sepolia\nNew RPC URL: https://sepolia.infura.io/v3/YOUR_INFURA_API_KEY\nChain ID: 11155111\nCurrency Symbol: ETH\nBlock Explorer URL: https://sepolia.etherscan.io"
+          "code": "Network Name: Sepolia\nNew RPC URL: https://ethereum-sepolia-rpc.publicnode.com\nChain ID: 11155111\nCurrency Symbol: ETH\nBlock Explorer URL: https://sepolia.etherscan.io"
         },
         {
           "type": "tip",
@@ -619,14 +619,14 @@
             "Go to a Sepolia faucet like https://sepoliafaucet.com or https://www.infura.io/faucet/sepolia",
             "Connect MetaMask (click 'Connect Wallet')",
             "Enter your wallet address (copy from MetaMask: Click account > Copy)",
-            "Request ETH – usually 0.1-1 ETH per day. Wait a minute; check balance in MetaMask"
+            "Request ETH – usually 0.01-0.1 ETH per day. Wait a minute; check balance in MetaMask"
           ]
         },
         {
           "type": "note",
           "icon": "zap",
           "title": "Troubleshooting",
-          "content": "If denied, try another faucet or wait 24 hours. Aim for at least 0.5 ETH to cover deployments."
+          "content": "If denied, try another faucet or wait 24 hours."
         },
         {
           "type": "subheader",
@@ -634,35 +634,19 @@
         },
         {
           "type": "text",
-          "content": "Hardhat is our tool for compiling and deploying Solidity contracts. We'll set it up with env vars for security."
+          "content": "Hardhat is our tool for compiling and deploying Solidity contracts. We'll set it up with hardhat vars for security. Remember the wallet you created specifically for deployment? You can create one with metamask. Keep the 12-word recovery phrase"
         },
         {
           "type": "code",
           "language": "bash",
-          "title": "Create .env File",
-          "code": "# In your repo root, create a .env file\ntouch .env\n\n# Add these lines (replace with your actual values):\nINFURA_API_KEY=your_infura_key_here\nPRIVATE_KEY=your_metamask_private_key"
+          "title": "set hardhat variables",
+          "code": "npx hardhat vars set MNEMONIC\n# You'll be asked to input the phrase, this is where you put it\n\nnpx hardhat vars set INFURA_API_KEY\n# Paste the key you got from infura here"
         },
         {
           "type": "tip",
           "icon": "lock",
           "title": "Security Warning",
-          "content": "PRIVATE_KEY is your wallet's secret key – never commit this file to Git! Add .env to .gitignore if not there. Use a test account only!"
-        },
-        {
-          "type": "code",
-          "language": "javascript",
-          "title": "Edit hardhat.config.js",
-          "code": "require('@nomicfoundation/hardhat-toolbox');\nrequire('dotenv').config();\n\nmodule.exports = {\n  solidity: '0.8.24',\n  networks: {\n    sepolia: {\n      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,\n      accounts: [process.env.PRIVATE_KEY]\n    }\n  }\n};"
-        },
-        {
-          "type": "text",
-          "content": "This tells Hardhat to use Sepolia with your keys. Install Hardhat plugins if needed:"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Install Dependencies",
-          "code": "npm install --save-dev @nomicfoundation/hardhat-toolbox dotenv"
+          "content": "MNEMONIC is what gives access to your entire wallet and its keys - never give it out! Use a test account only!"
         },
         {
           "type": "subheader",
@@ -670,25 +654,7 @@
         },
         {
           "type": "text",
-          "content": "Let's deploy a placeholder contract (we'll replace with PotionGuesser later)."
-        },
-        {
-          "type": "code",
-          "language": "solidity",
-          "title": "contracts/Placeholder.sol",
-          "code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.24;\n\ncontract Placeholder {\n  string public message = \"Hello Sepolia!\";\n}"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Compile Contract",
-          "code": "npx hardhat compile"
-        },
-        {
-          "type": "code",
-          "language": "javascript",
-          "title": "scripts/deploy.js",
-          "code": "async function main() {\n  const Placeholder = await ethers.getContractFactory('Placeholder');\n  const contract = await Placeholder.deploy();\n  await contract.waitForDeployment();\n  console.log('Deployed to:', await contract.getAddress());\n}\n\nmain().catch((error) => {\n  console.error(error);\n  process.exitCode = 1;\n});"
+          "content": "Let's deploy the existing contract to Sepolia"
         },
         {
           "type": "code",
@@ -697,41 +663,8 @@
           "code": "npx hardhat run scripts/deploy.js --network sepolia\n\n# Watch for the transaction hash\n# Check on https://sepolia.etherscan.io (paste address)"
         },
         {
-          "type": "subheader",
-          "text": "Step 5: Verifying Deployment"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Install Etherscan Plugin",
-          "code": "npm install --save-dev @nomiclabs/hardhat-etherscan"
-        },
-        {
           "type": "text",
-          "content": "Add to hardhat.config.js: etherscan: { apiKey: 'your_etherscan_api_key' } (get free from https://etherscan.io/register)"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Verify Contract",
-          "code": "npx hardhat verify --network sepolia YOUR_CONTRACT_ADDRESS"
-        },
-        {
-          "type": "subheader",
-          "text": "Step 6: Interacting with Sepolia from Frontend"
-        },
-        {
-          "type": "text",
-          "content": "Now connect the React app to your deployed contract."
-        },
-        {
-          "type": "list",
-          "items": [
-            "In packages/site, update any contract address placeholders with your deployed address",
-            "Start Frontend: `cd packages/site && npm run dev` – opens at localhost:3000",
-            "In browser, connect MetaMask (ensure on Sepolia). Use demo hooks to call your contract",
-            "If errors: Check console for RPC issues; refresh MetaMask"
-          ]
+          "content": "Uhhhh!!! That failed. You know why? It's because the content of our functions are empty and they don't match the return values. Don't worry, we'll get to that in the next section"
         },
         {
           "type": "subheader",
@@ -740,11 +673,8 @@
         {
           "type": "list",
           "items": [
-            "**No ETH**: Faucet again if deployment fails",
-            "**Key Errors**: Double-check .env spelling; restart terminal",
-            "**Gas Limits**: If 'out of gas,' increase in Hardhat config: `gas: 3000000`",
-            "**Network Issues**: Verify Infura API key is correct and active",
-            "Use Etherscan to monitor transactions – search your address"
+            "**No ETH**: Claim faucet again",
+            "**Network Issues**: Verify Infura API key is correct and active"
           ]
         },
         {
@@ -755,8 +685,7 @@
           "type": "list",
           "items": [
             "Sepolia setup with MetaMask and faucets enables real testnet deploys",
-            "Hardhat with env vars (like PRIVATE_KEY) handles secure deployments",
-            "Interaction confirms frontend-backend link – you're ready for the contract!",
+            "Hardhat with env vars (like MNEMONIC) handles secure deployments",
             "Real-world testing on Sepolia prepares you for production deployment"
           ]
         }
@@ -782,184 +711,312 @@
     },
     {
       "id": 6,
-      "title": "Crafting the Enchanted Contract",
-      "subtitle": "From Plain to Private Potion Guessing",
-      "description": "Greetings, code conjurers! In this pivotal section, we'll forge the core of our Private Potion Guesser dApp: the Potion.sol smart contract. We'll begin by examining a basic non-FHE version to highlight its privacy shortcomings, then upgrade it to harness fhEVM's power, ensuring guesses and targets remain shrouded in encryption. Assume you're starting with a skeleton file where the function contents are empty – we'll guide you on filling them line by line, explaining what each line does, why it's there, and where to place it in the file.",
+      "title": "Brewing the Enchanted Contract",
+      "subtitle": "From Plain Arithmetic to Private Potion Power",
+      "description": "Welcome, blockchain alchemists! In this crucial chapter, we'll craft the heart of our Private Potion dApp: the Potion.sol smart contract. We'll start by examining a basic non-FHE version to expose its privacy vulnerabilities, then transform it using fhEVM's cryptographic magic to ensure all ingredient values, calculations, and scores remain encrypted end-to-end. You'll be working with a boilerplate contract where function bodies are empty – we'll guide you through filling them line by line, explaining each component's purpose and placement.",
       "learningObjectives": [
-        "Contrast a standard Solidity guessing contract with its privacy-enhanced fhEVM counterpart",
-        "Construct the Potion.sol contract line by line, understanding each component's role in maintaining data privacy",
-        "Test the contract to confirm it handles encrypted operations correctly"
+        "Understand the critical privacy flaws in standard Solidity contracts through a plain arithmetic example",
+        "Build the Potion.sol contract step-by-step, mastering encrypted types and homomorphic operations",
+        "Implement a privacy-preserving leaderboard system where scores remain encrypted yet comparable",
+        "Test your implementation to verify encrypted computations work correctly"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "The Non-FHE Version: Exposing the Elixir"
+          "text": "The Plain Version: Brewing in the Open"
         },
         {
           "type": "text",
-          "content": "To appreciate FHE's magic, let's consider a simple non-private guessing contract. Create a temporary file like PlainPotion.sol in your contracts/ folder to experiment (you can delete it later). This version stores and compares values in plaintext, making everything visible on the blockchain."
+          "content": "Before diving into encrypted magic, let's see why we need it. Consider this simple non-private potion contract that computes a power score from ingredients:"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "PlainPotion.sol - Non-Private Version",
-          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\ncontract PlainPotion {\n    uint8 internal target;\n\n    function setTarget(uint8 _target) public {\n        target = _target;\n    }\n\n    function guess(uint8 _guess) public view returns (bool) {\n        return _guess == target;\n    }\n}"
+          "title": "PlainPotion.sol - Unencrypted Version",
+          "code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\ncontract PlainPotion {\n    mapping(address => uint16) public highestScore;\n    \n    function compute(\n        uint8 a,\n        uint8 b,\n        uint8 c,\n        uint8 d,\n        uint8 e\n    ) public returns (uint16) {\n        // Sum ingredients\n        uint16 sum = uint16(a) + uint16(b) + uint16(c) + uint16(d) + uint16(e);\n        \n        // Scale by 14 and add offset\n        uint16 score = sum * 14 + 300;\n        \n        // Update if higher\n        if (score > highestScore[msg.sender]) {\n            highestScore[msg.sender] = score;\n        }\n        \n        return score;\n    }\n}"
         },
         {
           "type": "note",
           "icon": "alert-triangle",
-          "title": "Privacy Flaw",
-          "content": "The target and guesses are stored and compared openly. Anyone scanning transaction data or the contract state can see the values – no secrecy, like brewing in an open pot. This defeats our privacy goal for the potion strength guessing game."
+          "title": "Critical Privacy Flaw",
+          "content": "Every transaction parameter is visible on the blockchain! Anyone can inspect transaction data to see: (1) Which ingredient values produce the highest scores, (2) Everyone's exact scores and ingredients, (3) Optimal strategies to win. This is like brewing your secret potion recipe in a glass cauldron on a public stage – zero privacy! Competitors can reverse-engineer winning formulas by watching transactions."
+        },
+        {
+          "type": "text",
+          "content": "**The Attack Vector**: A curious player could easily scan recent transactions, extract the input values that produced high scores, and copy those exact ingredients. The entire competition becomes meaningless because secrecy is impossible. This is where Fully Homomorphic Encryption (FHE) becomes essential."
         },
         {
           "type": "subheader",
-          "text": "Upgrading to fhEVM: Building the Private Version"
+          "text": "Enter fhEVM: Building the Private Potion Contract"
         },
         {
           "type": "text",
-          "content": "Now, let's build Potion.sol in the contracts/ folder. Start with an empty file and add lines as instructed. We'll use fhEVM's TFHE library for encrypted types and operations, ensuring computations happen on ciphertexts."
+          "content": "Now let's build the real Potion.sol contract that uses Zama's fhEVM to keep all data encrypted. You should have a boilerplate file with empty function bodies. We'll fill them together, explaining every line. This contract processes 5 encrypted ingredients through a secure computation pipeline."
         },
         {
           "type": "text",
-          "content": "**Step 1: Add the License and Pragma (Top of File)**"
+          "content": "**Step 1: License, Pragma, and Imports (Top of File)**"
+        },
+        {
+          "type": "text",
+          "content": "These lines should already be in your boilerplate. Here's what they do:"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "License and Pragma",
-          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;"
+          "title": "File Header",
+          "code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport {FHE, externalEuint8, euint8, euint16, ebool, externalEuint32} from \"@fhevm/solidity/lib/FHE.sol\";\nimport {SepoliaConfig} from \"@fhevm/solidity/config/ZamaConfig.sol\";"
         },
         {
           "type": "note",
           "icon": "info",
-          "title": "Why These Lines?",
-          "content": "The license specifies usage rights (BSD-3 is permissive). Pragma declares the Solidity version for compatibility – ^0.8.24 means 0.8.24 or higher in the 0.8 series."
+          "title": "Understanding the Imports",
+          "content": "**FHE library**: Provides encrypted types and operations. `externalEuint8` = encrypted data from clients, `euint8/euint16` = encrypted integers for computation, `ebool` = encrypted boolean. **SepoliaConfig**: Pre-configured settings for Zama's Sepolia testnet deployment. This handles all the cryptographic infrastructure setup automatically."
         },
         {
           "type": "text",
-          "content": "**Step 2: Import the TFHE Library**"
+          "content": "**Step 2: Contract Declaration and State Variables**"
+        },
+        {
+          "type": "text",
+          "content": "Your boilerplate should have this structure. Let's understand each piece:"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "Import Statement",
-          "code": "import \"fhevm/lib/TFHE.sol\";"
-        },
-        {
-          "type": "note",
-          "icon": "sparkles",
-          "title": "Why Import TFHE?",
-          "content": "This brings in Zama's TFHE library, which provides encrypted types (like euint8) and functions (like eq, reencrypt). Place it here to make these available throughout the contract. Without it, you'll get errors about undefined types."
-        },
-        {
-          "type": "text",
-          "content": "**Step 3: Declare the Contract and Target Variable**"
-        },
-        {
-          "type": "code",
-          "language": "solidity",
-          "title": "Contract Declaration",
-          "code": "contract Potion {\n    euint8 internal target;"
+          "title": "Contract Structure",
+          "code": "contract Potion is SepoliaConfig {\n    mapping(address => euint16) public highestPlayerGuess;\n    mapping(address => bool) public hasPlayed;\n    address[] public players;\n    \n    event ComputeResult(euint16 value);"
         },
         {
           "type": "note",
           "icon": "lock",
-          "title": "Understanding euint8",
-          "content": "This creates a storage variable 'target' as an encrypted 8-bit unsigned integer (euint8 from TFHE). 'internal' means it's accessible within the contract but not publicly readable, keeping the encrypted potion strength hidden. Use euint8 for small numbers (0-255) to save gas; larger guesses could use euint16/32."
+          "title": "State Variables Explained",
+          "content": "**highestPlayerGuess**: Maps each player to their encrypted best score (`euint16` = encrypted 16-bit uint, range 0-65535). This stays encrypted onchain! **hasPlayed**: Tracks if an address participated before. **players**: Array of all player addresses for leaderboard retrieval. **ComputeResult event**: Emits encrypted scores for frontend tracking."
+        },
+        {
+          "type": "subheader",
+          "text": "Step 3: Building the compute Function"
         },
         {
           "type": "text",
-          "content": "**Step 4: Add the setTarget Function**"
+          "content": "This is where the magic happens! The `compute` function takes 5 encrypted ingredients, processes them homomorphically, and updates the leaderboard. Let's build it line by line inside your empty function body."
+        },
+        {
+          "type": "text",
+          "content": "**Lines 1-5: Convert External Encrypted Inputs**"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "setTarget Function",
-          "code": "    function setTarget(bytes calldata encryptedTarget) public {\n        target = TFHE.asEuint8(encryptedTarget);\n    }"
+          "title": "Input Conversion",
+          "code": "        euint8 a = FHE.fromExternal(aExt, attestation);\n        euint8 b = FHE.fromExternal(bExt, attestation);\n        euint8 c = FHE.fromExternal(cExt, attestation);\n        euint8 d = FHE.fromExternal(dExt, attestation);\n        euint8 e = FHE.fromExternal(eExt, attestation);"
         },
         {
           "type": "note",
           "icon": "key",
-          "title": "How setTarget Works",
-          "content": "This function takes encrypted input as bytes (calldata for efficiency) and converts it to euint8 using TFHE.asEuint8. Why? The input comes encrypted from the frontend; this safely casts it for onchain storage. The target stays encrypted from the start, allowing the deployer to set the initial secret target post-deployment."
+          "title": "Why fromExternal?",
+          "content": "The frontend sends encrypted data as `externalEuint8` handles. `FHE.fromExternal` verifies the attestation (proof the ciphertext is valid) and converts it to a contract-usable `euint8` type. This prevents malicious fake encrypted data. Each ingredient (a-e) represents an encrypted value between 0-255."
         },
         {
           "type": "text",
-          "content": "**Step 5: Add the guess Function**"
+          "content": "**Lines 6-8: Homomorphic Arithmetic - Sum the Ingredients**"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "guess Function",
-          "code": "    function guess(bytes calldata encryptedGuess, bytes32 publicKey) public view returns (bytes memory) {\n        ebool isEqual = TFHE.eq(target, TFHE.asEuint8(encryptedGuess));\n        return TFHE.reencrypt(isEqual, publicKey);\n    }\n}"
+          "title": "Computing Sum",
+          "code": "        euint16 sum = FHE.add(\n            FHE.add(FHE.add(FHE.add(FHE.asEuint16(a), FHE.asEuint16(b)), FHE.asEuint16(c)), FHE.asEuint16(d)),\n            FHE.asEuint16(e)\n        );"
         },
         {
           "type": "note",
           "icon": "zap",
-          "title": "How guess Works",
-          "content": "This view function (no state change, gas-efficient) takes an encrypted guess and user's public key. It uses TFHE.eq to compare the encrypted target and casted guess, storing the result as an encrypted bool (ebool). Then TFHE.reencrypt reencrypts the ebool under the user's public key and returns it as bytes. Why? This allows only the user (with their private key) to decrypt the result offchain, maintaining end-to-end privacy. The comparison happens homomorphically without decryption!"
-        },
-        {
-          "type": "subheader",
-          "text": "Complete Contract: Ready to Deploy"
+          "title": "Homomorphic Addition",
+          "content": "**FHE.add** performs encrypted addition without decryption! We convert each `euint8` to `euint16` using `asEuint16` to prevent overflow (5 × 255 = 1275 > 255). The nested structure chains additions: ((((a+b)+c)+d)+e). The sum remains encrypted throughout – no plaintext ever exists."
         },
         {
           "type": "text",
-          "content": "Here's the full Potion.sol contract assembled. Copy this into your contracts/ folder:"
+          "content": "**Lines 9-10: Scale and Offset the Score**"
         },
         {
           "type": "code",
           "language": "solidity",
-          "title": "Potion.sol - Complete Private Contract",
-          "code": "// SPDX-License-Identifier: BSD-3-Clause-Clear\npragma solidity ^0.8.24;\n\nimport \"fhevm/lib/TFHE.sol\";\n\ncontract Potion {\n    euint8 internal target;\n\n    function setTarget(bytes calldata encryptedTarget) public {\n        target = TFHE.asEuint8(encryptedTarget);\n    }\n\n    function guess(bytes calldata encryptedGuess, bytes32 publicKey) public view returns (bytes memory) {\n        ebool isEqual = TFHE.eq(target, TFHE.asEuint8(encryptedGuess));\n        return TFHE.reencrypt(isEqual, publicKey);\n    }\n}"
+          "title": "Scaling",
+          "code": "        euint16 scaled = FHE.mul(sum, FHE.asEuint16(14));\n        result = FHE.add(scaled, FHE.asEuint16(300));"
         },
         {
-          "type": "subheader",
-          "text": "Testing for Correctness"
+          "type": "note",
+          "icon": "sparkles",
+          "title": "Score Calculation Formula",
+          "content": "**FHE.mul** multiplies the encrypted sum by 14 (also encrypted). Then **FHE.add** adds 300. This creates score range: minimum (5 × 0 × 14 + 300 = 300), maximum (5 × 255 × 14 + 300 = 18,150). The constants 14 and 300 are encrypted using `asEuint16` so the entire computation happens on ciphertexts. Result: a privacy-preserving power score!"
         },
         {
           "type": "text",
-          "content": "To verify your contract works, create test/Potion.test.js in the tests/ folder. This Hardhat test simulates deployment, setting target, guessing, and decrypting:"
+          "content": "**Lines 11-16: Player Registration and Previous Score Retrieval**"
         },
         {
           "type": "code",
-          "language": "javascript",
-          "title": "Potion.test.js",
-          "code": "const { expect } = require(\"chai\");\nconst { ethers } = require(\"hardhat\");\nconst { createInstance } = require(\"fhevmjs\");\n\ndescribe(\"Potion\", function () {\n  let potion, instance, deployer;\n\n  before(async function () {\n    [deployer] = await ethers.getSigners();\n    const Potion = await ethers.getContractFactory(\"Potion\");\n    potion = await Potion.deploy();\n    instance = await createInstance({ chainId: 31337 }); // Local or Sepolia ID\n  });\n\n  it(\"should set encrypted target and guess correctly\", async function () {\n    const encryptedTarget = instance.encrypt8(42);\n    await potion.setTarget(encryptedTarget);\n\n    const userKeys = instance.generateKeypair();\n    const encryptedGuess = instance.encrypt8(42);\n    const reencrypted = await potion.guess(encryptedGuess, userKeys.publicKey);\n\n    const result = instance.decrypt(await potion.getAddress(), reencrypted, userKeys.privateKey);\n    expect(result).to.equal(1); // 1 for true in bool\n  });\n});"
+          "language": "solidity",
+          "title": "Player Tracking",
+          "code": "        euint16 prevBest = highestPlayerGuess[msg.sender];\n\n        if (!hasPlayed[msg.sender]) {\n            players.push(msg.sender);\n            prevBest = FHE.asEuint16(0);\n            hasPlayed[msg.sender] = true;\n        }"
         },
         {
-          "type": "tip",
-          "icon": "terminal",
-          "title": "Running Tests",
-          "content": "Run the test with: npx hardhat test. This confirms the private equality works without leaks. If you see errors, check that fhevmjs is installed and your Hardhat config is correct."
+          "type": "note",
+          "icon": "users",
+          "title": "Leaderboard Management",
+          "content": "First, we load the player's previous best score (encrypted). If they're new (`!hasPlayed`), we register them in the `players` array, set their previous best to encrypted zero (`FHE.asEuint16(0)`), and mark them as played. This builds our leaderboard tracking system."
+        },
+        {
+          "type": "text",
+          "content": "**Lines 17-19: Compare and Select Best Score (Encrypted Conditional)**"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Encrypted Comparison",
+          "code": "        ebool isHigher = FHE.gt(result, prevBest);\n        euint16 newBest = FHE.select(isHigher, result, prevBest);\n        highestPlayerGuess[msg.sender] = newBest;"
+        },
+        {
+          "type": "note",
+          "icon": "target",
+          "title": "Homomorphic Comparison Magic",
+          "content": "**FHE.gt** (greater than) compares encrypted values, returning an encrypted boolean (`ebool`). **FHE.select** is an encrypted if/else: if `isHigher` is true (encrypted), return `result`, else return `prevBest`. This updates the best score without ever decrypting! The blockchain never sees which score was higher or the actual values."
+        },
+        {
+          "type": "text",
+          "content": "**Lines 20-28: Permission Management and Event Emission**"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Access Control",
+          "code": "        FHE.allowThis(result);\n        FHE.allowThis(highestPlayerGuess[msg.sender]);\n\n        FHE.allow(result, msg.sender);\n        FHE.allow(newBest, msg.sender);\n\n        FHE.makePubliclyDecryptable(newBest);\n\n        emit ComputeResult(result);"
+        },
+        {
+          "type": "note",
+          "icon": "shield",
+          "title": "fhEVM Permission System",
+          "content": "**FHE.allowThis**: Lets the contract itself access encrypted values for future operations. **FHE.allow**: Grants the player permission to decrypt their own result and best score using their private key. **FHE.makePubliclyDecryptable**: Makes the best score requestable by anyone (for leaderboard reveals) after a delay. Without these permissions, encrypted data is completely inaccessible, even to the owner!"
         },
         {
           "type": "subheader",
-          "text": "Common Pitfalls and Troubleshooting"
+          "text": "Step 4: The getAllHighestGuesses Function"
+        },
+        {
+          "type": "text",
+          "content": "This view function retrieves all players and their encrypted scores for leaderboard display. Fill in your empty function body:"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Leaderboard Retrieval",
+          "code": "        uint256 count = players.length;\n        guesses = new euint16[](count);\n\n        for (uint256 i = 0; i < count; i++) {\n            guesses[i] = highestPlayerGuess[players[i]];\n        }\n\n        return (players, guesses);"
+        },
+        {
+          "type": "note",
+          "icon": "list",
+          "title": "How It Works",
+          "content": "Creates an array of encrypted scores matching the players array. Loops through all registered players, copying their encrypted best scores. Returns both arrays to the frontend, which can decrypt the scores (if permitted) for display. The scores remain encrypted in transit and storage!"
+        },
+        {
+          "type": "subheader",
+          "text": "Complete Contract: Your Finished Code"
+        },
+        {
+          "type": "text",
+          "content": "If you've followed along correctly, your Potion.sol should now look like this complete version. Compare it with yours to verify:"
+        },
+        {
+          "type": "code",
+          "language": "solidity",
+          "title": "Potion.sol - Complete Encrypted Contract",
+          "code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\nimport {FHE, externalEuint8, euint8, euint16, ebool, externalEuint32} from \"@fhevm/solidity/lib/FHE.sol\";\nimport {SepoliaConfig} from \"@fhevm/solidity/config/ZamaConfig.sol\";\n\ncontract Potion is SepoliaConfig {\n    mapping(address => euint16) public highestPlayerGuess;\n    mapping(address => bool) public hasPlayed;\n    address[] public players;\n\n    event ComputeResult(euint16 value);\n\n    function compute(\n        externalEuint8 aExt,\n        externalEuint8 bExt,\n        externalEuint8 cExt,\n        externalEuint8 dExt,\n        externalEuint8 eExt,\n        bytes calldata attestation\n    ) public returns (euint16 result) {\n        euint8 a = FHE.fromExternal(aExt, attestation);\n        euint8 b = FHE.fromExternal(bExt, attestation);\n        euint8 c = FHE.fromExternal(cExt, attestation);\n        euint8 d = FHE.fromExternal(dExt, attestation);\n        euint8 e = FHE.fromExternal(eExt, attestation);\n\n        euint16 sum = FHE.add(\n            FHE.add(FHE.add(FHE.add(FHE.asEuint16(a), FHE.asEuint16(b)), FHE.asEuint16(c)), FHE.asEuint16(d)),\n            FHE.asEuint16(e)\n        );\n\n        euint16 scaled = FHE.mul(sum, FHE.asEuint16(14));\n        result = FHE.add(scaled, FHE.asEuint16(300));\n\n        euint16 prevBest = highestPlayerGuess[msg.sender];\n\n        if (!hasPlayed[msg.sender]) {\n            players.push(msg.sender);\n            prevBest = FHE.asEuint16(0);\n            hasPlayed[msg.sender] = true;\n        }\n\n        ebool isHigher = FHE.gt(result, prevBest);\n        euint16 newBest = FHE.select(isHigher, result, prevBest);\n        highestPlayerGuess[msg.sender] = newBest;\n\n        FHE.allowThis(result);\n        FHE.allowThis(highestPlayerGuess[msg.sender]);\n\n        FHE.allow(result, msg.sender);\n        FHE.allow(newBest, msg.sender);\n\n        FHE.makePubliclyDecryptable(newBest);\n\n        emit ComputeResult(result);\n    }\n\n    function getAllHighestGuesses() public view returns (address[] memory allPlayers, euint16[] memory guesses) {\n        uint256 count = players.length;\n        guesses = new euint16[](count);\n\n        for (uint256 i = 0; i < count; i++) {\n            guesses[i] = highestPlayerGuess[players[i]];\n        }\n\n        return (players, guesses);\n    }\n}"
+        },
+        {
+          "type": "subheader",
+          "text": "Testing Your Implementation"
+        },
+        {
+          "type": "text",
+          "content": "Now for the moment of truth! We've prepared comprehensive tests to verify your contract works correctly. Run them from your project root:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Run Tests",
+          "code": "npx hardhat test"
+        },
+        {
+          "type": "tip",
+          "icon": "check-circle",
+          "title": "What the Tests Verify",
+          "content": "The test suite checks: (1) Contract deploys successfully, (2) Encrypted inputs are processed correctly, (3) Score computation formula works (sum × 14 + 300), (4) Leaderboard tracking updates properly, (5) Multiple players can compete independently, (6) Permissions are set correctly. **All tests should pass** if you've implemented the contract correctly!"
+        },
+        {
+          "type": "note",
+          "icon": "alert-circle",
+          "title": "If Tests Fail",
+          "content": "**Common issues**: Missing lines in function bodies (go back and compare with the complete contract), Incorrect FHE function names (check spelling: `FHE.add`, `FHE.mul`, `FHE.gt`, `FHE.select`), Wrong variable types (`euint8` vs `euint16`), Permission calls missing or in wrong order. Carefully compare your code with the complete version above, paying special attention to the exact line placement and syntax."
+        },
+        {
+          "type": "subheader",
+          "text": "Understanding What You Built"
+        },
+        {
+          "type": "text",
+          "content": "Congratulations! You've built a privacy-preserving leaderboard system. Let's review what makes this revolutionary:"
         },
         {
           "type": "list",
           "items": [
-            "**Import Errors**: Ensure TFHE.sol is installed via npm or in the right path. Check your remappings.txt if using Foundry/Hardhat.",
-            "**Type Mismatches**: Use bytes for inputs; TFHE.asEuint8 handles conversion from encrypted bytes to euint8.",
-            "**Gas Issues**: Test on Sepolia; optimize by using small euint types. If 'out of gas', increase in Hardhat config: gas: 3000000.",
-            "**Undefined TFHE**: Double-check import path and that fhevm library is installed: npm install fhevm"
+            "**End-to-End Encryption**: Ingredients are encrypted client-side, stay encrypted onchain during computation, and only decrypt for authorized users.",
+            "**Homomorphic Operations**: Addition, multiplication, and comparison all happen on ciphertexts. The EVM never sees plaintext values.",
+            "**Privacy-Preserving Leaderboard**: Scores are encrypted yet comparable. Players can compete without revealing strategies.",
+            "**Selective Disclosure**: Players decrypt their own scores, but best scores can become publicly decryptable for leaderboard reveals.",
+            "**Zero Knowledge to Blockchain**: Even validators processing transactions can't see ingredient values or scores – they only see encrypted blobs."
           ]
         },
         {
           "type": "tip",
           "icon": "lightbulb",
-          "title": "Pro Tip",
-          "content": "Use Etherscan to monitor transactions on Sepolia. Search your contract address to verify deployments and interactions. Remember: even though operations are encrypted, transaction hashes and addresses are still public!"
+          "title": "Real-World Applications",
+          "content": "This pattern extends beyond games: private voting (encrypted votes, public results), sealed-bid auctions (bids hidden until reveal), confidential DeFi (private balances/trades), medical data (encrypted records with selective access), supply chain (proprietary quantities/prices). fhEVM enables entirely new blockchain use cases impossible with public ledgers!"
+        },
+        {
+          "type": "subheader",
+          "text": "Common Pitfalls and Advanced Tips"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Gas Costs**: FHE operations are more expensive than plaintext. Use smallest encrypted types possible (`euint8` over `euint32` when values fit).",
+            "**Overflow Safety**: Always upcast before operations that might overflow. We use `euint16` for sum because 5 × `euint8` could exceed 255.",
+            "**Permission Management**: Forgetting `FHE.allow` means users can't decrypt their data. Forgetting `FHE.allowThis` breaks future contract operations.",
+            "**Attestation Importance**: Never skip attestation verification in `fromExternal` – it prevents malicious fake encrypted data.",
+            "**Public Decryptability**: `makePubliclyDecryptable` has a delay before values become accessible. Plan your UX accordingly."
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "terminal",
+          "title": "Debugging Tips",
+          "content": "Use Hardhat console.log for plaintext debugging (but only in test environments). Check Sepolia faucets if transactions fail (need TZAMA and Sepolia ETH). Monitor gas usage in tests to optimize. Use descriptive test names to quickly identify which functionality broke."
+        },
+        {
+          "type": "subheader",
+          "text": "Next Steps"
+        },
+        {
+          "type": "text",
+          "content": "With your contract complete and tested, you're ready to deploy and build the frontend! In the next section, we'll deploy to Zama's Sepolia testnet and integrate the contract with a React UI where users can encrypt ingredients, submit guesses, and view the leaderboard. The pieces are coming together – your private potion game is almost ready to brew! ✨"
         }
       ],
       "resources": [
         {
-          "title": "Zama TFHE Library Documentation",
-          "url": "https://docs.zama.ai/fhevm"
+          "title": "Zama Solidity Guide",
+          "url": "https://docs.zama.ai/protocol/solidity-guides"
         },
         {
-          "title": "fhEVM Solidity Library",
+          "title": "FHE Solidity Library Reference",
           "url": "https://github.com/zama-ai/fhevm"
         },
         {
@@ -967,8 +1024,8 @@
           "url": "https://hardhat.org/hardhat-runner/docs/guides/test-contracts"
         },
         {
-          "title": "fhevmjs Documentation",
-          "url": "https://docs.zama.ai/fhevm/guides/frontend"
+          "title": "Understanding Homomorphic Encryption under the hood",
+          "url": "https://docs.zama.ai/protocol/zama-protocol-litepaper"
         }
       ]
     },
@@ -976,368 +1033,790 @@
       "id": 7,
       "title": "Launching the Spell",
       "subtitle": "Deploying the Contract and Integrating Frontend",
-      "description": "Hey, spellbinders! Now that your PotionGuesser contract is crafted, it's time to deploy it to Sepolia and weave it into the frontend for user interactions. We'll use Hardhat for deployment and integrate with Wagmi and RainbowKit for wallet connections in the React app. Based on the completed demo repo, we've identified removed code sections like deployment scripts, ABI imports, and Wagmi configs – we'll guide you on re-adding them exactly where they belong, with explanations.",
+      "description": "Your smart contract is written and tested - now it's time to deploy it to the blockchain and connect your frontend! In this section, you'll deploy to Zama's Sepolia testnet, configure your frontend with the deployment artifacts, and implement wallet connection functionality. By the end, users will be able to connect their wallets, view their balances, and your dApp will be ready to interact with the deployed contract.",
       "learningObjectives": [
-        "Deploy the PotionGuesser to Sepolia with Hardhat, including verification",
-        "Add the ABI to the frontend for contract interactions",
-        "Configure Wagmi and RainbowKit in App.tsx for chain support and wallet connects",
-        "Use useContractWrite in components for submitting guesses"
+        "Deploy your Potion contract to Sepolia testnet using Hardhat",
+        "Configure frontend with contract address and ABI from deployment artifacts",
+        "Implement wallet connection with RainbowKit and Wagmi",
+        "Read blockchain data to display leaderboard",
+        "Understand the complete deployment-to-frontend workflow"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Step 1: Preparing Deployment"
+          "text": "Part 1: Deploying Your Contract to Sepolia"
         },
         {
           "type": "text",
-          "content": "Ensure hardhat.config.js in root includes the toolbox and dotenv for environment variables. This configuration loads secrets and sets up network connections."
-        },
-        {
-          "type": "code",
-          "language": "javascript",
-          "title": "hardhat.config.js - Root Configuration",
-          "code": "require(\"@nomicfoundation/hardhat-toolbox\");\nrequire(\"dotenv\").config();\nrequire(\"@nomiclabs/hardhat-etherscan\");\n\nmodule.exports = {\n  solidity: \"0.8.24\",\n  networks: {\n    sepolia: {\n      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,\n      accounts: [process.env.PRIVATE_KEY]\n    }\n  },\n  etherscan: {\n    apiKey: process.env.ETHERSCAN_API_KEY // From etherscan.io\n  }\n};"
-        },
-        {
-          "type": "note",
-          "icon": "package",
-          "title": "Install Dependencies",
-          "content": "If not already installed, run: npm install --save-dev @nomiclabs/hardhat-etherscan. This enables contract verification on Etherscan."
-        },
-        {
-          "type": "subheader",
-          "text": "Step 2: Creating the Deployment Script"
+          "content": "Before your frontend can interact with the contract, it needs to exist on the blockchain! We'll deploy to Zama's Sepolia testnet, which is configured for FHE operations. The deployment script is already prepared - you just need to run it."
         },
         {
           "type": "text",
-          "content": "Create a TypeScript deployment script that uses ethers to factory the contract, deploy it, and log the address for frontend use."
-        },
-        {
-          "type": "code",
-          "language": "typescript",
-          "title": "scripts/deploy.ts",
-          "code": "import { ethers } from \"hardhat\";\n\nasync function main() {\n  const PotionGuesser = await ethers.getContractFactory(\"PotionGuesser\");\n  const potionGuesser = await PotionGuesser.deploy();\n  await potionGuesser.waitForDeployment();\n  const address = await potionGuesser.getAddress();\n  console.log(\"PotionGuesser deployed to:\", address);\n}\n\nmain().catch((error) => {\n  console.error(error);\n  process.exitCode = 1;\n});"
-        },
-        {
-          "type": "tip",
-          "icon": "terminal",
-          "title": "Why TypeScript?",
-          "content": "Using TypeScript provides type safety and better IDE support. The script uses the ethers library to interact with the blockchain and deploy your contract."
-        },
-        {
-          "type": "subheader",
-          "text": "Step 3: Deploying and Verifying"
-        },
-        {
-          "type": "text",
-          "content": "Follow these steps to deploy your contract to Sepolia testnet:"
+          "content": "**Prerequisites Check**"
         },
         {
           "type": "list",
           "items": [
-            "**Compile**: Run npx hardhat compile to generate artifacts and ABI",
-            "**Deploy**: Run npx hardhat run scripts/deploy.ts --network sepolia",
-            "**Verify**: Run npx hardhat verify --network sepolia DEPLOYED_ADDRESS"
+            "Ensure you have Sepolia testnet ETH in your deployer wallet (get from https://sepoliafaucet.com/)",
+            "Verify your `.env` file has `PRIVATE_KEY` set to your wallet's private key",
+            "Confirm you're in the root directory of your smart contract project (where `hardhat.config.ts` exists)"
           ]
         },
         {
-          "type": "note",
-          "icon": "save",
-          "title": "Save the Address",
-          "content": "Copy the deployed contract address from the console output. You'll need to paste it in frontend files as CONTRACT_ADDRESS for the app to interact with your contract."
-        },
-        {
-          "type": "subheader",
-          "text": "Step 4: Adding ABI to Frontend"
-        },
-        {
           "type": "text",
-          "content": "The ABI (Application Binary Interface) defines the contract's function signatures. Create a new folder and file for the ABI."
-        },
-        {
-          "type": "code",
-          "language": "json",
-          "title": "src/abi/PotionGuesserABI.json",
-          "code": "[\n  {\n    \"inputs\": [\n      {\n        \"internalType\": \"bytes\",\n        \"name\": \"encryptedTarget\",\n        \"type\": \"bytes\"\n      }\n    ],\n    \"name\": \"setTarget\",\n    \"outputs\": [],\n    \"stateMutability\": \"nonpayable\",\n    \"type\": \"function\"\n  },\n  {\n    \"inputs\": [\n      {\n        \"internalType\": \"bytes\",\n        \"name\": \"encryptedGuess\",\n        \"type\": \"bytes\"\n      },\n      {\n        \"internalType\": \"bytes32\",\n        \"name\": \"publicKey\",\n        \"type\": \"bytes32\"\n      }\n    ],\n    \"name\": \"guess\",\n    \"outputs\": [\n      {\n        \"internalType\": \"bytes\",\n        \"name\": \"\",\n        \"type\": \"bytes\"\n      }\n    ],\n    \"stateMutability\": \"view\",\n    \"type\": \"function\"\n  }\n]"
-        },
-        {
-          "type": "tip",
-          "icon": "file-json",
-          "title": "Getting the ABI",
-          "content": "Find the complete ABI in artifacts/contracts/PotionGuesser.sol/PotionGuesser.json after compilation. Copy just the 'abi' array into your frontend file."
-        },
-        {
-          "type": "subheader",
-          "text": "Step 5: Integrating Wagmi and RainbowKit"
-        },
-        {
-          "type": "text",
-          "content": "Install the required packages for wallet connection and contract interaction:"
+          "content": "**Run the Deployment Command**"
         },
         {
           "type": "code",
           "language": "bash",
-          "title": "Install Frontend Dependencies",
-          "code": "cd packages/site\nnpm install wagmi viem @rainbow-me/rainbowkit @tanstack/react-query connectkit"
+          "title": "Deploy to Sepolia",
+          "code": "yarn deploy:sepolia"
+        },
+        {
+          "type": "note",
+          "icon": "terminal",
+          "title": "What Happens During Deployment",
+          "content": "The deployment script compiles your contract, connects to Sepolia testnet, deploys the Potion contract, and saves the deployment artifacts (address and ABI) to `deployments/sepolia/Potion.json`. You'll see transaction hashes and the deployed contract address in your terminal. This process takes about 30-60 seconds."
+        },
+        {
+          "type": "tip",
+          "icon": "check-circle",
+          "title": "Verify Deployment Success",
+          "content": "After deployment, you should see output like 'Potion deployed to: 0x123...' and a confirmation message. Copy this address - you'll need it! You can also verify the deployment on Sepolia Etherscan (https://sepolia.etherscan.io/) by pasting the contract address."
+        },
+        {
+          "type": "subheader",
+          "text": "Part 2: Connecting Frontend to Deployed Contract"
         },
         {
           "type": "text",
-          "content": "Create a Wagmi configuration file that sets up Sepolia chain and wallet connectors:"
+          "content": "Now that your contract is deployed, your frontend needs to know where to find it and how to interact with it. This is done through the contract's **address** (where it lives on the blockchain) and **ABI** (Application Binary Interface - the 'instruction manual' for calling its functions)."
+        },
+        {
+          "type": "text",
+          "content": "**Step 1: Locate the Deployment Artifact**"
+        },
+        {
+          "type": "text",
+          "content": "Navigate to your smart contract project and find the file:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Deployment Artifact Location",
+          "code": "deployments/sepolia/Potion.json"
+        },
+        {
+          "type": "text",
+          "content": "Open this file. You'll see JSON containing the deployed contract address and the complete ABI. This is everything your frontend needs to communicate with your contract."
+        },
+        {
+          "type": "text",
+          "content": "**Step 2: Update Frontend Config**"
+        },
+        {
+          "type": "text",
+          "content": "In your **frontend project**, navigate to the config folder and open the existing `Potion.json` file:"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "title": "Frontend Config Location",
+          "code": "config/Potion.json"
+        },
+        {
+          "type": "text",
+          "content": "**Replace the entire contents** of this frontend config file with the contents from your deployment artifact (`deployments/sepolia/Potion.json`). Copy everything from the deployment file and paste it into the frontend config file, then save."
+        },
+        {
+          "type": "note",
+          "icon": "info",
+          "title": "Why This Step Matters",
+          "content": "The frontend `Potion.json` is imported by your React app to configure the contract connection. By copying the deployment artifact, you're telling your frontend: 'Here's the contract address on Sepolia' and 'Here's how to call its functions (the ABI)'. Without this, your frontend wouldn't know where your contract lives or how to talk to it."
+        },
+        {
+          "type": "tip",
+          "icon": "lightbulb",
+          "title": "Understanding the ABI",
+          "content": "The ABI is automatically generated from your Solidity contract during compilation. It describes every function (name, parameters, return types), event, and error your contract has. Think of it as a menu at a restaurant - it tells you what you can order (call) and what ingredients (parameters) each dish needs. Your frontend uses this to construct properly formatted contract calls."
+        },
+        {
+          "type": "subheader",
+          "text": "Part 3: Setting Up Wallet Connection"
+        },
+        {
+          "type": "text",
+          "content": "With your contract deployed and configured, let's enable users to connect their wallets. We'll use RainbowKit for a beautiful connection UI and Wagmi hooks to interact with the connected wallet."
+        },
+        {
+          "type": "text",
+          "content": "**File 1: Configure Wagmi (`src/lib/wagmi.ts`)**"
+        },
+        {
+          "type": "text",
+          "content": "Find the `wagmi.ts` file in your frontend. You'll see an empty configuration. Replace it with this setup:"
         },
         {
           "type": "code",
           "language": "typescript",
           "title": "src/lib/wagmi.ts",
-          "code": "import { getDefaultConfig } from 'connectkit';\nimport { createConfig } from 'wagmi';\nimport { sepolia } from 'viem/chains';\n\nexport const config = createConfig(\n  getDefaultConfig({\n    chains: [sepolia],\n    appName: \"Private Potion Guesser\",\n    walletConnectProjectId: 'your_id_here' // Get from walletconnect.com\n  })\n);"
+          "code": "import { getDefaultConfig } from \"@rainbow-me/rainbowkit\";\nimport { sepolia } from \"wagmi/chains\";\n\nconst projectId = \"your-project-id-here\";\n\nexport const config = getDefaultConfig({\n  appName: \"Potion Brew\",\n  projectId,\n  chains: [sepolia],\n  ssr: false,\n});"
         },
         {
           "type": "note",
-          "icon": "link",
-          "title": "WalletConnect Project ID",
-          "content": "Sign up at walletconnect.com to get a free project ID. This enables WalletConnect support for mobile wallets and other providers."
+          "icon": "settings",
+          "title": "Configuration Breakdown",
+          "content": "**appName**: Displayed in wallet connection prompts. **projectId**: Your WalletConnect identifier. **chains**: Array of networks your app supports - we're using `sepolia` (Ethereum's testnet). **ssr: false**: Indicates this is a client-side only app (not server-side rendered), which is correct for this project."
         },
         {
           "type": "text",
-          "content": "Update App.tsx to wrap your application with the necessary providers:"
+          "content": "**File 2: Display Connected Wallet (`src/components/WalletConnect.tsx`)**"
+        },
+        {
+          "type": "text",
+          "content": "In the `WalletConnect.tsx` component, find the `ConnectedWalletDisplay` function with empty logic. Fill it in with this code:"
         },
         {
           "type": "code",
           "language": "typescript",
-          "title": "src/App.tsx - Provider Setup",
-          "code": "import { Toaster } from \"@/components/ui/toaster\";\nimport { Toaster as Sonner } from \"@/components/ui/sonner\";\nimport { TooltipProvider } from \"@/components/ui/tooltip\";\nimport { QueryClient, QueryClientProvider } from \"@tanstack/react-query\";\nimport { WagmiProvider } from \"wagmi\";\nimport { BrowserRouter, Routes, Route } from \"react-router-dom\";\nimport { config } from \"./lib/wagmi\";\nimport { Landing } from \"./pages/Landing\";\nimport { Game } from \"./pages/Game\";\nimport NotFound from \"./pages/NotFound\";\nimport { RainbowKitProvider } from \"@rainbow-me/rainbowkit\";\nimport \"@rainbow-me/rainbowkit/styles.css\";\nimport { useEffect, useState } from \"react\";\nimport { initializeFHE } from \"./lib/fhe\";\n\nconst queryClient = new QueryClient();\n\nconst App = () => {\n  // FHE initialization will be added in Section 8\n  return (\n    <WagmiProvider config={config}>\n      <QueryClientProvider client={queryClient}>\n        <RainbowKitProvider>\n          <TooltipProvider>\n            <Sonner />\n            <Toaster />\n            <BrowserRouter>\n              <Routes>\n                <Route path=\"/\" element={<Landing />} />\n                <Route path=\"/game\" element={<Game />} />\n                <Route path=\"*\" element={<NotFound />} />\n              </Routes>\n            </BrowserRouter>\n          </TooltipProvider>\n        </RainbowKitProvider>\n      </QueryClientProvider>\n    </WagmiProvider>\n  );\n};\n\nexport default App;"
+          "title": "src/components/WalletConnect.tsx",
+          "code": "function ConnectedWalletDisplay({ account }: { account: any }) {\n  const { address } = useAccount();\n  const { data: balance } = useBalance({ address });\n\n  const formatAddress = (addr: string) =>\n    `${addr.slice(0, 6)}...${addr.slice(-4)}`;\n\n  const formatBalance = (bal: any) =>\n    bal ? `${parseFloat(bal.formatted).toFixed(3)} ${bal.symbol}` : \"0.000 ETH\";\n\n  // ... rest of component UI (already in your boilerplate)\n}"
+        },
+        {
+          "type": "note",
+          "icon": "info",
+          "title": "Understanding Wagmi Hooks",
+          "content": "**useAccount()**: Returns wallet connection state including the connected address. Updates automatically when the user switches accounts or disconnects. **useBalance()**: Fetches the ETH balance for a given address. Pass the address from `useAccount()` to fetch the connected wallet's balance. These hooks are reactive - they re-fetch when dependencies change."
+        },
+        {
+          "type": "note",
+          "icon": "palette",
+          "title": "Formatting for UX",
+          "content": "**formatAddress()**: Converts '0x1234567890abcdef...' to '0x1234...cdef' for readability. Full addresses are long and hard to read. **formatBalance()**: Displays balance as '0.123 ETH' with 3 decimal places. The raw balance data comes with many decimals (wei precision) - formatting makes it human-readable."
         },
         {
           "type": "tip",
-          "icon": "layers",
-          "title": "Provider Order Matters",
-          "content": "WagmiProvider must wrap QueryClientProvider, which wraps RainbowKitProvider. This ensures proper context propagation throughout your app."
-        },
-        {
-          "type": "text",
-          "content": "Update your Game page to include the GuessForm component:"
-        },
-        {
-          "type": "code",
-          "language": "typescript",
-          "title": "src/pages/Game.tsx",
-          "code": "import GuessForm from \"../components/GuessForm\";\n\nexport const Game = () => {\n  return (\n    <div className=\"container mx-auto p-4\">\n      <h1 className=\"text-4xl font-bold mb-8\">Private Potion Guesser</h1>\n      <GuessForm />\n    </div>\n  );\n};"
-        },
-        {
-          "type": "text",
-          "content": "Create the GuessForm component that uses Wagmi hooks for contract interactions:"
-        },
-        {
-          "type": "code",
-          "language": "typescript",
-          "title": "src/components/GuessForm.tsx - Basic Structure",
-          "code": "import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';\nimport PotionGuesserABI from '../abi/PotionGuesserABI.json';\n\nconst CONTRACT_ADDRESS = 'your_deployed_address_here';\n\nfunction GuessForm() {\n  const { isConnected } = useAccount();\n\n  // Encryption logic will be added in Section 8\n  // For now, we'll prepare the contract write\n\n  const { config } = usePrepareContractWrite({\n    address: CONTRACT_ADDRESS,\n    abi: PotionGuesserABI,\n    functionName: 'guess',\n    args: [] // Will add encrypted args in Section 8\n  });\n\n  const { write } = useContractWrite(config);\n\n  if (!isConnected) {\n    return <div>Please connect your wallet</div>;\n  }\n\n  return (\n    <div>\n      <input type=\"number\" min=\"0\" max=\"255\" placeholder=\"Enter your guess\" />\n      <button onClick={() => write?.()}>Submit Guess</button>\n    </div>\n  );\n}\n\nexport default GuessForm;"
+          "icon": "test-tube",
+          "title": "Testing Wallet Connection",
+          "content": "Save your changes and start the dev server (`npm run dev`). You should see a 'Connect Wallet' button. Click it, select MetaMask, and approve the connection. Your formatted address and ETH balance should appear. If you don't have Sepolia ETH, visit https://sepoliafaucet.com/ to get free testnet tokens."
         },
         {
           "type": "subheader",
-          "text": "Common Pitfalls and Troubleshooting"
+          "text": "Part 4: Reading Contract Data (Leaderboard)"
+        },
+        {
+          "type": "text",
+          "content": "Now that wallets can connect, let's read data from your deployed contract. We'll fetch the leaderboard by calling the `getAllHighestGuesses` view function. This demonstrates how to read blockchain data without spending gas."
+        },
+        {
+          "type": "text",
+          "content": "**File: `src/hooks/usePotionContract.ts`**"
+        },
+        {
+          "type": "text",
+          "content": "Find the `fetchLeaderboard` function with mock data. Replace it with this implementation that actually calls your contract:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Reading Leaderboard Data",
+          "code": "const fetchLeaderboard = useCallback(async () => {\n  if (!publicClient) return [];\n  \n  try {\n    setIsLoading(true);\n\n    // Call contract's view function\n    const result = await publicClient.readContract({\n      address: contractConfig.address,\n      abi: contractConfig.abi,\n      functionName: \"getAllHighestGuesses\",\n      args: [],\n    } as any);\n\n    // Destructure the returned arrays\n    const [players, guesses] = result as [string[], string[]];\n\n    if (guesses.length === 0) return [];\n\n    // For now, return with encrypted handles\n    // We'll decrypt these in Section 8\n    return players.map((player, idx) => ({\n      player,\n      guess: guesses[idx], // Still encrypted\n    }));\n  } catch (err: any) {\n    console.error(\"Error fetching leaderboard:\", err);\n    toast({\n      title: \"Failed to load leaderboard\",\n      description: \"Unable to fetch leaderboard data.\",\n      variant: \"destructive\",\n    });\n    return [];\n  } finally {\n    setIsLoading(false);\n  }\n}, [publicClient, toast]);"
+        },
+        {
+          "type": "note",
+          "icon": "book-open",
+          "title": "How publicClient.readContract Works",
+          "content": "**publicClient**: A Viem client configured for read-only operations (no wallet needed). **readContract()**: Calls view/pure functions on your contract - these are free (no gas) because they don't modify state. **functionName**: Must match exactly with your contract's function name. **args**: Array of function arguments (empty here because `getAllHighestGuesses` takes no parameters). The function returns whatever your contract returns - in this case, two arrays."
+        },
+        {
+          "type": "note",
+          "icon": "lock",
+          "title": "Why Guesses Are Still Encrypted",
+          "content": "The `guesses` array contains encrypted `euint16` handles (strings like '0x123...'). These are still encrypted onchain! In Section 8, you'll implement the FHE decryption logic to convert these handles into actual numbers. For now, you're successfully reading the encrypted data - that's progress!"
+        },
+        {
+          "type": "tip",
+          "icon": "check-circle",
+          "title": "Testing Leaderboard Fetch",
+          "content": "After implementing this, your leaderboard component should load without errors (though it may be empty if no one has played yet, or show encrypted handles). Check the browser console - you should see the raw contract response logged. No errors here means your frontend is successfully communicating with your deployed contract!"
+        },
+        {
+          "type": "subheader",
+          "text": "Understanding the Deployment Flow"
+        },
+        {
+          "type": "text",
+          "content": "Let's recap what you've accomplished and how the pieces fit together:"
         },
         {
           "type": "list",
           "items": [
-            "**Transaction Fails**: Check you have enough Sepolia ETH in your wallet for gas fees",
-            "**Wagmi Not Connecting**: Ensure walletConnectProjectId is set correctly in wagmi.ts",
-            "**ABI Mismatch**: Always recompile and copy the latest ABI after contract changes",
-            "**Wrong Network**: Make sure MetaMask is connected to Sepolia testnet"
+            "**Contract Deployment**: Your Solidity contract was compiled, deployed to Sepolia, and given a permanent address on the blockchain.",
+            "**Artifact Generation**: Hardhat created `Potion.json` containing the address and ABI - the 'coordinates and instruction manual' for your contract.",
+            "**Frontend Configuration**: By copying this artifact to your frontend, you linked your UI to the deployed contract.",
+            "**Wallet Connection**: RainbowKit + Wagmi enable users to connect their wallets, providing the address and signer needed for transactions.",
+            "**Data Reading**: Viem's `publicClient` lets you call view functions to read blockchain state without gas costs.",
+            "**Current State**: Your dApp can now connect wallets and read contract data. The encrypted values are fetched successfully - decryption comes next!"
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "workflow",
+          "title": "The Full Data Flow",
+          "content": "Here's how data flows in your dApp: (1) User connects wallet via RainbowKit, (2) Frontend reads contract address/ABI from `Potion.json`, (3) Viem's publicClient calls contract view functions, (4) Contract returns encrypted data, (5) Frontend receives the response. In Section 8, we'll add: (6) FHE SDK decrypts the data, (7) UI displays plaintext results."
+        },
+        {
+          "type": "subheader",
+          "text": "Troubleshooting Common Issues"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Deployment fails with 'insufficient funds'**: Get Sepolia ETH from https://sepoliafaucet.com/. You need ~0.05 ETH for deployment.",
+            "**Cannot find Potion.json**: Make sure you're in the correct project directory. Smart contract project for deployment, frontend project for config update.",
+            "**Wallet won't connect**: Verify you have MetaMask installed and are on the Sepolia network. Check that your WalletConnect Project ID is valid.",
+            "**'Contract not found' error**: Ensure you copied the deployment artifact correctly. The address in frontend `Potion.json` must match your deployed contract.",
+            "**Leaderboard shows nothing**: If no one has played yet, the arrays are empty - this is expected",
+            "**TypeScript errors in IDE**: Run `npm install` to ensure all dependencies are installed. Some IDEs need a restart to pick up new types."
           ]
         },
         {
           "type": "tip",
-          "icon": "compass",
-          "title": "Testing Locally",
-          "content": "Before deploying to Sepolia, test on a local Hardhat node with: npx hardhat node. Deploy to localhost network first to catch issues early."
+          "icon": "bug",
+          "title": "Debugging Tips",
+          "content": "Open browser DevTools (F12) and check the Console tab for errors. Network tab shows contract calls - look for successful responses. If you see errors, read them carefully - they often tell you exactly what's wrong (e.g., 'wrong network', 'contract not found'). Check that MetaMask is connected to Sepolia, not mainnet or another testnet."
+        },
+        {
+          "type": "subheader",
+          "text": "What's Next: Encryption Magic Awaits"
+        },
+        {
+          "type": "text",
+          "content": "You've successfully deployed your contract and built the basic frontend infrastructure. Users can connect wallets and your app can read contract data. But the leaderboard still shows encrypted handles, and there's no way to submit potions yet. That's where Section 8 comes in!"
+        },
+        {
+          "type": "text",
+          "content": "In the next section, you'll implement the FHE encryption magic that makes this dApp truly private. You'll learn to:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Initialize the Zama FHE SDK in your React app",
+            "Encrypt user input client-side before sending to the blockchain",
+            "Submit encrypted transactions with proper handle formatting",
+            "Request private decryption using EIP-712 signatures",
+            "Decrypt public leaderboard data for display",
+            "Handle the complete encrypted transaction lifecycle with user feedback"
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "rocket",
+          "title": "Ready for the Next Challenge?",
+          "content": "Make sure everything in this section works before moving on. Your wallet should connect, your balance should display, and the leaderboard should load (even if empty). Once these basics work, you're ready for the encryption magic in Section 8. Test thoroughly now - it's easier to debug connection issues separately from encryption issues!"
         }
       ],
       "resources": [
         {
-          "title": "Hardhat Deployment Guide",
-          "url": "https://hardhat.org/hardhat-runner/docs/guides/deploying"
+          "title": "Sepolia Faucet",
+          "url": "https://sepoliafaucet.com/"
         },
         {
           "title": "Wagmi Documentation",
-          "url": "https://wagmi.sh/"
+          "url": "https://wagmi.sh/react/getting-started"
         },
         {
-          "title": "RainbowKit Setup",
-          "url": "https://www.rainbowkit.com/docs/installation"
+          "title": "Viem Documentation",
+          "url": "https://viem.sh/docs/getting-started"
         },
         {
-          "title": "Sepolia Faucet",
-          "url": "https://sepoliafaucet.com/"
+          "title": "Sepolia Etherscan",
+          "url": "https://sepolia.etherscan.io/"
         }
       ]
     },
     {
       "id": 8,
       "title": "The Art of Secret Infusion",
-      "subtitle": "Frontend Encryption and Decryption with FHEVM",
-      "description": "Let's seal the secrets! Using fhevmjs, we'll add encryption and decryption to the frontend. From the demo repo, removed code includes FHE init in App, functions in fhe.ts, and logic in GuessForm – we'll add them back with placement and explanations. This completes the privacy circle: encrypt client-side, compute onchain, decrypt client-side.",
+      "subtitle": "Frontend Encryption and Decryption with FHEvm",
+      "description": "Welcome to the cryptographic heart of your dApp! In this section, you'll implement Fully Homomorphic Encryption (FHE) on the client side, enabling true privacy for your potion game. You'll learn to encrypt user input before it touches the blockchain, submit encrypted transactions, request private decryption with cryptographic signatures, and decrypt public leaderboard data. This is where your dApp transcends traditional blockchain transparency to achieve genuine privacy.",
       "learningObjectives": [
-        "Initialize FHE in App.tsx with proper loading states",
-        "Create fhe.ts with functions for initialization, encryption, and decryption",
-        "Add key generation, encryption, and decryption logic in GuessForm",
-        "Understand the complete FHE workflow from user input to result"
+        "Initialize and configure the Zama FHE SDK in your React application",
+        "Encrypt user input client-side using FHE before blockchain submission",
+        "Submit encrypted transactions with proper handle formatting and attestation",
+        "Implement EIP-712 signature-based private decryption for user-specific data",
+        "Decrypt publicly decryptable data for leaderboard display",
+        "Handle the complete encrypted transaction lifecycle with comprehensive error handling"
       ],
       "content": [
         {
           "type": "subheader",
-          "text": "Step 1: Creating FHE Library Functions"
+          "text": "Understanding the FHE Architecture"
         },
         {
           "type": "text",
-          "content": "Create a dedicated file for FHE operations. This module handles initialization, encryption, and decryption, keeping the logic centralized and reusable."
+          "content": "Before diving into code, let's understand what makes FHE special. In traditional blockchain apps, all data is public - anyone can see transaction inputs and contract state. FHE changes this by allowing computations on encrypted data. Your contract never sees plaintext values; it operates on ciphertexts directly. The Zama FHE SDK handles encryption client-side and works with a relayer service for decryption."
         },
         {
-          "type": "code",
-          "language": "typescript",
-          "title": "src/lib/fhe.ts",
-          "code": "import { createInstance } from 'fhevmjs';\n\nexport const initializeFHE = async () => {\n  const instance = await createInstance({ chainId: 11155111 }); // Sepolia\n  return instance;\n};\n\nexport const encryptGuess = (instance: any, value: number) => {\n  const publicKey = instance.getPublicKey();\n  return instance.encrypt8(value, publicKey);\n};\n\nexport const decryptResult = (\n  instance: any,\n  contractAddress: string,\n  reencrypted: string,\n  privateKey: string\n) => {\n  return instance.decrypt(contractAddress, reencrypted, privateKey);\n};"
+          "type": "list",
+          "items": [
+            "**Client Encryption**: User selects potions → SDK encrypts locally → Produces ciphertext handles + attestation proof",
+            "**Blockchain Submission**: Encrypted handles sent to contract → Contract computes on ciphertexts → Emits encrypted result",
+            "**Private Decryption**: User requests decryption → Signs EIP-712 message → Relayer decrypts with proof of ownership",
+            "**Public Decryption**: Contract marks values public → Anyone can request → Relayer decrypts without signature"
+          ]
         },
         {
           "type": "note",
-          "icon": "code",
-          "title": "What These Functions Do",
-          "content": "initializeFHE creates the FHE instance for the Sepolia chain. encryptGuess encrypts a value (0-255) using the network's public key. decryptResult decrypts the reencrypted response using the user's private key."
-        },
-        {
-          "type": "tip",
-          "icon": "package",
-          "title": "Install fhevmjs",
-          "content": "Don't forget to install the library: npm install fhevmjs. This provides all the cryptographic functions needed for client-side FHE operations."
+          "icon": "shield",
+          "title": "Privacy Guarantee",
+          "content": "With FHE, the blockchain, validators, block explorers - no one can see your potion ingredients or attempt scores. Only you can decrypt your private data (with your signature), and only publicly marked data (best scores) can be seen by others. This is cryptographically enforced, not just access control."
         },
         {
           "type": "subheader",
-          "text": "Step 2: Initializing FHE in App.tsx"
+          "text": "Part 1: Initializing the FHE SDK"
         },
         {
           "type": "text",
-          "content": "Add FHE initialization logic to App.tsx. This loads the FHE instance on mount, shows a loading state, and handles errors gracefully."
+          "content": "The FHE SDK must be initialized before any encryption operations. We'll create initialization functions and a loading screen to ensure the SDK is ready before users interact with your dApp."
+        },
+        {
+          "type": "text",
+          "content": "**File: `src/lib/fhe.ts` - SDK Initialization**"
+        },
+        {
+          "type": "text",
+          "content": "Find the empty `initializeFHE` and `getFhevmInstance` functions. Replace them with this implementation:"
         },
         {
           "type": "code",
           "language": "typescript",
-          "title": "src/App.tsx - FHE Initialization",
-          "code": "import { useEffect, useState } from \"react\";\nimport { initializeFHE } from \"./lib/fhe\";\n// ... other imports\n\nconst App = () => {\n  const [fheReady, setFheReady] = useState(false);\n  const [fheInstance, setFheInstance] = useState<any>(null);\n\n  useEffect(() => {\n    initializeFHE()\n      .then((instance) => {\n        setFheInstance(instance);\n        setFheReady(true);\n        console.log(\"FHE initialized successfully\");\n      })\n      .catch((err) => {\n        console.error(\"FHE initialization failed:\", err);\n      });\n  }, []);\n\n  if (!fheReady) {\n    return (\n      <div className=\"flex items-center justify-center min-h-screen\">\n        <div className=\"text-center\">\n          <h2 className=\"text-2xl font-bold mb-2\">Initializing encryption...</h2>\n          <p className=\"text-muted-foreground\">Loading FHE cryptography</p>\n        </div>\n      </div>\n    );\n  }\n\n  // Pass fheInstance to Game via context or props\n  return (\n    <WagmiProvider config={config}>\n      {/* ... rest of providers */}\n    </WagmiProvider>\n  );\n};"
+          "title": "Initializing the FHE SDK",
+          "code": "export async function initializeFHE() {\n  try {\n    if (!relayer) {\n      await initSDK();\n      relayer = await createInstance(SepoliaConfig);\n    }\n    return relayer;\n  } catch (error) {\n    console.error(\"Failed to initialize FHEVM relayer SDK:\", error);\n    throw new Error(\"Failed to initialize FHE encryption\");\n  }\n}\n\nexport async function getFhevmInstance() {\n  if (!relayer) {\n    await initializeFHE();\n  }\n  return relayer;\n}"
         },
         {
           "type": "note",
-          "icon": "clock",
-          "title": "Why Loading State?",
-          "content": "FHE initialization can take a few seconds as it loads cryptographic parameters. The loading screen prevents users from interacting before the system is ready, avoiding errors."
-        },
-        {
-          "type": "tip",
-          "icon": "react",
-          "title": "Passing FHE Instance",
-          "content": "For cleaner code, consider using React Context to pass fheInstance to child components instead of prop drilling. Create a FHEContext with createContext and useContext."
-        },
-        {
-          "type": "subheader",
-          "text": "Step 3: Key Generation, Encryption, and Decryption in GuessForm"
+          "icon": "rocket",
+          "title": "What Happens During Initialization",
+          "content": "**initSDK()**: Loads the core FHE cryptographic libraries (WASM modules for encryption/decryption). Takes 2-3 seconds. **createInstance(SepoliaConfig)**: Configures the relayer service for Zama's Sepolia deployment, setting up the gateway for encryption and decryption operations. **relayer singleton**: Stored globally so we only initialize once. Subsequent calls return the existing instance."
         },
         {
           "type": "text",
-          "content": "Now we'll add the complete encryption workflow to the GuessForm component: generate user keypair, encrypt the guess, submit to contract, and decrypt the result."
+          "content": "**File: `src/App.tsx` - Loading Screen**"
+        },
+        {
+          "type": "text",
+          "content": "Go to your App.tsx, and at the top of your App function, paste this code so we can use the initializeFHE globally"
         },
         {
           "type": "code",
           "language": "typescript",
-          "title": "src/components/GuessForm.tsx - Complete Implementation",
-          "code": "import { useEffect, useState } from 'react';\nimport { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';\nimport { encryptGuess, decryptResult } from '../lib/fhe';\nimport PotionGuesserABI from '../abi/PotionGuesserABI.json';\nimport { Button } from '@/components/ui/button';\nimport { Input } from '@/components/ui/input';\nimport { useToast } from '@/hooks/use-toast';\n\nconst CONTRACT_ADDRESS = 'your_deployed_address_here';\n\ninterface GuessFormProps {\n  fheInstance: any;\n}\n\nfunction GuessForm({ fheInstance }: GuessFormProps) {\n  const { isConnected } = useAccount();\n  const { toast } = useToast();\n  \n  const [userKeys, setUserKeys] = useState<any>(null);\n  const [guess, setGuess] = useState(0);\n  const [encryptedGuess, setEncryptedGuess] = useState<any>(null);\n  const [isEncrypting, setIsEncrypting] = useState(false);\n\n  // Generate user keypair on mount\n  useEffect(() => {\n    if (fheInstance) {\n      const keys = fheInstance.generateKeypair();\n      setUserKeys(keys);\n      console.log('User keypair generated');\n    }\n  }, [fheInstance]);\n\n  // Handle encryption\n  const handleEncrypt = async () => {\n    if (!fheInstance || !guess) return;\n    \n    setIsEncrypting(true);\n    try {\n      const encrypted = encryptGuess(fheInstance, guess);\n      setEncryptedGuess(encrypted);\n      toast({\n        title: \"Guess Encrypted\",\n        description: \"Your guess is now encrypted and ready to submit\"\n      });\n    } catch (error) {\n      console.error('Encryption failed:', error);\n      toast({\n        title: \"Encryption Failed\",\n        description: \"Please try again\",\n        variant: \"destructive\"\n      });\n    } finally {\n      setIsEncrypting(false);\n    }\n  };\n\n  // Prepare contract write\n  const { config } = usePrepareContractWrite({\n    address: CONTRACT_ADDRESS,\n    abi: PotionGuesserABI,\n    functionName: 'guess',\n    args: [\n      encryptedGuess,\n      '0x', // Attestation (empty for development)\n      userKeys?.publicKey\n    ],\n    enabled: !!encryptedGuess && !!userKeys\n  });\n\n  const { write, data, isSuccess, isLoading } = useContractWrite(config);\n\n  // Handle successful transaction and decrypt result\n  useEffect(() => {\n    if (isSuccess && data && userKeys) {\n      const reencrypted = data; // Response from contract\n      try {\n        const result = decryptResult(\n          fheInstance,\n          CONTRACT_ADDRESS,\n          reencrypted,\n          userKeys.privateKey\n        );\n        \n        toast({\n          title: result ? \"Correct!\" : \"Wrong!\",\n          description: result \n            ? \"You guessed the potion strength correctly!\" \n            : \"Try again with a different guess\"\n        });\n        \n        // Reset form\n        setEncryptedGuess(null);\n        setGuess(0);\n      } catch (error) {\n        console.error('Decryption failed:', error);\n      }\n    }\n  }, [isSuccess, data, userKeys, fheInstance]);\n\n  if (!isConnected) {\n    return (\n      <div className=\"text-center\">\n        <p>Please connect your wallet to play</p>\n      </div>\n    );\n  }\n\n  return (\n    <div className=\"space-y-4\">\n      <div>\n        <label className=\"block mb-2\">Enter your guess (0-255):</label>\n        <Input\n          type=\"number\"\n          min=\"0\"\n          max=\"255\"\n          value={guess}\n          onChange={(e) => setGuess(parseInt(e.target.value) || 0)}\n          disabled={isEncrypting || isLoading}\n        />\n      </div>\n      \n      <div className=\"flex gap-2\">\n        <Button \n          onClick={handleEncrypt}\n          disabled={!guess || isEncrypting || !!encryptedGuess}\n        >\n          {isEncrypting ? 'Encrypting...' : 'Encrypt Guess'}\n        </Button>\n        \n        <Button\n          onClick={() => write?.()}\n          disabled={!encryptedGuess || isLoading}\n          variant=\"default\"\n        >\n          {isLoading ? 'Submitting...' : 'Submit Guess'}\n        </Button>\n      </div>\n      \n      {encryptedGuess && (\n        <p className=\"text-sm text-muted-foreground\">\n          ✓ Guess encrypted and ready to submit\n        </p>\n      )}\n    </div>\n  );\n}\n\nexport default GuessForm;"
+          "title": "App Component with FHE Initialization",
+          "code": "const App = () => {\n  const [fheReady, setFheReady] = useState(false);\n\n  useEffect(() => {\n    initializeFHE()\n      .then(() => {\n        console.log(\"FHE initialized successfully\");\n        setFheReady(true);\n      })\n      .catch((err) => {\n        console.error(\"Failed to initialize FHE:\", err);\n      });\n  }, []);\n\n  if (!fheReady) {\n    return (\n      <div className=\"min-h-screen bg-background flex items-center justify-center\">\n        <div className=\"text-center\">\n          <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-magic-purple mx-auto mb-4\"></div>\n          <p className=\"text-muted-foreground\">Initializing encryption...</p>\n        </div>\n      </div>\n    );\n  }\n\n  return (/* ... rest of your app UI */);\n};"
+        },
+        {
+          "type": "note",
+          "icon": "hourglass",
+          "title": "Why the Loading Screen?",
+          "content": "If users try to encrypt data before the SDK is ready, they'll get 'relayer not initialized' errors. The loading screen prevents this by blocking the UI until `fheReady` is true. The spinning animation and message provide feedback during the 2-3 second initialization. Once loaded, all FHE operations work immediately."
+        },
+        {
+          "type": "tip",
+          "icon": "check-circle",
+          "title": "Testing Initialization",
+          "content": "After implementing this, refresh your app. You should see the loading screen briefly, then the main UI appears. Check the browser console - you should see 'FHE initialized successfully'. If initialization fails, check your network connection (the SDK needs to load WASM modules from a CDN)."
+        },
+        {
+          "type": "subheader",
+          "text": "Part 2: Client-Side Encryption"
+        },
+        {
+          "type": "text",
+          "content": "Now let's encrypt user input! When a user selects 5 potions and clicks 'Brew', we need to encrypt those values locally before sending them to the blockchain. This ensures no plaintext ever leaves the browser."
+        },
+        {
+          "type": "text",
+          "content": "**File: `src/lib/fhe.ts` - Encryption Function**"
+        },
+        {
+          "type": "text",
+          "content": "Find the empty `encryptValue` function and implement it:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Encrypting Potion Ingredients",
+          "code": "export async function encryptValue(\n  contractAddress: string,\n  address: string,\n  plainDigits: number[]\n) {\n  if (!relayer) throw new Error(\"Relayer not initialized\");\n\n  const inputHandle = relayer.createEncryptedInput(contractAddress, address);\n  \n  for (const d of plainDigits) {\n    inputHandle.add8(d);\n  }\n  \n  const ciphertextBlob = await inputHandle.encrypt();\n  return ciphertextBlob;\n}"
+        },
+        {
+          "type": "note",
+          "icon": "lock",
+          "title": "How Encryption Works",
+          "content": "**createEncryptedInput()**: Creates a builder bound to your contract address and user's wallet. This context is cryptographically important. **add8()**: Adds each ingredient as an encrypted uint8 (range 0-255), matching your contract's `externalEuint8` parameters. Called 5 times for 5 ingredients. **encrypt()**: Performs the actual FHE encryption, returning an object with `handles` (encrypted ciphertext pointers) and `inputProof` (attestation proving validity)."
+        },
+        {
+          "type": "note",
+          "icon": "sparkles",
+          "title": "What's in the Ciphertext Blob?",
+          "content": "The returned object contains: **handles[]**: Array of 5 encrypted values (one per ingredient). Each is a unique ciphertext handle. **inputProof**: Cryptographic proof that these ciphertexts were properly generated and haven't been tampered with. Your contract will verify this proof via `FHE.fromExternal()` to prevent malicious inputs."
+        },
+        {
+          "type": "subheader",
+          "text": "Part 3: Submitting Encrypted Transactions"
+        },
+        {
+          "type": "text",
+          "content": "With encryption ready, let's implement the full transaction submission flow. This is the most complex function - it encrypts data, formats it for the contract, submits the transaction, waits for confirmation, and extracts the result from event logs."
+        },
+        {
+          "type": "text",
+          "content": "**File: `src/hooks/usePotionContract.ts` - submitPotion Function**"
+        },
+        {
+          "type": "text",
+          "content": "Find the `submitPotion` function with mock implementation and replace it entirely:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Complete Transaction Submission (Part 1)",
+          "code": "const submitPotion = useCallback(async (vaultCode: number[]) => {\n  if (!address || !walletClient || !publicClient) {\n    throw new Error(\"Wallet not connected\");\n  }\n  \n  try {\n    setIsLoading(true);\n\n    // STEP 1: Encrypt ingredients client-side\n    const encryptedVault = await encryptValue(\n      contractConfig.address,\n      address,\n      vaultCode\n    );\n\n    toast({\n      title: \"⚡ Encrypting potion...\",\n      description: \"Securing your brew with FHE encryption.\",\n    });\n\n    // STEP 2: Format encrypted handles as hex strings\n    const formatHandle = (handle: any): `0x${string}` => {\n      if (typeof handle === 'string') {\n        return handle.startsWith('0x') ? handle as `0x${string}` : `0x${handle}`;\n      }\n      const hexString = Array.from(new Uint8Array(handle))\n        .map(b => b.toString(16).padStart(2, '0'))\n        .join('');\n      return `0x${hexString}`;\n    };"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Complete Transaction Submission (Part 2)",
+          "code": "    // STEP 3: Submit transaction to blockchain\n    const hash = await walletClient.writeContract({\n      address: contractConfig.address,\n      abi: contractConfig.abi,\n      functionName: \"compute\",\n      args: [\n        formatHandle(encryptedVault.handles[0]),\n        formatHandle(encryptedVault.handles[1]),\n        formatHandle(encryptedVault.handles[2]),\n        formatHandle(encryptedVault.handles[3]),\n        formatHandle(encryptedVault.handles[4]),\n        formatHandle(encryptedVault.inputProof),\n      ],\n      account: address,\n    } as any);\n\n    toast({\n      title: \"📡 Transaction submitted\",\n      description: \"Waiting for confirmation...\",\n    });\n\n    // STEP 4: Wait for transaction to be mined\n    const receipt = await publicClient.waitForTransactionReceipt({ hash });"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Complete Transaction Submission (Part 3)",
+          "code": "    // STEP 5: Decode ComputeResult event from logs\n    let value: string | null = null;\n    \n    for (const log of receipt.logs ?? []) {\n      try {\n        const decoded: any = decodeEventLog({\n          abi: contractConfig.abi,\n          data: log.data,\n          topics: (log as any).topics,\n        });\n        \n        if (decoded.eventName === \"ComputeResult\") {\n          value = decoded.args.value;\n          break;\n        }\n      } catch {\n        continue;\n      }\n    }\n\n    if (value == null) {\n      throw new Error(\"ComputeResult not found in logs\");\n    }\n\n    // STEP 6: Decrypt result with user's private key\n    const provider = new ethers.BrowserProvider(walletClient.transport as any);\n    const signer = await provider.getSigner();\n\n    const decrypted = await requestUserDecryption(\n      contractConfig.address,\n      signer,\n      value\n    );\n\n    return { decrypted };"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Complete Transaction Submission (Part 4 - Error Handling)",
+          "code": "  } catch (err: any) {\n    const errorMsg = err.message || \"\";\n    if (errorMsg.includes(\"rejected\") || errorMsg.includes(\"denied\")) {\n      toast({\n        title: \"❌ Transaction Cancelled\",\n        description: \"You rejected the transaction.\",\n        variant: \"destructive\",\n      });\n    } else {\n      toast({\n        title: \"❌ Transaction Failed\",\n        description: \"Please try again.\",\n        variant: \"destructive\",\n      });\n    }\n    throw err;\n  } finally {\n    setIsLoading(false);\n  }\n}, [address, walletClient, publicClient, toast]);"
+        },
+        {
+          "type": "note",
+          "icon": "zap",
+          "title": "Breaking Down the Transaction Flow",
+          "content": "**Step 1**: Encrypt 5 ingredients using `encryptValue()` from Part 2. **Step 2**: Convert handles to hex format that Viem/contract expects. **Step 3**: Submit via `writeContract()` - MetaMask pops up for user approval. **Step 4**: Wait for blockchain confirmation (15-30 seconds). **Step 5**: Parse transaction logs to extract the encrypted result event. **Step 6**: Decrypt the result so user can see their score."
+        },
+        {
+          "type": "note",
+          "icon": "file-code",
+          "title": "Why Format Handles?",
+          "content": "The FHE SDK returns handles as various types (Uint8Array, strings, etc.). Your smart contract expects `bytes calldata` which Viem needs as hex strings with '0x' prefix. The `formatHandle` helper converts any format to proper hex. Without this, the contract would reject the transaction with 'invalid input' errors."
+        },
+        {
+          "type": "note",
+          "icon": "file-text",
+          "title": "Event Log Decoding Explained",
+          "content": "When your contract emits `ComputeResult(value)`, the encrypted result is buried in the transaction receipt's logs. We loop through all logs, decode each with your contract's ABI, and extract `value` when we find the ComputeResult event. This encrypted `euint16` handle is what we decrypt in Step 6. The try-catch is necessary because other contracts might emit logs in the same transaction."
+        },
+        {
+          "type": "tip",
+          "icon": "lightbulb",
+          "title": "Progressive User Feedback",
+          "content": "Notice the toast messages guide users through each step: '⚡ Encrypting' → '📡 Transaction submitted' → (waiting) → Success. This 15-30 second process feels transparent rather than frozen. Users know exactly what's happening, reducing anxiety and abandoned transactions."
+        },
+        {
+          "type": "subheader",
+          "text": "Part 4: Private Decryption with EIP-712 Signatures"
+        },
+        {
+          "type": "text",
+          "content": "The encrypted result from your contract can only be decrypted by you. This requires proving ownership through an EIP-712 signature. Let's implement the private decryption function that prompts users to sign and then decrypts their personal data."
+        },
+        {
+          "type": "text",
+          "content": "**File: `src/lib/fhe.ts` - Private Decryption**"
+        },
+        {
+          "type": "text",
+          "content": "Find the empty `requestUserDecryption` function and implement it:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "EIP-712 Signature-Based Decryption (Part 1)",
+          "code": "export async function requestUserDecryption(\n  contractAddress: string,\n  signer: Signer,\n  ciphertextHandle: string\n) {\n  if (!relayer) throw new Error(\"Relayer not initialized\");\n\n  // 1. Generate ephemeral keypair for this request\n  const keypair = relayer.generateKeypair();\n  \n  // 2. Setup decryption parameters\n  const handleContractPairs: HandleContractPair[] = [\n    { handle: ciphertextHandle, contractAddress }\n  ];\n  const startTimeStamp = Math.floor(Date.now() / 1000).toString();\n  const durationDays = \"10\";\n  const contractAddresses = [contractAddress];"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "EIP-712 Signature-Based Decryption (Part 2)",
+          "code": "  // 3. Create EIP-712 typed data structure\n  const eip712 = relayer.createEIP712(\n    keypair.publicKey,\n    contractAddresses,\n    startTimeStamp,\n    durationDays\n  );\n\n  // 4. Request user signature (MetaMask popup)\n  const signature = await signer.signTypedData(\n    eip712.domain,\n    { UserDecryptRequestVerification: eip712.types.UserDecryptRequestVerification },\n    eip712.message\n  );"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "EIP-712 Signature-Based Decryption (Part 3)",
+          "code": "  // 5. Decrypt with relayer using signature proof\n  const result = await relayer.userDecrypt(\n    handleContractPairs,\n    keypair.privateKey,\n    keypair.publicKey,\n    signature.replace(\"0x\", \"\"),\n    contractAddresses,\n    await signer.getAddress(),\n    startTimeStamp,\n    durationDays\n  );\n\n  return result[ciphertextHandle];\n}"
         },
         {
           "type": "note",
           "icon": "key",
-          "title": "Key Generation Per Session",
-          "content": "User keypairs are generated once per session when the component mounts. The private key stays in memory and is never sent anywhere, ensuring only the user can decrypt their results."
+          "title": "Understanding EIP-712 Signatures",
+          "content": "**What is EIP-712?** A standard for signing typed, structured data (not transactions). No gas cost. **Why sign?** The relayer needs cryptographic proof that YOU authorize decryption of YOUR encrypted data. Anyone can see the encrypted handle onchain, but only you can prove ownership to decrypt it. **What you're signing**: 'I (wallet address) authorize decryption of this ciphertext handle for 10 days using this public key.'"
         },
         {
-          "type": "tip",
+          "type": "note",
           "icon": "shield",
-          "title": "Attestation Parameter",
-          "content": "The attestation parameter ('0x' in development) would contain a proof in production environments. For testing on Sepolia, an empty bytes value works fine."
+          "title": "Security: How It Works",
+          "content": "**generateKeypair()**: Creates ephemeral keys (not your wallet keys) for this specific decryption request. **Signature verification**: The relayer checks: (1) Signature is valid for your wallet address, (2) You're authorized to decrypt this handle, (3) Request hasn't expired. Only then does it decrypt and return plaintext. Without valid signature, decryption fails - this is the cryptographic privacy guarantee."
         },
         {
-          "type": "subheader",
-          "text": "Understanding the Complete FHE Flow"
-        },
-        {
-          "type": "list",
-          "items": [
-            "**Step 1 - Initialize**: Load FHE instance with network parameters on app startup",
-            "**Step 2 - Generate Keys**: Create user keypair (public + private) for the session",
-            "**Step 3 - Encrypt**: User input is encrypted with network public key before leaving the browser",
-            "**Step 4 - Submit**: Encrypted data is sent to the smart contract along with user's public key",
-            "**Step 5 - Compute**: Contract performs homomorphic comparison on encrypted data",
-            "**Step 6 - Reencrypt**: Contract reencrypts result under user's public key",
-            "**Step 7 - Decrypt**: User decrypts the result client-side with their private key"
-          ]
-        },
-        {
-          "type": "subheader",
-          "text": "Common Pitfalls and Troubleshooting"
-        },
-        {
-          "type": "list",
-          "items": [
-            "**FHE Not Ready**: Always check if fheInstance exists before calling encryption functions",
-            "**Key Loss**: Keys are session-based - if user refreshes, they'll need new keys and can't decrypt old results",
-            "**Wrong Key Usage**: Use network public key for initial encryption, user public key for reencryption request",
-            "**Type Mismatches**: encrypt8 expects numbers 0-255; validate input ranges before encrypting"
-          ]
+          "type": "note",
+          "icon": "clock",
+          "title": "Duration Parameter",
+          "content": "`durationDays: '10'` means this authorization is valid for 10 days. After that, you'd need to sign again to decrypt the same data. This limits the window for potential key compromise. For this game, 10 days is plenty - results are immediate. Production apps might use shorter durations (hours) for sensitive data."
         },
         {
           "type": "tip",
-          "icon": "database",
-          "title": "Key Storage Best Practice",
-          "content": "Never store private keys in localStorage (persists across sessions). Use in-memory state or sessionStorage at most. Private keys should be ephemeral and session-specific."
+          "icon": "user-check",
+          "title": "User Experience",
+          "content": "When this function runs, MetaMask shows a signature popup (not a transaction popup). Users see the structured data they're signing. Make sure your app UI explains: 'Sign to decrypt your score (no gas fee)'. First-time users might be confused since it looks different from transaction approvals."
         },
         {
           "type": "subheader",
-          "text": "Testing the Complete Flow"
+          "text": "Part 5: Public Decryption for Leaderboards"
         },
         {
           "type": "text",
-          "content": "To test your implementation:"
+          "content": "While personal scores require signatures, leaderboard scores are marked as publicly decryptable by your contract. Anyone can request decryption of these values without signing. Let's implement the public decryption function."
+        },
+        {
+          "type": "text",
+          "content": "**File: `src/lib/fhe.ts` - Public Decryption**"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Public Decryption Function",
+          "code": "export async function fetchPublicDecryption(handles: string[]): Promise<any> {\n  if (!relayer) throw new Error(\"Relayer not initialized\");\n  return relayer.publicDecrypt(handles);\n}"
+        },
+        {
+          "type": "note",
+          "icon": "users",
+          "title": "Public vs Private Decryption",
+          "content": "**publicDecrypt()**: No signature required because the contract called `FHE.makePubliclyDecryptable()` on these handles. The relayer knows these are public and allows anyone to decrypt them. **Use case**: Leaderboard best scores need transparency for competition. **Privacy preserved**: Individual potion ingredients and attempt scores remain private (require signature). Only the best scores become public."
+        },
+        {
+          "type": "text",
+          "content": "**Update Leaderboard Fetching (`src/hooks/usePotionContract.ts`)**"
+        },
+        {
+          "type": "text",
+          "content": "Now that we have public decryption, update your `fetchLeaderboard` function to decrypt the scores:"
+        },
+        {
+          "type": "code",
+          "language": "typescript",
+          "title": "Complete Leaderboard with Decryption",
+          "code": "const fetchLeaderboard = useCallback(async () => {\n  if (!publicClient) return [];\n  \n  try {\n    setIsLoading(true);\n\n    const result = await publicClient.readContract({\n      address: contractConfig.address,\n      abi: contractConfig.abi,\n      functionName: \"getAllHighestGuesses\",\n      args: [],\n    } as any);\n\n    const [players, guesses] = result as [string[], string[]];\n\n    if (guesses.length === 0) return [];\n\n    // Decrypt the encrypted scores publicly\n    const decryptedMap = await fetchPublicDecryption(guesses);\n    \n    // Map players to their decrypted scores\n    return players.map((player, idx) => ({\n      player,\n      guess: Number(decryptedMap[guesses[idx]]),\n    }));\n  } catch (err: any) {\n    console.error(\"Error fetching leaderboard:\", err);\n    toast({\n      title: \"Failed to load leaderboard\",\n      description: \"Unable to fetch leaderboard data.\",\n      variant: \"destructive\",\n    });\n    return [];\n  } finally {\n    setIsLoading(false);\n  }\n}, [publicClient, toast]);"
+        },
+        {
+          "type": "note",
+          "icon": "book-open",
+          "title": "How This Works",
+          "content": "`fetchPublicDecryption(guesses)` takes an array of encrypted handles and returns a map: `{ '0x123...': 450, '0x456...': 720 }`. We use this map to convert each encrypted handle to its plaintext number. `Number()` converts the decrypted value to a JavaScript number for display. The leaderboard now shows actual scores instead of encrypted handles!"
+        },
+        {
+          "type": "tip",
+          "icon": "check-circle",
+          "title": "Testing Leaderboard Decryption",
+          "content": "After implementing this, your leaderboard should display actual numbers! If you haven't played yet, submit a potion brew first. Wait for the transaction to confirm, then refresh the leaderboard. You should see your wallet address and your best score in plaintext. If you see '[object Object]' or encrypted strings, check that you're calling `Number()` on the decrypted value."
+        },
+        {
+          "type": "subheader",
+          "text": "Complete Testing Checklist"
+        },
+        {
+          "type": "text",
+          "content": "Time to test your complete encrypted dApp! Follow this comprehensive checklist:"
         },
         {
           "type": "list",
           "items": [
-            "**Connect Wallet**: Use MetaMask on Sepolia testnet",
-            "**Wait for Init**: Ensure 'FHE initialized successfully' appears in console",
-            "**Enter Guess**: Input a number between 0-255",
-            "**Encrypt**: Click encrypt button and verify encryption success toast",
-            "**Submit**: Click submit and approve the MetaMask transaction",
-            "**View Result**: After tx confirms, see the decrypted result (correct/wrong)"
+            "**✅ FHE Initialization**: App shows loading screen briefly, then loads. Console logs 'FHE initialized successfully'.",
+            "**✅ Wallet Connection**: Connect MetaMask, see formatted address and balance.",
+            "**✅ Leaderboard Loading**: Leaderboard displays (may be empty) with no console errors.",
+            "**✅ Potion Selection**: Click 5 potion bottles, 'Brew Potion' button enables.",
+            "**✅ Encryption Toast**: Click 'Brew Potion', see '⚡ Encrypting potion...' toast.",
+            "**✅ Transaction Approval**: MetaMask pops up requesting transaction approval.",
+            "**✅ Transaction Submission**: After approval, see '📡 Transaction submitted' toast.",
+            "**✅ Signature Request**: MetaMask pops up requesting signature (EIP-712, not transaction).",
+            "**✅ Result Display**: After confirmation, see your decrypted score with success message.",
+            "**✅ Leaderboard Update**: Refresh leaderboard, see your address and score in plaintext.",
+            "**✅ Cancellation Handling**: Try brewing but reject transaction - see cancellation message, no errors.",
+            "**✅ Signature Cancellation**: Approve transaction but reject signature - handled gracefully."
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "bug",
+          "title": "Common Issues & Solutions",
+          "content": "**'Relayer not initialized'**: Refresh page, ensure loading screen completes. **'Invalid handle format'**: Check `formatHandle` function is implemented correctly. **'Signature verification failed'**: Try disconnecting/reconnecting wallet, clear MetaMask cache. **Leaderboard shows '[object Object]'**: Ensure you're calling `Number()` on decrypted values. **Transaction succeeds but no result**: Check event name matches exactly: 'ComputeResult'."
+        },
+        {
+          "type": "subheader",
+          "text": "Understanding the Complete Flow"
+        },
+        {
+          "type": "text",
+          "content": "Let's trace a complete user journey through your encrypted dApp:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**1. App Load**: FHE SDK initializes (2-3s), loads cryptographic libraries, configures relayer.",
+            "**2. Wallet Connect**: User connects MetaMask, app displays address/balance via Wagmi hooks.",
+            "**3. View Leaderboard**: App calls `getAllHighestGuesses` → Gets encrypted handles → Publicly decrypts → Displays scores.",
+            "**4. Select Potions**: User clicks 5 bottles, state updates, button enables.",
+            "**5. Encryption**: `encryptValue` encrypts 5 numbers locally → Returns handles + proof.",
+            "**6. Transaction**: `writeContract` sends encrypted data to blockchain → MetaMask approval → Transaction hash.",
+            "**7. Confirmation**: Wait for mining → Parse logs → Extract encrypted result handle.",
+            "**8. Private Decryption**: Generate keypair → Create EIP-712 → User signs → Relayer decrypts → Return plaintext.",
+            "**9. Display**: Show score to user, update leaderboard.",
+            "**10. Privacy Achieved**: Ingredients never left browser unencrypted. Blockchain never saw plaintext. Only user decrypted their result."
           ]
         },
         {
           "type": "note",
-          "icon": "check-circle",
-          "title": "Privacy Verified",
-          "content": "Check the transaction on Etherscan - you'll see encrypted bytes, not the actual guess or result. The blockchain is blind to the plaintext values!"
+          "icon": "sparkles",
+          "title": "The Privacy Guarantee",
+          "content": "At no point in this flow does anyone except the user see the plaintext ingredient values or attempt scores. The blockchain stores only ciphertexts. Validators process encrypted transactions. Block explorers show encrypted data. Only authorized decryption (with signature) reveals plaintext. Best scores become public only after being marked as such by the contract. This is cryptographically enforced privacy on a public blockchain!"
+        },
+        {
+          "type": "subheader",
+          "text": "Real-World Applications of FHE"
+        },
+        {
+          "type": "text",
+          "content": "The patterns you've learned extend far beyond games. Here are production use cases:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Private Voting**: Encrypted votes, homomorphic tallying, public results without revealing individual choices.",
+            "**Sealed-Bid Auctions**: Bids stay encrypted during auction, only winner revealed after closing.",
+            "**Confidential DeFi**: Trading with encrypted balances/amounts, protecting position sizes from MEV.",
+            "**Healthcare Records**: Encrypted medical data onchain, selective disclosure to authorized providers.",
+            "**Supply Chain**: Proprietary quantities/prices encrypted, revealed only to parties in transaction.",
+            "**Credit Scoring**: Encrypted financial data processed for scores without exposing underlying info.",
+            "**Private DAOs**: Encrypted proposal details until voting completes, preventing manipulation.",
+            "**Payroll Systems**: Encrypted salary data, individuals decrypt their own, aggregate statistics public."
+          ]
+        },
+        {
+          "type": "note",
+          "icon": "trending-up",
+          "title": "Why FHE Matters",
+          "content": "Traditional blockchain forces a choice: transparency OR privacy. FHE breaks this tradeoff. You get: (1) Verifiable computation (blockchain guarantees), (2) Data privacy (encryption), (3) Selective disclosure (choose what to reveal), (4) Trustless operation (no trusted third party). This enables entirely new categories of blockchain applications impossible with public ledgers."
+        },
+        {
+          "type": "subheader",
+          "text": "Performance Considerations & Optimization"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Gas Costs**: FHE operations are expensive (10-100x normal operations). Use smallest encrypted types possible (`euint8` vs `euint32`).",
+            "**Initialization Time**: SDK loads WASM (~2-3s). Show loading screens, don't block user interactions unnecessarily.",
+            "**Encryption Speed**: Client-side encryption is fast (<1s for 5 values). Parallelize if encrypting many values.",
+            "**Decryption Latency**: Relayer requests take 2-5s. Show progress indicators, don't assume instant responses.",
+            "**Transaction Confirmation**: Encrypted transactions still follow normal block times (15-30s on Sepolia).",
+            "**Batch Operations**: If submitting multiple potions, consider batching contract calls to save gas.",
+            "**Caching**: Cache public decryptions - they don't change. Don't re-decrypt leaderboard on every view.",
+            "**Error Retry**: Network issues are common in Web3. Implement exponential backoff for failed requests."
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "zap",
+          "title": "Production Optimization Tips",
+          "content": "**Lazy load FHE SDK**: Initialize only when user clicks 'Brew' first time (not on app load) if most users just view leaderboard. **Service worker**: Cache WASM modules for instant subsequent loads. **Optimistic UI**: Show 'submitting' state immediately, update after confirmation. **Request batching**: If decrypting many leaderboard entries, batch them into single relayer request."
+        },
+        {
+          "type": "subheader",
+          "text": "Next Steps & Advanced Topics"
+        },
+        {
+          "type": "text",
+          "content": "You've built a complete privacy-preserving dApp! Here are directions to expand your skills:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Add More FHE Operations**: Experiment with `FHE.min`, `FHE.max`, `FHE.div` in your contract for different game mechanics.",
+            "**Implement Time-Based Reveals**: Use block timestamps to auto-reveal scores after a delay.",
+            "**Build Multiplayer Features**: Add encrypted head-to-head comparisons without revealing individual scores.",
+            "**Add Access Control**: Implement role-based decryption permissions (admin can see all scores).",
+            "**Create Leaderboard Filters**: Sort by score, filter by date, search by player.",
+            "**Deploy to Mainnet**: When Zama launches mainnet, migrate with real economic value.",
+            "**Build Analytics Dashboard**: Aggregate public data for insights (total games, average scores, etc.).",
+            "**Add Social Features**: Share achievements, challenge friends, create tournaments."
+          ]
+        },
+        {
+          "type": "tip",
+          "icon": "book-open",
+          "title": "Continue Learning",
+          "content": "**Zama Documentation**: Deep dive into advanced FHE operations and optimization techniques. **EIP-712 Spec**: Understand structured data signing for custom authorization flows. **Viem Advanced**: Learn about contract events, multicall, and batch operations. **Web3 Security**: Study common vulnerabilities (reentrancy, access control, oracle attacks). **Gas Optimization**: Techniques for reducing transaction costs in production."
+        },
+        {
+          "type": "subheader",
+          "text": "Congratulations!"
+        },
+        {
+          "type": "text",
+          "content": "You've mastered building privacy-preserving Web3 applications with Fully Homomorphic Encryption! You can now:"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Deploy FHE-enabled smart contracts to Sepolia testnet",
+            "Initialize and configure the Zama FHE SDK in React applications",
+            "Encrypt sensitive data client-side before blockchain submission",
+            "Submit and confirm encrypted transactions with proper error handling",
+            "Implement EIP-712 signature-based private decryption",
+            "Decrypt public data for leaderboards and shared information",
+            "Build production-ready user experiences with loading states and feedback",
+            "Understand the complete encrypted data lifecycle from input to output"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "This technology is cutting-edge - you're among the first developers building truly private blockchain applications. The patterns you've learned here apply to countless real-world use cases where privacy is paramount. Keep experimenting, keep building, and help shape the future of confidential smart contracts!"
+        },
+        {
+          "type": "note",
+          "icon": "sparkles",
+          "title": "You're a Privacy Pioneer",
+          "content": "FHE on blockchain is nascent technology. By building this dApp, you've gained expertise that few developers have. The Web3 industry desperately needs privacy solutions for mass adoption. You now have the skills to build them. Consider contributing to open source FHE projects, writing tutorials, or building production applications. The future of private smart contracts starts with pioneers like you!"
         }
       ],
       "resources": [
         {
-          "title": "fhevmjs Documentation",
-          "url": "https://docs.zama.ai/fhevm/guides/frontend"
+          "title": "Zama Docs",
+          "url": "https://docs.zama.ai/"
         },
         {
-          "title": "fhevmjs GitHub Repository",
-          "url": "https://github.com/zama-ai/fhevmjs"
+          "title": "EIP-712 Specification",
+          "url": "https://eips.ethereum.org/EIPS/eip-712"
         },
         {
-          "title": "Zama Key Management Guide",
-          "url": "https://docs.zama.ai/fhevm/guides/keys"
+          "title": "Web3 Security Best Practices",
+          "url": "https://ethereum.org/en/developers/docs/security/"
         },
         {
-          "title": "React Context API",
-          "url": "https://react.dev/reference/react/useContext"
+          "title": "Sepolia Etherscan",
+          "url": "https://sepolia.etherscan.io/"
         }
       ]
     },
@@ -1345,7 +1824,7 @@
       "id": 9,
       "title": "Reflecting on the Brew",
       "subtitle": "Recap, Achievements, and Lessons Learned",
-      "description": "Well done, master brewers – your confidential potion is bubbling! Let's pause to reflect on the journey through our Private Potion Guesser dApp. This section recaps the full process in clear steps, celebrates your key achievements, and distills the core lessons on fhEVM's privacy magic. Think of it as tasting your elixir: Savor what you've created, note the flavors (learnings), and ponder how to refine future brews.",
+      "description": "Well done, master brewers – your confidential potion is bubbling! Let's pause to reflect on the journey through our Private Potion Brewer dApp. This section recaps the full process in clear steps, celebrates your key achievements, and distills the core lessons on fhEVM's privacy magic. Think of it as tasting your elixir: Savor what you've created, note the flavors (learnings), and ponder how to refine future brews.",
       "learningObjectives": [
         "Recap the end-to-end dApp development process, from FHE basics to frontend integration",
         "Recognize your achievements in building a privacy-focused application",
@@ -1364,10 +1843,10 @@
           "type": "list",
           "items": [
             "**FHE and fhEVM Foundations (Sections 1-2)**: We unveiled FHE's principles – computing on encrypted data without decryption – and explored fhEVM as Zama's EVM extension for onchain privacy. You learned crypto basics (keys, TFHE scheme), data types (euint8, ebool), and operations (add, eq) with examples.",
-            "**Project Setup and Tools (Sections 3-5)**: We outlined the dApp (private guessing game), gathered tools (Hardhat, React, fhevmjs, Wagmi), cloned the boilerplate repo, and configured environments – adding Sepolia to MetaMask, funding with faucets, and setting .env vars for secure deploys.",
-            "**Contract Crafting (Section 6)**: Built Potion.sol with encrypted target storage and private comparisons using TFHE.eq and reencrypt, testing via Hardhat to verify privacy.",
+            "**Project Setup and Tools (Sections 3-5)**: We outlined the dApp (private brewing game), gathered tools (Hardhat, React, relayer-sdk, Wagmi), cloned the boilerplate repo, and configured environments – adding Sepolia to MetaMask, funding with faucets, and setting env vars for secure deploys.",
+            "**Contract Crafting (Section 6)**: Built PotionBrew.sol with encrypted target storage and private comparisons using TFHE.eq, testing via Hardhat to verify privacy.",
             "**Deployment and Integration (Section 7)**: Deployed to Sepolia with scripts/deploy.ts, added ABI to frontend, and integrated Wagmi/RainbowKit in App.tsx for wallet connects and contract writes.",
-            "**Encryption Magic (Section 8)**: Added fhevmjs in lib/fhe.ts for init/encrypt/decrypt, generating user keys and handling client-side privacy in GuessForm.tsx."
+            "**Encryption Magic (Section 8)**: Added relayer-sdk in lib/fhe.ts for init/encrypt/decrypt and handling client-side privacy "
           ]
         },
         {
@@ -1388,9 +1867,9 @@
           "type": "list",
           "items": [
             "**Built a Confidential dApp from Scratch**: Deployed a privacy-preserving guessing game, demonstrating the encrypt-compute-decrypt workflow end-to-end",
-            "**Integrated Key Tools Seamlessly**: Combined Hardhat for backend, React/Next.js for UI, Wagmi for interactions, and fhevmjs for FHE – a full-stack Web3 skillset",
+            "**Integrated Key Tools Seamlessly**: Combined Hardhat for backend, React/Next.js for UI, Wagmi for interactions, and relayer sdk for FHE – a full-stack Web3 skillset",
             "**Ensured True Privacy**: No data leaks; everything stays encrypted onchain, with offchain decryption for users only",
-            "**Tested and Optimized**: Used Hardhat tests to validate logic, aware of gas costs and optimizations like small euint types"
+            "**Tested and Optimized**: Used Hardhat tests to validate logic, aware of gas costs and optimizations"
           ]
         },
         {
@@ -1407,7 +1886,6 @@
           "type": "list",
           "items": [
             "**Privacy Without Compromise**: fhEVM solves Web3's transparency-privacy tension – computations are verifiable yet secret, ideal for DeFi, health data, or AI inference",
-            "**Challenges and Trade-offs**: FHE ops are gas-heavy (optimize with bounded logic, small types); key management is crucial (user keys for reencrypt prevent leaks)",
             "**Broader Impact**: This project shows FHE's potential in real dApps – e.g., sealed-bid auctions where bids compute privately, or machine learning on encrypted inputs",
             "**Best Practices**: Always test locally/Sepolia first; use .env for secrets; modularize with hooks for clean code"
           ]
@@ -1447,7 +1925,7 @@
             "**Full App Debug**: Simulate complete workflows locally with Hardhat node before testnet deployment",
             "**Log Encrypted Values**: Display encrypted values as hex strings for verification and debugging",
             "**Gas Estimation**: Use hardhat gas-reporter plugin to identify expensive operations",
-            "**Frontend Errors**: Check browser console for fhevmjs initialization and encryption errors",
+            "**Frontend Errors**: Check browser console for relayer sdk initialization and encryption errors",
             "**Contract Events**: Emit events for important state changes to track execution flow"
           ]
         },
@@ -1474,20 +1952,16 @@
       ],
       "resources": [
         {
-          "title": "Zama Use Cases",
-          "url": "https://www.zama.ai/use-cases"
+          "title": "Zama Protocol overview",
+          "url": "https://docs.zama.ai/protocol/examples"
         },
         {
-          "title": "fhEVM Advanced Tutorials",
-          "url": "https://docs.zama.ai/fhevm/tutorials"
+          "title": "Zama solidity guides",
+          "url": "https://docs.zama.ai/protocol/examples"
         },
         {
-          "title": "Privacy in Web3 Research",
-          "url": "https://docs.zama.ai/fhevm/fundamentals/why-privacy"
-        },
-        {
-          "title": "FHE Development Best Practices",
-          "url": "https://docs.zama.ai/fhevm/guides/best-practices"
+          "title": "Zama Examples",
+          "url": "https://docs.zama.ai/protocol/examples"
         }
       ]
     },
@@ -1532,7 +2006,7 @@
         },
         {
           "type": "text",
-          "content": "In packages/site, create .env.production with CONTRACT_ADDRESS (your deployed Potion.sol address). This ensures the live site points to the right contract."
+          "content": "In packages/site, create .env.production with CONTRACT_ADDRESS (your deployed PotionBrew.sol address). This ensures the live site points to the right contract."
         },
         {
           "type": "code",
@@ -1617,7 +2091,7 @@
           "type": "code",
           "language": "markdown",
           "title": "Sample README.md",
-          "code": "# Private Potion Guesser 🧪\n\nA privacy-preserving guessing game powered by fhEVM.\n\n## ✨ Features\n- Fully encrypted guesses and targets\n- Zero-knowledge gameplay\n- Interactive React UI with Wagmi\n- Deployed on Sepolia testnet\n\n## 🛠 Tech Stack\n- **Smart Contracts**: Solidity + fhEVM (Zama)\n- **Frontend**: React + Next.js\n- **Web3**: Wagmi + RainbowKit\n- **Encryption**: fhevmjs\n- **Testing**: Hardhat\n\n## 🚀 Live Demo\n[View Demo](https://your-app.vercel.app)\n\n## 📦 Setup\n1. Clone repo: `git clone ...`\n2. Install: `npm install`\n3. Configure .env with CONTRACT_ADDRESS\n4. Run: `npm run dev`\n\n## 🎮 How to Play\n1. Connect MetaMask (Sepolia)\n2. Enter your guess (0-255)\n3. Encrypt and submit\n4. Decrypt result privately!\n\n## 🔐 Privacy Guarantees\nAll guesses and comparisons happen on encrypted data. The blockchain never sees plaintext values – only you can decrypt your results!"
+          "code": "# Private Potion Guesser 🧪\n\nA privacy-preserving guessing game powered by fhEVM.\n\n## ✨ Features\n- Fully encrypted guesses and targets\n- Zero-knowledge gameplay\n- Interactive React UI with Wagmi\n- Deployed on Sepolia testnet\n\n## 🛠 Tech Stack\n- **Smart Contracts**: Solidity + fhEVM (Zama)\n- **Frontend**: React + Next.js\n- **Web3**: Wagmi + RainbowKit\n- **Encryption**: Zama relayer sdk\n- **Testing**: Hardhat\n\n## 🚀 Live Demo\n[View Demo](https://your-app.vercel.app)\n\n## 📦 Setup\n1. Clone repo: `git clone ...`\n2. Install: `npm install`\n3. Configure .env with CONTRACT_ADDRESS\n4. Run: `npm run dev`\n\n## 🎮 How to Play\n1. Connect MetaMask (Sepolia)\n2. Enter your guess (0-255)\n3. Encrypt and submit\n4. Decrypt result privately!\n\n## 🔐 Privacy Guarantees\nAll guesses and comparisons happen on encrypted data. The blockchain never sees plaintext values – only you can decrypt your results!"
         },
         {
           "type": "tip",
@@ -1782,336 +2256,6 @@
             "Compressing files magically"
           ],
           "correctAnswer": 1,
-          "explanation": "Homomorphic comes from Greek roots meaning 'same shape.' It's all about maintaining that same magical structure—operations on ciphertexts mirror those on plaintexts!"
-        },
-        {
-          "id": 2,
-          "type": "fill-blank",
-          "question": "FHE allows _____ on ciphertexts without ever needing to decrypt during the process.",
-          "correctAnswer": "computations",
-          "explanation": "The core magic of FHE is performing computations (or operations/calculations) directly on encrypted data without decryption. Accepted answers: computations, operations, or calculations."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "Arrange these steps in the correct FHE workflow order: (1) Perform operations (2) Encrypt data (3) Decrypt result (4) Get output. What is the correct sequence?",
-          "options": [
-            "1 → 2 → 3 → 4",
-            "2 → 1 → 3 → 4",
-            "2 → 3 → 1 → 4",
-            "4 → 2 → 1 → 3"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct FHE workflow is: First Encrypt plaintext data, then Perform homomorphic operations on the ciphertext, then Decrypt the result, and finally Get the final plaintext output."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "In the potion-brewing analogy, traditional encryption requires opening the _____ to mix ingredients, while FHE mixes blindly inside.",
-          "correctAnswer": "cauldron",
-          "explanation": "The key difference: Traditional encryption requires opening the cauldron (decrypting) to perform operations, creating a vulnerability. FHE keeps the cauldron sealed throughout the entire process."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "Which company is pioneering FHE integration into Ethereum smart contracts with fhEVM?",
-          "options": ["OpenZeppelin", "ConsenSys", "Zama", "Chainlink"],
-          "correctAnswer": 2,
-          "explanation": "Zama is the groundbreaking company behind fhEVM (Fully Homomorphic Ethereum Virtual Machine), bringing FHE to blockchain and enabling private computation in smart contracts."
-        }
-      ]
-    },
-    {
-      "sectionId": 6,
-      "questions": [
-        {
-          "id": 1,
-          "type": "fill-blank",
-          "question": "Import _____ for FHE operations in your Solidity contract.",
-          "correctAnswer": "fhevm/lib/TFHE.sol",
-          "explanation": "The TFHE library from fhevm provides all the encrypted types (like euint8) and operations (like eq, reencrypt) needed for FHE computations."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "Why use TFHE.reencrypt in the guess function?",
-          "options": [
-            "To decrypt the result onchain",
-            "To allow user-private decryption with their key",
-            "To store the result publicly",
-            "To save gas costs"
-          ],
-          "correctAnswer": 1,
-          "explanation": "TFHE.reencrypt reencrypts the result under the user's public key, allowing only them to decrypt it offchain with their private key. This maintains end-to-end privacy."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "In the private Potion contract, arrange these operations in correct order: (1) Compare encrypted values (2) Receive encrypted guess (3) Return reencrypted result. What is the correct sequence?",
-          "options": ["1 → 2 → 3", "2 → 1 → 3", "3 → 2 → 1", "2 → 3 → 1"],
-          "correctAnswer": 1,
-          "explanation": "The correct flow is: First receive the encrypted guess (2), then compare it with the target using TFHE.eq (1), finally return the reencrypted result (3)."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "What is euint8 used for in the Potion contract?",
-          "correctAnswer": "encrypted integers",
-          "explanation": "euint8 represents encrypted 8-bit unsigned integers. It allows the contract to store and compute on encrypted values (0-255) while maintaining privacy. Accepted answers: encrypted integers, encrypted numbers, or encrypted values."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "What is the main privacy flaw in the PlainPotion contract?",
-          "options": [
-            "It uses too much gas",
-            "The target and guesses are visible on the blockchain",
-            "It doesn't have a constructor",
-            "It uses old Solidity syntax"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The PlainPotion contract stores the target and processes guesses in plaintext, making all values visible to anyone scanning the blockchain. This completely defeats the privacy requirement of our guessing game."
-        }
-      ]
-    },
-    {
-      "sectionId": 7,
-      "questions": [
-        {
-          "id": 1,
-          "type": "fill-blank",
-          "question": "The contract's _____ defines function signatures for frontend interactions.",
-          "correctAnswer": "ABI",
-          "explanation": "ABI (Application Binary Interface) defines the contract's function signatures, allowing the frontend to call contract methods correctly."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "What command deploys the contract to Sepolia?",
-          "options": [
-            "npx hardhat deploy",
-            "npx hardhat run scripts/deploy.ts --network sepolia",
-            "npm run deploy-sepolia",
-            "hardhat deploy --sepolia"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct command is 'npx hardhat run scripts/deploy.ts --network sepolia', which executes the deployment script on the Sepolia testnet."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "In the provider hierarchy, which order is correct?",
-          "options": [
-            "RainbowKit → Wagmi → QueryClient",
-            "QueryClient → RainbowKit → Wagmi",
-            "Wagmi → QueryClient → RainbowKit",
-            "Wagmi → RainbowKit → QueryClient"
-          ],
-          "correctAnswer": 2,
-          "explanation": "WagmiProvider wraps QueryClientProvider, which wraps RainbowKitProvider. This order ensures proper context propagation."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "Wagmi uses _____ hooks to interact with smart contracts.",
-          "correctAnswer": "useContractWrite",
-          "explanation": "useContractWrite (and usePrepareContractWrite) are Wagmi hooks that enable writing to smart contracts. Accepted answers: useContractWrite, React hooks, or Wagmi hooks."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "Why verify the contract on Etherscan?",
-          "options": [
-            "It's required for deployment",
-            "It makes the code publicly viewable and trustworthy",
-            "It reduces gas costs",
-            "It improves contract performance"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Verification makes your contract's source code publicly viewable on Etherscan, building trust and transparency in your dApp."
-        }
-      ]
-    },
-    {
-      "sectionId": 8,
-      "questions": [
-        {
-          "id": 1,
-          "type": "fill-blank",
-          "question": "The fhevmjs function _____ encrypts values as 8-bit unsigned integers.",
-          "correctAnswer": "encrypt8",
-          "explanation": "encrypt8 is the fhevmjs function that encrypts values in the range 0-255 as 8-bit unsigned integers (euint8)."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "Why generate user keypairs on the client side?",
-          "options": [
-            "To save gas costs",
-            "To ensure only the user can decrypt their results",
-            "To speed up encryption",
-            "To reduce server load"
-          ],
-          "correctAnswer": 1,
-          "explanation": "User keypairs ensure that only the user who made the guess can decrypt the result using their private key, maintaining end-to-end privacy."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "Arrange the FHE flow steps: (1) Decrypt result (2) Encrypt guess (3) Generate keys (4) Contract computes. What is the correct sequence?",
-          "options": [
-            "1 → 2 → 3 → 4",
-            "3 → 2 → 4 → 1",
-            "2 → 3 → 4 → 1",
-            "3 → 4 → 2 → 1"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct flow is: Generate keys (3), Encrypt guess (2), Contract computes (4), Decrypt result (1). Keys must be generated first, then data is encrypted, processed, and finally decrypted."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "Private keys should be stored in _____ to maintain security.",
-          "correctAnswer": "memory",
-          "explanation": "Private keys should stay in memory (React state) or sessionStorage at most, never in localStorage. They should be ephemeral and session-specific. Accepted answers: memory, state, or sessionStorage."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "What does the attestation parameter do?",
-          "options": [
-            "It encrypts the guess",
-            "It provides a proof in production (empty in development)",
-            "It stores the user's address",
-            "It verifies the contract"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The attestation parameter would contain a cryptographic proof in production environments. For testing on Sepolia, an empty bytes value ('0x') works fine."
-        }
-      ]
-    },
-    {
-      "sectionId": 9,
-      "questions": [
-        {
-          "id": 1,
-          "type": "mcq",
-          "question": "The core FHE workflow is: Encrypt, _____, Decrypt",
-          "options": ["Deploy", "Compute", "Test", "Share"],
-          "correctAnswer": 1,
-          "explanation": "The FHE workflow is Encrypt → Compute → Decrypt. Data is encrypted, computations happen on ciphertexts, then results are decrypted."
-        },
-        {
-          "id": 2,
-          "type": "fill-blank",
-          "question": "Achievement: Built a _____ dApp with fhEVM.",
-          "correctAnswer": "privacy-preserving",
-          "explanation": "You built a privacy-preserving (or confidential) dApp that keeps all sensitive data encrypted. Accepted answers: privacy-preserving, confidential, or private."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "Arrange these tutorial sections: (1) Encryption Magic (2) Foundations (3) Contract Crafting. What is the correct order?",
-          "options": ["1 → 2 → 3", "2 → 3 → 1", "3 → 1 → 2", "2 → 1 → 3"],
-          "correctAnswer": 1,
-          "explanation": "The correct order is: Foundations (sections 1-2), Contract Crafting (section 6), Encryption Magic (section 8)."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "Key lesson: FHE ops are _____, so optimize with small types.",
-          "correctAnswer": "gas-intensive",
-          "explanation": "FHE operations are gas-intensive (or gas-heavy/expensive) compared to regular operations. Using smaller encrypted types like euint8 helps optimize costs. Accepted answers: gas-intensive, gas-heavy, or expensive."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "Which real-world application is enabled by FHE?",
-          "options": [
-            "Public transaction logs",
-            "Sealed-bid auctions with private bids",
-            "Unencrypted data storage",
-            "Standard token transfers"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Sealed-bid auctions are a perfect FHE use case – bids remain encrypted and private until the reveal phase, preventing manipulation."
-        }
-      ]
-    },
-    {
-      "sectionId": 10,
-      "questions": [
-        {
-          "id": 1,
-          "type": "mcq",
-          "question": "Does Vercel host smart contracts?",
-          "options": [
-            "Yes, it hosts everything",
-            "No, frontend only",
-            "Only Solidity files",
-            "Yes, but only testnet contracts"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Vercel hosts frontends only (React, Next.js apps). Smart contracts are deployed separately to blockchains like Sepolia via Hardhat."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "What is a key fhEVM advantage?",
-          "options": [
-            "Public onchain computations",
-            "Confidential onchain computations",
-            "Slower transaction speeds",
-            "Higher gas costs only"
-          ],
-          "correctAnswer": 1,
-          "explanation": "fhEVM's key advantage is enabling confidential computations directly onchain without revealing data, maintaining privacy while using blockchain."
-        },
-        {
-          "id": 3,
-          "type": "fill-blank",
-          "question": "Deploy command: vercel --_____",
-          "correctAnswer": "prod",
-          "explanation": "The command 'vercel --prod' deploys your application to production. Without --prod, it creates a preview deployment."
-        },
-        {
-          "id": 4,
-          "type": "mcq",
-          "question": "Which extension idea uses TFHE comparisons?",
-          "options": [
-            "NFT minting",
-            "Adding private hints with gt/lt",
-            "Changing UI colors",
-            "Social media integration"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Adding private hints using TFHE.gt (greater than) and TFHE.lt (less than) operations would provide encrypted 'too high/low' feedback without revealing the target."
-        },
-        {
-          "id": 5,
-          "type": "fill-blank",
-          "question": "Share your work with hashtag _____",
-          "correctAnswer": "#fhEVM",
-          "explanation": "Using #fhEVM (along with #ZamaAI) helps your project reach the privacy-focused Web3 community. Accepted answers: #fhEVM, #ZamaAI, or #Web3Privacy."
-        }
-      ]
-    }
-  ],
-  "quizzes": [
-    {
-      "sectionId": 1,
-      "questions": [
-        {
-          "id": 1,
-          "type": "mcq",
-          "question": "What does 'homomorphic' mean in the context of FHE?",
-          "options": [
-            "Computing on decrypted data",
-            "Preserving operations between plaintext and ciphertext",
-            "Randomizing data for security",
-            "Compressing files magically"
-          ],
-          "correctAnswer": 1,
           "explanation": "Homomorphic comes from Greek meaning 'same shape.' It means operations on ciphertexts mirror those on plaintexts, preserving the structure of computations."
         },
         {
@@ -2165,9 +2309,9 @@
           "id": 1,
           "type": "mcq",
           "question": "What tool is used for frontend encryption in fhEVM?",
-          "options": ["Hardhat", "fhevmjs", "MetaMask", "Wagmi"],
+          "options": ["Hardhat", "Relayer sdk", "MetaMask", "Wagmi"],
           "correctAnswer": 1,
-          "explanation": "fhevmjs is the JavaScript library for client-side encryption and decryption in fhEVM applications."
+          "explanation": "Zama relayer sdk is the JavaScript library for client-side encryption and decryption in fhEVM applications."
         },
         {
           "id": 2,
@@ -2303,9 +2447,9 @@
         {
           "id": 1,
           "type": "fill-blank",
-          "question": "Command to compile Hardhat contracts: npx hardhat _____",
-          "correctAnswer": "compile",
-          "explanation": "The 'npx hardhat compile' command builds your Solidity contracts, including TFHE imports, generating artifacts for deployment."
+          "question": "Command to deploy Hardhat contracts: npx hardhat _____",
+          "correctAnswer": "deploy",
+          "explanation": "The 'npx hardhat deploy' command builds your Solidity contracts, and then deploys them"
         },
         {
           "id": 2,
@@ -2313,38 +2457,32 @@
           "question": "What stores sensitive data like MNEMONIC and API keys?",
           "options": [
             "hardhat.config.ts",
-            ".env file or hardhat vars",
+            "hardhat vars",
             "package.json",
             "Public GitHub repo"
           ],
           "correctAnswer": 1,
-          "explanation": "Environment variables should be stored in a .env file or using 'npx hardhat vars set' for security. Never commit secrets to version control!"
+          "explanation": "Environment variables should be stored using 'npx hardhat vars set' for security. Never commit secrets to version control!"
         },
         {
           "id": 3,
-          "type": "mcq",
-          "question": "What is the default RPC URL for Hardhat's local node?",
-          "options": [
-            "http://localhost:3000",
-            "http://127.0.0.1:8545",
-            "http://localhost:8080",
-            "http://127.0.0.1:3000"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Hardhat's local node runs at http://127.0.0.1:8545 (Chain ID: 31337) by default, providing a fast testing environment with unlimited gas."
+          "type": "fill-blank",
+          "question": "To let hardhat use our 12-word phrase, we use npx hardhat vars set _____",
+          "correctAnswer": "MNEMONIC",
+          "explanation": "The 'npx hardhat vars set MNEMONIC' command lets hardhat use our 12-word phrase"
         },
         {
           "id": 4,
           "type": "mcq",
-          "question": "Why run a local Hardhat node instead of deploying directly to testnet?",
+          "question": "Why do we need a faucet?",
           "options": [
             "It's required for production",
-            "For fast, free testing without gas costs",
-            "Testnets don't support fhEVM",
-            "Local nodes are more secure"
+            "To get test eth to deploy our contracts",
+            "Testnets don't support real money",
+            "No reason"
           ],
           "correctAnswer": 1,
-          "explanation": "Local nodes provide instant, free testing with unlimited gas, perfect for rapid development before deploying to real testnets like Sepolia."
+          "explanation": "We use the fuacet to get test eth to deploy our contracts to testnets like Sepolia."
         }
       ]
     },
@@ -2353,50 +2491,55 @@
       "questions": [
         {
           "id": 1,
-          "type": "fill-blank",
-          "question": "Import _____ for FHE operations in Solidity.",
-          "correctAnswer": "@fhevm/solidity/lib/FHE.sol",
-          "alternatives": ["FHE.sol", "fhevm"],
-          "explanation": "The FHE library is imported from @fhevm/solidity/lib/FHE.sol to access encrypted types and operations."
+          "type": "mcq",
+          "question": "What is the critical privacy flaw in the PlainPotion contract shown in the tutorial?",
+          "options": [
+            "It uses too much gas for computations",
+            "All ingredient values and scores are visible in transaction data on the blockchain",
+            "It doesn't have enough functions",
+            "The contract owner can see all data"
+          ],
+          "correctAnswer": 1,
+          "explanation": "In the PlainPotion contract, all transaction parameters (ingredient values) and computed scores are publicly visible on the blockchain, allowing anyone to reverse-engineer winning strategies by inspecting transaction data."
         },
         {
           "id": 2,
           "type": "mcq",
-          "question": "Why use FHE in smart contracts?",
+          "question": "What does FHE.select(isHigher, result, prevBest) accomplish?",
           "options": [
-            "To increase gas costs",
-            "To hide computation data and ensure privacy",
-            "To make contracts public",
-            "To slow down transactions"
+            "It decrypts the higher value between result and prevBest",
+            "It performs an encrypted conditional selection, returning result if isHigher is true, otherwise prevBest",
+            "It compares two values and returns a boolean",
+            "It selects random values for testing"
           ],
           "correctAnswer": 1,
-          "explanation": "FHE is used to hide sensitive data and ensure privacy during computations, preventing exposure on the blockchain."
+          "explanation": "FHE.select is an encrypted if/else operation. It takes an encrypted boolean (isHigher) and returns the first value (result) if true, or the second value (prevBest) if false, all without decryption."
         },
         {
           "id": 3,
           "type": "mcq",
-          "question": "What does FHE.reencrypt do?",
+          "question": "What is the purpose of FHE.allow(result, msg.sender) in the compute function?",
           "options": [
-            "Decrypts data permanently",
-            "Encrypts plaintext",
-            "Reencrypts result for specific user's private decryption",
-            "Compresses ciphertext"
+            "It allows the contract to modify the result",
+            "It grants the player permission to decrypt their own result using their private key",
+            "It makes the result publicly visible on the blockchain",
+            "It encrypts the result for storage"
           ],
-          "correctAnswer": 2,
-          "explanation": "FHE.reencrypt transforms the encrypted result so it can be decrypted by a specific user with their private key."
+          "correctAnswer": 1,
+          "explanation": "FHE.allow grants specific addresses permission to decrypt encrypted values. Without this permission, even the player who submitted the transaction cannot decrypt their own result. It's essential for selective disclosure in fhEVM."
         },
         {
           "id": 4,
           "type": "mcq",
-          "question": "Compared to standard Solidity, fhEVM gas costs are approximately:",
+          "question": "Which operation in the contract happens WITHOUT ever decrypting the values?",
           "options": [
-            "The same",
-            "2-5x higher",
-            "10-20x higher",
-            "100-1000x higher"
+            "Only the addition of ingredients",
+            "Only the comparison of scores",
+            "All operations: addition, multiplication, comparison, and conditional selection",
+            "None - values must be decrypted for computation"
           ],
-          "correctAnswer": 3,
-          "explanation": "FHE operations are computationally intensive, resulting in gas costs that are 100-1000x higher than standard operations."
+          "correctAnswer": 2,
+          "explanation": "This is the power of Fully Homomorphic Encryption! All operations (FHE.add, FHE.mul, FHE.gt, FHE.select) are performed directly on ciphertexts without any decryption. The blockchain never sees plaintext values."
         }
       ]
     },
@@ -2406,49 +2549,49 @@
         {
           "id": 1,
           "type": "mcq",
-          "question": "Is the ABI needed for frontend calls?",
+          "question": "After deploying your contract with 'yarn deploy:sepolia', what file contains the deployment artifacts you need to copy to your frontend?",
           "options": [
-            "No, it's optional",
-            "Yes, it defines the contract interface",
-            "Only for read operations",
-            "Only for write operations"
+            "hardhat.config.ts",
+            "deployments/sepolia/Potion.json",
+            "contracts/Potion.sol",
+            "artifacts/contracts/Potion.json"
           ],
           "correctAnswer": 1,
-          "explanation": "The ABI (Application Binary Interface) is essential for the frontend to understand and interact with contract functions."
+          "explanation": "The deployment script saves the contract address and ABI to 'deployments/sepolia/Potion.json'. You copy this entire file to your frontend's config/Potion.json so your app knows where the contract lives and how to interact with it."
         },
         {
           "id": 2,
           "type": "fill-blank",
-          "question": "Deploy command: npx hardhat _____ --network sepolia",
-          "correctAnswer": "run scripts/deploy.js",
-          "alternatives": ["run", "deploy"],
-          "explanation": "The full command 'npx hardhat run scripts/deploy.js --network sepolia' executes the deployment script on Sepolia testnet."
+          "question": "The _____ is like an instruction manual that tells your frontend what functions your contract has and how to call them.",
+          "correctAnswer": "ABI",
+          "alternatives": ["abi", "Application Binary Interface"],
+          "explanation": "ABI (Application Binary Interface) is automatically generated from your Solidity contract during compilation. It describes every function, event, and error with their parameters and types, allowing your frontend to construct properly formatted contract calls."
         },
         {
           "id": 3,
           "type": "mcq",
-          "question": "Why verify contracts on Etherscan?",
+          "question": "What do the Wagmi hooks useAccount() and useBalance() provide in your wallet connection component?",
           "options": [
-            "It's required for deployment",
-            "For transparency and trust - makes code publicly viewable",
-            "To reduce gas costs",
-            "To encrypt the contract"
+            "They encrypt wallet data before sending to blockchain",
+            "They provide the connected wallet's address and ETH balance, updating automatically on changes",
+            "They deploy smart contracts from the frontend",
+            "They generate new wallet addresses for users"
           ],
           "correctAnswer": 1,
-          "explanation": "Verification makes your contract code publicly viewable on Etherscan, building trust and transparency with users."
+          "explanation": "useAccount() returns wallet connection state including the address, while useBalance() fetches the ETH balance for that address. These hooks are reactive - they automatically re-fetch and update when the user switches accounts or disconnects."
         },
         {
           "id": 4,
           "type": "mcq",
-          "question": "Which Wagmi hook is used for contract write operations?",
+          "question": "When reading the leaderboard with publicClient.readContract(), why is this operation free (no gas cost)?",
           "options": [
-            "useContractRead",
-            "useContractWrite",
-            "useContract",
-            "useWallet"
+            "Because we're using a special gas-free API",
+            "Because it's a view/pure function that only reads data without modifying blockchain state",
+            "Because Sepolia testnet has no gas fees",
+            "Because RainbowKit subsidizes the gas costs"
           ],
           "correctAnswer": 1,
-          "explanation": "useContractWrite is the Wagmi hook for executing write operations (transactions) on smart contracts."
+          "explanation": "View and pure functions in Solidity don't modify state - they only read existing data. Since they don't require consensus or state changes, they can be executed locally by your node without submitting a transaction, making them free."
         }
       ]
     },
@@ -2458,48 +2601,62 @@
         {
           "id": 1,
           "type": "mcq",
-          "question": "When does decryption happen in the FHE workflow?",
+          "question": "Why does your app show a loading screen while the FHE SDK initializes?",
           "options": [
-            "Before computation",
-            "After computation on the client side",
-            "During computation on blockchain",
-            "Never"
+            "To make the app look more professional",
+            "To prevent users from encountering 'relayer not initialized' errors if they try to encrypt data before SDK is ready",
+            "To load smart contract data from the blockchain",
+            "To connect to the user's wallet"
           ],
           "correctAnswer": 1,
-          "explanation": "Decryption happens after computation, on the client side using the user's private key - never on the blockchain."
+          "explanation": "The FHE SDK takes 2-3 seconds to load cryptographic libraries (WASM modules) and configure the relayer. If users try to encrypt data before initialization completes, operations will fail. The loading screen blocks the UI until fheReady is true."
         },
         {
           "id": 2,
-          "type": "fill-blank",
-          "question": "Library for frontend FHE operations: _____",
-          "correctAnswer": "fhevmjs",
-          "explanation": "fhevmjs is the JavaScript library that handles encryption and decryption on the frontend."
+          "type": "mcq",
+          "question": "What's the difference between fetchPublicDecryption() and requestUserDecryption()?",
+          "options": [
+            "There is no difference, they both require signatures",
+            "Public decryption works for data marked publicly decryptable by the contract (no signature needed); private decryption requires EIP-712 signature proof",
+            "Public decryption is faster but less secure",
+            "Private decryption only works on testnet"
+          ],
+          "correctAnswer": 1,
+          "explanation": "publicDecrypt() doesn't require signatures because the contract called FHE.makePubliclyDecryptable() on those handles (like leaderboard best scores). requestUserDecryption() requires EIP-712 signatures to prove ownership before decrypting private data (like individual attempt scores). This enables selective disclosure - you control what becomes public."
         },
         {
           "id": 3,
-          "type": "mcq",
-          "question": "Why perform client-side encryption?",
-          "options": [
-            "It's faster",
-            "Prevents onchain data leaks by encrypting before submission",
-            "It's required by browsers",
-            "To reduce bundle size"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Client-side encryption ensures data is already encrypted before it reaches the blockchain, preventing any exposure."
+          "type": "fill-blank",
+          "question": "When the contract emits ComputeResult(value), we extract the encrypted result from the transaction receipt's _____ array.",
+          "correctAnswer": "logs",
+          "alternatives": ["log", "event logs"],
+          "explanation": "Contract events are stored in the transaction receipt's logs array. We loop through all logs, decode each with the contract's ABI using decodeEventLog(), and extract the 'value' when we find the ComputeResult event. This encrypted euint16 handle is what we then decrypt to show the user their score."
         },
         {
           "id": 4,
           "type": "mcq",
-          "question": "Where should user private keys be stored?",
+          "question": "Why does the tutorial emphasize distinguishing between 'user rejected' and other errors?",
           "options": [
-            "localStorage",
-            "Server database",
-            "In-memory or sessionStorage only",
-            "Public GitHub repo"
+            "To track analytics about rejection rates",
+            "Because user rejections aren't failures - they're choices, and shouldn't be treated as errors or make users feel bad",
+            "To retry rejected transactions automatically",
+            "To charge users for rejected transactions"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Users have the right to reject transactions or signatures - it's a feature, not a bug. Good UX distinguishes rejection (neutral message, no scary red styling) from actual errors (actionable feedback). This respects user agency and doesn't shame them for exercising control over their wallet."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "What's the privacy guarantee of this FHE implementation?",
+          "options": [
+            "Only the contract owner can see encrypted data",
+            "Data is encrypted during transmission but stored in plaintext onchain",
+            "Ingredient values and attempt scores never exist in plaintext onchain; only authorized decryption with signature reveals them",
+            "Privacy is maintained through access control lists"
           ],
           "correctAnswer": 2,
-          "explanation": "User private keys should only be stored in-memory or sessionStorage (temporary), never in persistent storage or servers."
+          "explanation": "With FHE, plaintext never touches the blockchain. Ingredients are encrypted client-side, the contract computes on ciphertexts, results are emitted encrypted. Only cryptographic signatures authorize decryption - the blockchain, validators, and observers see only ciphertexts. This is cryptographically enforced privacy, not just access control."
         }
       ]
     },

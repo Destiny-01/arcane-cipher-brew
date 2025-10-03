@@ -14,7 +14,7 @@ export interface ProgressData {
   currentSection: number;
 }
 
-const STORAGE_KEY = "potion-brewing-progress";
+export const STORAGE_KEY = "potion-brewing-progress";
 
 const defaultProgress: ProgressData = {
   completedSections: [],
