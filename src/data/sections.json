@@ -94,9 +94,8 @@
         {
           "type": "list",
           "items": [
-            "**Misconception: FHE is Too Slow for Real Use**: True, it's compute-intensive (operations can be 100-1000x slower than plaintext), but Zama's optimizations and hardware accelerations are closing the gap. Start with small datasets in your dApps.",
-            "**Overcomplicating the Math**: You don't need a PhD in alchemy—Zama's docs handle the heavy lifting. If stuck, refer to their official guides.",
-            "**Forgetting Key Management**: Always handle encryption keys securely; lose them, and your data is forever locked.",
+            "**Misconception: FHE is Too Slow for Real Use**: Not completely true. It was compute-intensive (operations can be 100-1000x slower than plaintext), but Zama's optimizations and hardware accelerations closed the gap, and they are now 100x faster FHE from 5 years back",
+            "**Overcomplicating the Math**: You don't need a PhD in computing or encryption, Zama's docs handle the heavy lifting. If stuck, refer to their official guides.",
             "**Resource Consumption**: Test on testnets like Sepolia first to avoid gas guzzlers—FHE ops consume more resources."
           ]
         },
@@ -219,7 +218,7 @@
           "type": "code",
           "language": "solidity",
           "title": "Data Types Example",
-          "code": "import \"fhevm/lib/TFHE.sol\";\n\n// Encrypt plaintext as euint8\neuint8 secretNumber = TFHE.asEuint8(42);\n\n// Start with euint8/16 for efficiency"
+          "code": "import { FHE, euint8 } from \"@fhevm/solidity/lib/FHE.sol\";\n\n// Encrypt plaintext as euint8\neuint8 secretNumber = FHE.asEuint8(42); // Produces an encrypted version of 42"
         },
         {
           "type": "subheader",
@@ -227,28 +226,22 @@
         },
         {
           "type": "text",
-          "content": "Using the TFHE.sol library (imported as tfhe.sol or TFHE.sol), fhEVM supports ops via TFHE functions. They're like Solidity ops but privacy-preserving."
+          "content": "Using the FHE library (imported from @fhevm/solidity/lib/FHE.sol), fhEVM supports ops via FHE functions. They're like Solidity ops but privacy-preserving."
         },
         {
           "type": "list",
           "items": [
-            "**Arithmetic**: Add (TFHE.add), subtract (TFHE.sub), multiply (TFHE.mul), divide (TFHE.div – plaintext divisor only), remainder (TFHE.rem – plaintext only), negate (TFHE.neg), min/max (TFHE.min/max)",
-            "**Bitwise**: AND (TFHE.and), OR (TFHE.or), XOR (TFHE.xor), NOT (TFHE.not), shifts (TFHE.shl/shr), rotates (TFHE.rotl/rotr)",
-            "**Comparisons**: Equal (TFHE.eq), not equal (TFHE.ne), less than (TFHE.lt), greater than (TFHE.gt), etc.",
-            "**Advanced**: Select (TFHE.select for if-else on encrypted conditions), random (TFHE.randEuint8 for onchain randomness)"
+            "**Arithmetic**: Add (FHE.add), subtract (FHE.sub), multiply (FHE.mul), min/max (FHE.min/max)",
+            "**Bitwise**: AND (FHE.and), OR (FHE.or), XOR (FHE.xor)",
+            "**Comparisons**: Equal (FHE.eq), not equal (FHE.ne), less than (FHE.lt), greater than (FHE.gt), etc.",
+            "**Advanced**: Select (FHE.select for if-else on encrypted conditions), random (FHE.randEuint8 for onchain randomness)"
           ]
         },
         {
           "type": "code",
           "language": "solidity",
           "title": "Operation Examples",
-          "code": "// Arithmetic: Add two encrypted integers\neuint32 sum = TFHE.add(a, b);\n\n// Bitwise: XOR encrypted values\neuint16 result = TFHE.xor(x, y);\n\n// Comparison: Check equality\nebool isEqual = TFHE.eq(guess, target);\n\n// Advanced: Conditional select\neuint64 choice = TFHE.select(condition, optionA, optionB);"
-        },
-        {
-          "type": "tip",
-          "icon": "zap",
-          "title": "Performance Tips",
-          "content": "Limitations: No arbitrary loops (use bounded ones); div/rem need plaintext divisors; ops are gas-heavy (100-1000x standard). Test locally first!"
+          "code": "// Arithmetic: Add two encrypted integers\neuint32 sum = FHE.add(a, b);\n\n// Bitwise: OR encrypted values\neuint16 result = FHE.or(x, y);\n\n// Comparison: Check equality\nebool isEqual = FHE.eq(guess, target);\n\n// Advanced: Conditional select\neuint64 choice = FHE.select(condition, optionA, optionB);"
         },
         {
           "type": "subheader",
@@ -257,10 +250,9 @@
         {
           "type": "list",
           "items": [
-            "**Import Errors**: Always import 'fhevm/lib/TFHE.sol'; missing it causes 'TFHE not found'",
-            "**Gas Overruns**: FHE ops cost more – optimize by using smaller euint types and test on local nodes",
-            "**Type Mismatches**: Ops need matching types; cast with TFHE.asEuintX",
-            "**Noise Issues**: TFHE handles it automatically, but deep chains? Monitor in tests"
+            "**Import Errors**: Always import '@fhevm/solidity/lib/FHE.sol'; missing it causes 'FHE not found'",
+            "**Gas Overruns**: FHE ops cost more - optimize by using smaller euint types and test on local nodes",
+            "**Type Mismatches**: Operations need matching types; cast with FHE.asEuintX"
           ]
         },
         {
@@ -283,8 +275,8 @@
           "url": "https://docs.zama.ai/protocol/solidity-guides"
         },
         {
-          "title": "TFHE Library Documentation",
-          "url": "https://docs.zama.ai/fhevm/fundamentals/types"
+          "title": "FHE Operations Documentation",
+          "url": "https://docs.zama.ai/protocol/solidity-guides/smart-contract/operations"
         }
       ]
     },
@@ -313,8 +305,8 @@
           "items": [
             "The smart contract holds an encrypted target number (set by the deployer)",
             "On the frontend, users encrypt their guess using the public key",
-            "The contract compares (e.g., TFHE.eq) on ciphertexts, returning an encrypted result",
-            "User decrypts offchain via threshold KMS, seeing 'Correct!' or hints without exposing data"
+            "The contract compares (e.g., FHE.eq) on ciphertexts, returning an encrypted result",
+            "User decrypts offchain via threshold KMS, seeing score on leaderboard"
           ]
         },
         {
@@ -416,7 +408,7 @@
       "id": 4,
       "title": "Gathering Your Alchemy Kit",
       "subtitle": "Cloning and Exploring the Boilerplate Repo",
-      "description": "Welcome back, aspiring privacy alchemists! In this crucial step, we'll summon our development toolkit by cloning a customized boilerplate repository – imagine it as discovering a well-stocked wizard's workshop, complete with enchanted scrolls and potions ready to mix. The repo we'll use is https://github.com/Destiny-01/potion-brew, a tailored version of Zama's fhEVM React template. It's designed specifically for building frontend interfaces that interact with fhEVM smart contracts, making it perfect for our Private Potion Guesser dApp.",
+      "description": "Welcome back, aspiring privacy alchemists! In this crucial step, we'll summon our development toolkit by cloning a customized boilerplate repository – imagine it as discovering a well-stocked wizard's workshop, complete with enchanted scrolls and potions ready to mix. The repo we'll use is https://github.com/Destiny-01/potion-brew, a version of PotionBrew with just the frontend. It's cloned from the fhevm-react-template which is designed specifically for building frontend interfaces that interact with fhEVM smart contracts, making it perfect for our Private Potion Guesser dApp.",
       "learningObjectives": [
         "Clone the repo, install dependencies, and set up your local environment with clear, beginner-friendly steps",
         "Understand the overall purpose of the repo as a boilerplate for fhEVM dApps, including how it ties into our Private Potion Guesser",
@@ -430,7 +422,7 @@
         },
         {
           "type": "text",
-          "content": "This repository, named 'FHEVM React Template,' is an ultra-minimal React project optimized for Fully Homomorphic Encryption (FHE)-enabled dApps on Ethereum. It pairs seamlessly with Zama's fhEVM Hardhat template (which we'll cover in later sections for the backend contracts). The focus here is on the frontend: It provides hooks for interacting with fhEVM contracts, wallet management, and basic UI setups."
+          "content": "This repository, is a minimal version of Potion Brew optimized for Fully Homomorphic Encryption (FHE)-enabled dApps on Ethereum. It pairs seamlessly with Zama's fhEVM Hardhat template (which we'll cover in later sections for the backend contracts). The focus here is on the frontend: It provides hooks for interacting with fhEVM contracts, wallet management, and basic UI setups."
         },
         {
           "type": "note",
@@ -473,8 +465,8 @@
         {
           "type": "list",
           "items": [
-            "**README.md**: Your ultimate guidebook – open this first. It explains the repo's purpose, features (like React integration with fhEVM), requirements (e.g., MetaMask wallet), and quickstart steps. It also covers how to run a local development server and common errors, like 'nonce mismatch' when connecting MetaMask to Hardhat (with fixes)",
-            "**package.json**: The project's blueprint. It lists all dependencies (e.g., @zama.ai/fhevmjs for encryption, react and next for the app, tailwindcss for styling) and scripts (commands you can run). Scripts like `npm run dev` start the frontend server",
+            "**README.md**: Your ultimate guidebook – open this first. It explains the repo's purpose, features (like React integration with fhEVM), requirements (e.g., MetaMask wallet), and quickstart steps.",
+            "**package.json**: The project's blueprint. It lists all dependencies (e.g., react and next for the app, tailwindcss for styling) and scripts (commands you can run). Scripts like `npm run dev` start the frontend server",
             "**Configuration Files**: Files like .eslintrc (sets rules for JavaScript linting), .prettierrc (auto-formats code), and tailwind.config.js (customizes Tailwind CSS themes) enforce code quality and style. They keep your code clean and professional"
           ]
         },
@@ -491,19 +483,13 @@
           "items": [
             "**packages/site/**: The main frontend directory containing the app's entry points and reusable code. It builds the user interface for interacting with fhEVM contracts – encrypting data, connecting wallets, and displaying results privately",
             "**fhevm/ subfolder**: Contains hooks (reusable functions) for fhEVM interactions. These are the 'spells' that fetch the global public key, handle encryption calls, and manage contract responses. For our dApp, you'll use these to encrypt guesses before sending them to the contract",
-            "**hooks/ subfolder**: Custom React hooks for logic separation, including useFHECounter.tsx (a demo hook showing how to interact with a simple fhEVM contract) and metamask/ (hooks for MetaMask wallet management, following EIP-6963 standard)",
-            "**Other Contents**: Expect src/ or app/ for pages (e.g., main guessing page), components/ for UI bits (like buttons/forms), and styles/ for CSS. These build the interactive parts – add a 'Guess Input' component here for our dApp"
+            "**hooks/ subfolder**: Custom React hooks for logic separation, including usePotionContract.tsx (a simple hook where we'll write out code to interact with a simple fhEVM contract)",
+            "**Other Contents**: Expect src/ or app/ for pages (e.g., main guessing page), components/ for UI bits (like buttons/forms), and styles/ for CSS."
           ]
         },
         {
-          "type": "code",
-          "language": "typescript",
-          "title": "Example: Using fhEVM Hooks",
-          "code": "// From packages/site/fhevm/\nimport { useFhevm } from './hooks';\n\nconst { instance, publicKey } = useFhevm();\n\n// Encrypt user's guess\nconst encryptedGuess = await instance.encrypt8(guessValue, publicKey);"
-        },
-        {
           "type": "subheader",
-          "text": "Key Concepts Explained: Like MNEMONIC"
+          "text": "Key Concepts Explained"
         },
         {
           "type": "list",
@@ -793,66 +779,6 @@
           "url": "https://sepolia.etherscan.io"
         }
       ]
-    }
-  ],
-  "quizzes": [
-    {
-      "sectionId": 1,
-      "questions": [
-        {
-          "id": 1,
-          "type": "mcq",
-          "question": "What does 'homomorphic' mean in the context of FHE?",
-          "options": [
-            "Computing on decrypted data",
-            "Preserving operations between plaintext and ciphertext",
-            "Randomizing data for security",
-            "Compressing files magically"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Homomorphic comes from Greek roots meaning 'same shape.' It's all about maintaining that same magical structure—operations on ciphertexts mirror those on plaintexts!"
-        },
-        {
-          "id": 2,
-          "type": "fill-blank",
-          "question": "FHE allows _____ on ciphertexts without ever needing to decrypt during the process.",
-          "correctAnswer": "computations",
-          "explanation": "The core magic of FHE is performing computations (or operations/calculations) directly on encrypted data without decryption. Accepted answers: computations, operations, or calculations."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "Arrange these steps in the correct FHE workflow order: (1) Perform operations (2) Encrypt data (3) Decrypt result (4) Get output. What is the correct sequence?",
-          "options": [
-            "1 → 2 → 3 → 4",
-            "2 → 1 → 3 → 4",
-            "2 → 3 → 1 → 4",
-            "4 → 2 → 1 → 3"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct FHE workflow is: First Encrypt plaintext data, then Perform homomorphic operations on the ciphertext, then Decrypt the result, and finally Get the final plaintext output."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "In the potion-brewing analogy, traditional encryption requires opening the _____ to mix ingredients, while FHE mixes blindly inside.",
-          "correctAnswer": "cauldron",
-          "explanation": "The key difference: Traditional encryption requires opening the cauldron (decrypting) to perform operations, creating a vulnerability. FHE keeps the cauldron sealed throughout the entire process."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "Which company is pioneering FHE integration into Ethereum smart contracts with fhEVM?",
-          "options": [
-            "OpenZeppelin",
-            "ConsenSys",
-            "Zama",
-            "Chainlink"
-          ],
-          "correctAnswer": 2,
-          "explanation": "Zama is the groundbreaking company behind fhEVM (Fully Homomorphic Ethereum Virtual Machine), bringing FHE to blockchain and enabling private computation in smart contracts."
-        }
-      ]
     },
     {
       "id": 6,
@@ -1043,64 +969,6 @@
         {
           "title": "fhevmjs Documentation",
           "url": "https://docs.zama.ai/fhevm/guides/frontend"
-        }
-      ]
-    },
-    {
-      "sectionId": 6,
-      "questions": [
-        {
-          "id": 1,
-          "type": "fill-blank",
-          "question": "Import _____ for FHE operations in your Solidity contract.",
-          "correctAnswer": "fhevm/lib/TFHE.sol",
-          "explanation": "The TFHE library from fhevm provides all the encrypted types (like euint8) and operations (like eq, reencrypt) needed for FHE computations."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "Why use TFHE.reencrypt in the guess function?",
-          "options": [
-            "To decrypt the result onchain",
-            "To allow user-private decryption with their key",
-            "To store the result publicly",
-            "To save gas costs"
-          ],
-          "correctAnswer": 1,
-          "explanation": "TFHE.reencrypt reencrypts the result under the user's public key, allowing only them to decrypt it offchain with their private key. This maintains end-to-end privacy."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "In the private Potion contract, arrange these operations in correct order: (1) Compare encrypted values (2) Receive encrypted guess (3) Return reencrypted result. What is the correct sequence?",
-          "options": [
-            "1 → 2 → 3",
-            "2 → 1 → 3",
-            "3 → 2 → 1",
-            "2 → 3 → 1"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct flow is: First receive the encrypted guess (2), then compare it with the target using TFHE.eq (1), finally return the reencrypted result (3)."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "What is euint8 used for in the Potion contract?",
-          "correctAnswer": "encrypted integers",
-          "explanation": "euint8 represents encrypted 8-bit unsigned integers. It allows the contract to store and compute on encrypted values (0-255) while maintaining privacy. Accepted answers: encrypted integers, encrypted numbers, or encrypted values."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "What is the main privacy flaw in the PlainPotion contract?",
-          "options": [
-            "It uses too much gas",
-            "The target and guesses are visible on the blockchain",
-            "It doesn't have a constructor",
-            "It uses old Solidity syntax"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The PlainPotion contract stores the target and processes guesses in plaintext, making all values visible to anyone scanning the blockchain. This completely defeats the privacy requirement of our guessing game."
         }
       ]
     },
@@ -1304,64 +1172,6 @@
       ]
     },
     {
-      "sectionId": 7,
-      "questions": [
-        {
-          "id": 1,
-          "type": "fill-blank",
-          "question": "The contract's _____ defines function signatures for frontend interactions.",
-          "correctAnswer": "ABI",
-          "explanation": "ABI (Application Binary Interface) defines the contract's function signatures, allowing the frontend to call contract methods correctly."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "What command deploys the contract to Sepolia?",
-          "options": [
-            "npx hardhat deploy",
-            "npx hardhat run scripts/deploy.ts --network sepolia",
-            "npm run deploy-sepolia",
-            "hardhat deploy --sepolia"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct command is 'npx hardhat run scripts/deploy.ts --network sepolia', which executes the deployment script on the Sepolia testnet."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "In the provider hierarchy, which order is correct?",
-          "options": [
-            "RainbowKit → Wagmi → QueryClient",
-            "QueryClient → RainbowKit → Wagmi",
-            "Wagmi → QueryClient → RainbowKit",
-            "Wagmi → RainbowKit → QueryClient"
-          ],
-          "correctAnswer": 2,
-          "explanation": "WagmiProvider wraps QueryClientProvider, which wraps RainbowKitProvider. This order ensures proper context propagation."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "Wagmi uses _____ hooks to interact with smart contracts.",
-          "correctAnswer": "useContractWrite",
-          "explanation": "useContractWrite (and usePrepareContractWrite) are Wagmi hooks that enable writing to smart contracts. Accepted answers: useContractWrite, React hooks, or Wagmi hooks."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "Why verify the contract on Etherscan?",
-          "options": [
-            "It's required for deployment",
-            "It makes the code publicly viewable and trustworthy",
-            "It reduces gas costs",
-            "It improves contract performance"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Verification makes your contract's source code publicly viewable on Etherscan, building trust and transparency in your dApp."
-        }
-      ]
-    },
-    {
       "id": 8,
       "title": "The Art of Secret Infusion",
       "subtitle": "Frontend Encryption and Decryption with FHEVM",
@@ -1532,64 +1342,6 @@
       ]
     },
     {
-      "sectionId": 8,
-      "questions": [
-        {
-          "id": 1,
-          "type": "fill-blank",
-          "question": "The fhevmjs function _____ encrypts values as 8-bit unsigned integers.",
-          "correctAnswer": "encrypt8",
-          "explanation": "encrypt8 is the fhevmjs function that encrypts values in the range 0-255 as 8-bit unsigned integers (euint8)."
-        },
-        {
-          "id": 2,
-          "type": "mcq",
-          "question": "Why generate user keypairs on the client side?",
-          "options": [
-            "To save gas costs",
-            "To ensure only the user can decrypt their results",
-            "To speed up encryption",
-            "To reduce server load"
-          ],
-          "correctAnswer": 1,
-          "explanation": "User keypairs ensure that only the user who made the guess can decrypt the result using their private key, maintaining end-to-end privacy."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "Arrange the FHE flow steps: (1) Decrypt result (2) Encrypt guess (3) Generate keys (4) Contract computes. What is the correct sequence?",
-          "options": [
-            "1 → 2 → 3 → 4",
-            "3 → 2 → 4 → 1",
-            "2 → 3 → 4 → 1",
-            "3 → 4 → 2 → 1"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct flow is: Generate keys (3), Encrypt guess (2), Contract computes (4), Decrypt result (1). Keys must be generated first, then data is encrypted, processed, and finally decrypted."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "Private keys should be stored in _____ to maintain security.",
-          "correctAnswer": "memory",
-          "explanation": "Private keys should stay in memory (React state) or sessionStorage at most, never in localStorage. They should be ephemeral and session-specific. Accepted answers: memory, state, or sessionStorage."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "What does the attestation parameter do?",
-          "options": [
-            "It encrypts the guess",
-            "It provides a proof in production (empty in development)",
-            "It stores the user's address",
-            "It verifies the contract"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The attestation parameter would contain a cryptographic proof in production environments. For testing on Sepolia, an empty bytes value ('0x') works fine."
-        }
-      ]
-    },
-    {
       "id": 9,
       "title": "Reflecting on the Brew",
       "subtitle": "Recap, Achievements, and Lessons Learned",
@@ -1736,64 +1488,6 @@
         {
           "title": "FHE Development Best Practices",
           "url": "https://docs.zama.ai/fhevm/guides/best-practices"
-        }
-      ]
-    },
-    {
-      "sectionId": 9,
-      "questions": [
-        {
-          "id": 1,
-          "type": "mcq",
-          "question": "The core FHE workflow is: Encrypt, _____, Decrypt",
-          "options": [
-            "Deploy",
-            "Compute",
-            "Test",
-            "Share"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The FHE workflow is Encrypt → Compute → Decrypt. Data is encrypted, computations happen on ciphertexts, then results are decrypted."
-        },
-        {
-          "id": 2,
-          "type": "fill-blank",
-          "question": "Achievement: Built a _____ dApp with fhEVM.",
-          "correctAnswer": "privacy-preserving",
-          "explanation": "You built a privacy-preserving (or confidential) dApp that keeps all sensitive data encrypted. Accepted answers: privacy-preserving, confidential, or private."
-        },
-        {
-          "id": 3,
-          "type": "mcq",
-          "question": "Arrange these tutorial sections: (1) Encryption Magic (2) Foundations (3) Contract Crafting. What is the correct order?",
-          "options": [
-            "1 → 2 → 3",
-            "2 → 3 → 1",
-            "3 → 1 → 2",
-            "2 → 1 → 3"
-          ],
-          "correctAnswer": 1,
-          "explanation": "The correct order is: Foundations (sections 1-2), Contract Crafting (section 6), Encryption Magic (section 8)."
-        },
-        {
-          "id": 4,
-          "type": "fill-blank",
-          "question": "Key lesson: FHE ops are _____, so optimize with small types.",
-          "correctAnswer": "gas-intensive",
-          "explanation": "FHE operations are gas-intensive (or gas-heavy/expensive) compared to regular operations. Using smaller encrypted types like euint8 helps optimize costs. Accepted answers: gas-intensive, gas-heavy, or expensive."
-        },
-        {
-          "id": 5,
-          "type": "mcq",
-          "question": "Which real-world application is enabled by FHE?",
-          "options": [
-            "Public transaction logs",
-            "Sealed-bid auctions with private bids",
-            "Unencrypted data storage",
-            "Standard token transfers"
-          ],
-          "correctAnswer": 1,
-          "explanation": "Sealed-bid auctions are a perfect FHE use case – bids remain encrypted and private until the reveal phase, preventing manipulation."
         }
       ]
     },
@@ -2071,6 +1765,278 @@
           "url": "https://docs.zama.ai/fhevm/tutorials"
         }
       ]
+    }
+  ],
+  "quizzes": [
+    {
+      "sectionId": 1,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "What does 'homomorphic' mean in the context of FHE?",
+          "options": [
+            "Computing on decrypted data",
+            "Preserving operations between plaintext and ciphertext",
+            "Randomizing data for security",
+            "Compressing files magically"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Homomorphic comes from Greek roots meaning 'same shape.' It's all about maintaining that same magical structure—operations on ciphertexts mirror those on plaintexts!"
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "FHE allows _____ on ciphertexts without ever needing to decrypt during the process.",
+          "correctAnswer": "computations",
+          "explanation": "The core magic of FHE is performing computations (or operations/calculations) directly on encrypted data without decryption. Accepted answers: computations, operations, or calculations."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Arrange these steps in the correct FHE workflow order: (1) Perform operations (2) Encrypt data (3) Decrypt result (4) Get output. What is the correct sequence?",
+          "options": [
+            "1 → 2 → 3 → 4",
+            "2 → 1 → 3 → 4",
+            "2 → 3 → 1 → 4",
+            "4 → 2 → 1 → 3"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct FHE workflow is: First Encrypt plaintext data, then Perform homomorphic operations on the ciphertext, then Decrypt the result, and finally Get the final plaintext output."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "In the potion-brewing analogy, traditional encryption requires opening the _____ to mix ingredients, while FHE mixes blindly inside.",
+          "correctAnswer": "cauldron",
+          "explanation": "The key difference: Traditional encryption requires opening the cauldron (decrypting) to perform operations, creating a vulnerability. FHE keeps the cauldron sealed throughout the entire process."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "Which company is pioneering FHE integration into Ethereum smart contracts with fhEVM?",
+          "options": ["OpenZeppelin", "ConsenSys", "Zama", "Chainlink"],
+          "correctAnswer": 2,
+          "explanation": "Zama is the groundbreaking company behind fhEVM (Fully Homomorphic Ethereum Virtual Machine), bringing FHE to blockchain and enabling private computation in smart contracts."
+        }
+      ]
+    },
+    {
+      "sectionId": 6,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "Import _____ for FHE operations in your Solidity contract.",
+          "correctAnswer": "fhevm/lib/TFHE.sol",
+          "explanation": "The TFHE library from fhevm provides all the encrypted types (like euint8) and operations (like eq, reencrypt) needed for FHE computations."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "Why use TFHE.reencrypt in the guess function?",
+          "options": [
+            "To decrypt the result onchain",
+            "To allow user-private decryption with their key",
+            "To store the result publicly",
+            "To save gas costs"
+          ],
+          "correctAnswer": 1,
+          "explanation": "TFHE.reencrypt reencrypts the result under the user's public key, allowing only them to decrypt it offchain with their private key. This maintains end-to-end privacy."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "In the private Potion contract, arrange these operations in correct order: (1) Compare encrypted values (2) Receive encrypted guess (3) Return reencrypted result. What is the correct sequence?",
+          "options": ["1 → 2 → 3", "2 → 1 → 3", "3 → 2 → 1", "2 → 3 → 1"],
+          "correctAnswer": 1,
+          "explanation": "The correct flow is: First receive the encrypted guess (2), then compare it with the target using TFHE.eq (1), finally return the reencrypted result (3)."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "What is euint8 used for in the Potion contract?",
+          "correctAnswer": "encrypted integers",
+          "explanation": "euint8 represents encrypted 8-bit unsigned integers. It allows the contract to store and compute on encrypted values (0-255) while maintaining privacy. Accepted answers: encrypted integers, encrypted numbers, or encrypted values."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "What is the main privacy flaw in the PlainPotion contract?",
+          "options": [
+            "It uses too much gas",
+            "The target and guesses are visible on the blockchain",
+            "It doesn't have a constructor",
+            "It uses old Solidity syntax"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The PlainPotion contract stores the target and processes guesses in plaintext, making all values visible to anyone scanning the blockchain. This completely defeats the privacy requirement of our guessing game."
+        }
+      ]
+    },
+    {
+      "sectionId": 7,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "The contract's _____ defines function signatures for frontend interactions.",
+          "correctAnswer": "ABI",
+          "explanation": "ABI (Application Binary Interface) defines the contract's function signatures, allowing the frontend to call contract methods correctly."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "What command deploys the contract to Sepolia?",
+          "options": [
+            "npx hardhat deploy",
+            "npx hardhat run scripts/deploy.ts --network sepolia",
+            "npm run deploy-sepolia",
+            "hardhat deploy --sepolia"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct command is 'npx hardhat run scripts/deploy.ts --network sepolia', which executes the deployment script on the Sepolia testnet."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "In the provider hierarchy, which order is correct?",
+          "options": [
+            "RainbowKit → Wagmi → QueryClient",
+            "QueryClient → RainbowKit → Wagmi",
+            "Wagmi → QueryClient → RainbowKit",
+            "Wagmi → RainbowKit → QueryClient"
+          ],
+          "correctAnswer": 2,
+          "explanation": "WagmiProvider wraps QueryClientProvider, which wraps RainbowKitProvider. This order ensures proper context propagation."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Wagmi uses _____ hooks to interact with smart contracts.",
+          "correctAnswer": "useContractWrite",
+          "explanation": "useContractWrite (and usePrepareContractWrite) are Wagmi hooks that enable writing to smart contracts. Accepted answers: useContractWrite, React hooks, or Wagmi hooks."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "Why verify the contract on Etherscan?",
+          "options": [
+            "It's required for deployment",
+            "It makes the code publicly viewable and trustworthy",
+            "It reduces gas costs",
+            "It improves contract performance"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Verification makes your contract's source code publicly viewable on Etherscan, building trust and transparency in your dApp."
+        }
+      ]
+    },
+    {
+      "sectionId": 8,
+      "questions": [
+        {
+          "id": 1,
+          "type": "fill-blank",
+          "question": "The fhevmjs function _____ encrypts values as 8-bit unsigned integers.",
+          "correctAnswer": "encrypt8",
+          "explanation": "encrypt8 is the fhevmjs function that encrypts values in the range 0-255 as 8-bit unsigned integers (euint8)."
+        },
+        {
+          "id": 2,
+          "type": "mcq",
+          "question": "Why generate user keypairs on the client side?",
+          "options": [
+            "To save gas costs",
+            "To ensure only the user can decrypt their results",
+            "To speed up encryption",
+            "To reduce server load"
+          ],
+          "correctAnswer": 1,
+          "explanation": "User keypairs ensure that only the user who made the guess can decrypt the result using their private key, maintaining end-to-end privacy."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Arrange the FHE flow steps: (1) Decrypt result (2) Encrypt guess (3) Generate keys (4) Contract computes. What is the correct sequence?",
+          "options": [
+            "1 → 2 → 3 → 4",
+            "3 → 2 → 4 → 1",
+            "2 → 3 → 4 → 1",
+            "3 → 4 → 2 → 1"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The correct flow is: Generate keys (3), Encrypt guess (2), Contract computes (4), Decrypt result (1). Keys must be generated first, then data is encrypted, processed, and finally decrypted."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Private keys should be stored in _____ to maintain security.",
+          "correctAnswer": "memory",
+          "explanation": "Private keys should stay in memory (React state) or sessionStorage at most, never in localStorage. They should be ephemeral and session-specific. Accepted answers: memory, state, or sessionStorage."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "What does the attestation parameter do?",
+          "options": [
+            "It encrypts the guess",
+            "It provides a proof in production (empty in development)",
+            "It stores the user's address",
+            "It verifies the contract"
+          ],
+          "correctAnswer": 1,
+          "explanation": "The attestation parameter would contain a cryptographic proof in production environments. For testing on Sepolia, an empty bytes value ('0x') works fine."
+        }
+      ]
+    },
+    {
+      "sectionId": 9,
+      "questions": [
+        {
+          "id": 1,
+          "type": "mcq",
+          "question": "The core FHE workflow is: Encrypt, _____, Decrypt",
+          "options": ["Deploy", "Compute", "Test", "Share"],
+          "correctAnswer": 1,
+          "explanation": "The FHE workflow is Encrypt → Compute → Decrypt. Data is encrypted, computations happen on ciphertexts, then results are decrypted."
+        },
+        {
+          "id": 2,
+          "type": "fill-blank",
+          "question": "Achievement: Built a _____ dApp with fhEVM.",
+          "correctAnswer": "privacy-preserving",
+          "explanation": "You built a privacy-preserving (or confidential) dApp that keeps all sensitive data encrypted. Accepted answers: privacy-preserving, confidential, or private."
+        },
+        {
+          "id": 3,
+          "type": "mcq",
+          "question": "Arrange these tutorial sections: (1) Encryption Magic (2) Foundations (3) Contract Crafting. What is the correct order?",
+          "options": ["1 → 2 → 3", "2 → 3 → 1", "3 → 1 → 2", "2 → 1 → 3"],
+          "correctAnswer": 1,
+          "explanation": "The correct order is: Foundations (sections 1-2), Contract Crafting (section 6), Encryption Magic (section 8)."
+        },
+        {
+          "id": 4,
+          "type": "fill-blank",
+          "question": "Key lesson: FHE ops are _____, so optimize with small types.",
+          "correctAnswer": "gas-intensive",
+          "explanation": "FHE operations are gas-intensive (or gas-heavy/expensive) compared to regular operations. Using smaller encrypted types like euint8 helps optimize costs. Accepted answers: gas-intensive, gas-heavy, or expensive."
+        },
+        {
+          "id": 5,
+          "type": "mcq",
+          "question": "Which real-world application is enabled by FHE?",
+          "options": [
+            "Public transaction logs",
+            "Sealed-bid auctions with private bids",
+            "Unencrypted data storage",
+            "Standard token transfers"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Sealed-bid auctions are a perfect FHE use case – bids remain encrypted and private until the reveal phase, preventing manipulation."
+        }
+      ]
     },
     {
       "sectionId": 10,
@@ -2173,12 +2139,7 @@
           "id": 4,
           "type": "mcq",
           "question": "What year did Craig Gentry create the first fully homomorphic encryption scheme?",
-          "options": [
-            "1978",
-            "2000",
-            "2009",
-            "2020"
-          ],
+          "options": ["1978", "2000", "2009", "2020"],
           "correctAnswer": 2,
           "explanation": "Craig Gentry created the first FHE scheme in 2009 using lattice-based cryptography, turning decades of theory into reality."
         },
@@ -2204,12 +2165,7 @@
           "id": 1,
           "type": "mcq",
           "question": "What tool is used for frontend encryption in fhEVM?",
-          "options": [
-            "Hardhat",
-            "fhevmjs",
-            "MetaMask",
-            "Wagmi"
-          ],
+          "options": ["Hardhat", "fhevmjs", "MetaMask", "Wagmi"],
           "correctAnswer": 1,
           "explanation": "fhevmjs is the JavaScript library for client-side encryption and decryption in fhEVM applications."
         },
@@ -2255,12 +2211,7 @@
           "id": 1,
           "type": "mcq",
           "question": "What is the minimum Node.js version required?",
-          "options": [
-            "v14",
-            "v16",
-            "v18",
-            "v20"
-          ],
+          "options": ["v14", "v16", "v18", "v20"],
           "correctAnswer": 2,
           "explanation": "Node.js v18 or higher is required for the fhEVM development environment and its dependencies."
         },
@@ -2268,12 +2219,7 @@
           "id": 2,
           "type": "mcq",
           "question": "Which testnet is recommended for deployment?",
-          "options": [
-            "Goerli",
-            "Sepolia",
-            "Rinkeby",
-            "Ropsten"
-          ],
+          "options": ["Goerli", "Sepolia", "Rinkeby", "Ropsten"],
           "correctAnswer": 1,
           "explanation": "Sepolia is the recommended Ethereum testnet for fhEVM deployments, offering stability and faucet availability."
         },
@@ -2309,17 +2255,17 @@
           "question": "Which folder contains fhEVM hooks for encryption?",
           "options": [
             "packages/contracts",
-            "packages/site/fhevm",
+            "packages/site/lib/fhe.ts",
             "src/components",
             "lib/encryption"
           ],
           "correctAnswer": 1,
-          "explanation": "The packages/site/fhevm folder contains essential hooks for encrypting data, fetching public keys, and interacting with fhEVM contracts."
+          "explanation": "The packages/site/lib/fhe.ts folder contains essential hooks for encrypting data, fetching public keys, and interacting with fhEVM contracts."
         },
         {
           "id": 2,
           "type": "mcq",
-          "question": "What does the useFHECounter.tsx hook demonstrate?",
+          "question": "What does the usePotionContract.ts hook show?",
           "options": [
             "Wallet connection",
             "Basic fhEVM operations",
@@ -2327,19 +2273,19 @@
             "API calls"
           ],
           "correctAnswer": 1,
-          "explanation": "useFHECounter.tsx is a demo hook showing how to perform basic fhEVM operations like incrementing an encrypted counter using the useFhevm hook."
+          "explanation": "usePotionContract.tsx is a hook showing how to perform basic fhEVM operations like incrementing an encrypted counter using the useFhevm hook."
         },
         {
           "id": 3,
           "type": "fill-blank",
-          "question": "Command to clone: git _____ https://github.com/zama-ai/fhevm-react-template.git",
+          "question": "Command to clone: git _____ https://github.com/Destiny-01/potion-brew",
           "correctAnswer": "clone",
           "explanation": "The 'git clone' command downloads a copy of the repository to your local machine."
         },
         {
           "id": 4,
           "type": "mcq",
-          "question": "How does the fhevm folder help in our guessing game?",
+          "question": "How does the hooks folder help in our guessing game?",
           "options": [
             "It styles the UI",
             "It provides hooks to encrypt guesses and decrypt results",
@@ -2347,7 +2293,7 @@
             "It handles wallet connections only"
           ],
           "correctAnswer": 1,
-          "explanation": "The fhevm folder provides essential hooks to encrypt guesses client-side and decrypt results, maintaining privacy throughout the game."
+          "explanation": "The hooks folder provides essential hooks to encrypt guesses client-side and decrypt results, maintaining privacy throughout the game."
         }
       ]
     },
@@ -2564,12 +2510,7 @@
           "id": 1,
           "type": "mcq",
           "question": "The core FHE workflow is: Encrypt, _____, Decrypt",
-          "options": [
-            "Deploy",
-            "Compute",
-            "Test",
-            "Verify"
-          ],
+          "options": ["Deploy", "Compute", "Test", "Verify"],
           "correctAnswer": 1,
           "explanation": "The core FHE workflow is Encrypt-Compute-Decrypt: data is encrypted, computation happens on ciphertext, then results are decrypted."
         },

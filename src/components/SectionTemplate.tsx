@@ -1,26 +1,30 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FlaskConical, Scroll } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { SectionHeader } from '@/components/content/SectionHeader';
-import { LearningObjectives } from '@/components/content/LearningObjectives';
-import { SubHeader } from '@/components/content/SubHeader';
-import { ContentBlock } from '@/components/content/ContentBlock';
-import { CodeBlock } from '@/components/content/CodeBlock';
-import { NoteBlock } from '@/components/content/NoteBlock';
-import { TipBlock } from '@/components/content/TipBlock';
-import { ResourceList } from '@/components/content/ResourceList';
-import { QuizModal } from '@/components/quiz/QuizModal';
-import sectionsData from '@/data/sections.json';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { FlaskConical, Scroll } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/content/SectionHeader";
+import { LearningObjectives } from "@/components/content/LearningObjectives";
+import { SubHeader } from "@/components/content/SubHeader";
+import { ContentBlock } from "@/components/content/ContentBlock";
+import { CodeBlock } from "@/components/content/CodeBlock";
+import { NoteBlock } from "@/components/content/NoteBlock";
+import { TipBlock } from "@/components/content/TipBlock";
+import { ResourceList } from "@/components/content/ResourceList";
+import { QuizModal } from "@/components/quiz/QuizModal";
+import sectionsData from "@/data/sections.json";
+import { processContent } from "@/lib/utils";
 
 interface SectionTemplateProps {
   sectionId: number;
   onSectionComplete?: () => void;
 }
 
-export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplateProps) => {
+export const SectionTemplate = ({
+  sectionId,
+  onSectionComplete,
+}: SectionTemplateProps) => {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
-  
+
   const section = sectionsData.sections.find((s) => s.id === sectionId);
   const quiz = sectionsData.quizzes.find((q) => q.sectionId === sectionId);
 
@@ -57,27 +61,34 @@ export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplat
         <div className="space-y-6 my-8">
           {section.content.map((item, index) => {
             switch (item.type) {
-              case 'subheader':
+              case "subheader":
                 return <SubHeader key={index} text={item.text} />;
-              
-              case 'text':
+
+              case "text":
                 return <ContentBlock key={index} content={item.content} />;
-              
-              case 'list':
+
+              case "list":
                 return (
-                  <ContentBlock key={index} content={
-                    <ul className="space-y-2 ml-6">
-                      {item.items.map((listItem: string, i: number) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <span className="text-accent mt-1">✦</span>
-                          <span dangerouslySetInnerHTML={{ __html: listItem }} />
-                        </li>
-                      ))}
-                    </ul>
-                  } />
+                  <ContentBlock
+                    key={index}
+                    content={
+                      <ul className="space-y-2 ml-6">
+                        {item.items.map((listItem: string, i: number) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <span className="text-accent mt-1">✦</span>
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: processContent(listItem),
+                              }}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    }
+                  />
                 );
-              
-              case 'code':
+
+              case "code":
                 return (
                   <CodeBlock
                     key={index}
@@ -86,8 +97,8 @@ export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplat
                     title={item.title}
                   />
                 );
-              
-              case 'note':
+
+              case "note":
                 return (
                   <NoteBlock
                     key={index}
@@ -96,8 +107,8 @@ export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplat
                     icon={item.icon as any}
                   />
                 );
-              
-              case 'tip':
+
+              case "tip":
                 return (
                   <TipBlock
                     key={index}
@@ -106,7 +117,7 @@ export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplat
                     icon={item.icon as any}
                   />
                 );
-              
+
               default:
                 return null;
             }
@@ -138,11 +149,11 @@ export const SectionTemplate = ({ sectionId, onSectionComplete }: SectionTemplat
             className="absolute inset-0 opacity-30"
             animate={{
               background: [
-                'radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-                'radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-                'radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-                'radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
-                'radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)',
+                "radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)",
               ],
             }}
             transition={{ duration: 8, repeat: Infinity }}

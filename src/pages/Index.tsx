@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { ParticleBackground } from '@/components/ParticleBackground';
-import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Footer } from '@/components/layout/Footer';
-import { SectionTemplate } from '@/components/SectionTemplate';
-import mysticalBackground from '@/assets/mystical-background.jpg';
+import { useState, useEffect } from "react";
+import { ParticleBackground } from "@/components/ParticleBackground";
+import { Header } from "@/components/layout/Header";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Footer } from "@/components/layout/Footer";
+import { SectionTemplate } from "@/components/SectionTemplate";
+import mysticalBackground from "@/assets/mystical-background.jpg";
 
 const Index = () => {
   const [currentSection, setCurrentSection] = useState(1);
@@ -12,7 +12,7 @@ const Index = () => {
 
   // Scroll to top when section changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentSection]);
 
   return (
@@ -22,9 +22,9 @@ const Index = () => {
         className="fixed inset-0 z-0"
         style={{
           backgroundImage: `url(${mysticalBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
           opacity: 0.4,
         }}
       />
@@ -38,22 +38,22 @@ const Index = () => {
       {/* Content */}
       <div className="relative z-10">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        
+
         <div className="flex">
-          <Sidebar 
-            currentSection={currentSection} 
+          <Sidebar
+            currentSection={currentSection}
             onSectionClick={setCurrentSection}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
           />
-          
+
           <main className="flex-1 md:ml-80 mt-16 p-4 sm:p-6 md:p-8 min-h-screen">
-            <SectionTemplate 
+            <SectionTemplate
               sectionId={currentSection}
               onSectionComplete={() => {
                 // Move to next section after completing quiz
                 if (currentSection < 10) {
-                  setCurrentSection(currentSection + 1);
+                  setCurrentSection((currSection) => currSection + 1);
                 }
               }}
             />
