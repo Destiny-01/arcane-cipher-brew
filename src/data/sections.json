@@ -1508,77 +1508,7 @@
         },
         {
           "type": "text",
-          "content": "Host your frontend on Vercel – it's free, fast, and integrates with GitHub."
-        },
-        {
-          "type": "text",
-          "content": "**Step 1: Install Vercel CLI**"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Install Vercel CLI",
-          "code": "npm i -g vercel"
-        },
-        {
-          "type": "note",
-          "icon": "terminal",
-          "title": "Global Installation",
-          "content": "Installing globally with -g makes the vercel command available throughout your system for easy deployment."
-        },
-        {
-          "type": "text",
-          "content": "**Step 2: Configure Environment Variables**"
-        },
-        {
-          "type": "text",
-          "content": "In packages/site, create .env.production with CONTRACT_ADDRESS (your deployed Potion.sol address). This ensures the live site points to the right contract."
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": ".env.production",
-          "code": "CONTRACT_ADDRESS=0xYourDeployedAddressHere\nCHAIN_ID=11155111"
-        },
-        {
-          "type": "text",
-          "content": "**Step 3: Build and Deploy**"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Navigate to your frontend folder: cd packages/site",
-            "Login to Vercel: vercel login (follow prompts with email/GitHub)",
-            "Deploy: vercel --prod",
-            "Handle prompts for scope/project name",
-            "Vercel builds your Next.js app, uploads, and assigns a URL (e.g., your-app.vercel.app)"
-          ]
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Deployment Commands",
-          "code": "cd packages/site\nvercel login\nvercel --prod"
-        },
-        {
-          "type": "tip",
-          "icon": "rocket",
-          "title": "Test After Deploy",
-          "content": "Visit your deployed URL, connect MetaMask (Sepolia), submit a guess, and verify decryption works. Check browser console if issues arise."
-        },
-        {
-          "type": "text",
-          "content": "**Advanced: GitHub Integration**"
-        },
-        {
-          "type": "text",
-          "content": "Link your GitHub repo for automatic deployments on pushes. In Vercel dashboard, connect your repository and enable auto-deploys. Each push to main will trigger a new deployment."
-        },
-        {
-          "type": "note",
-          "icon": "github",
-          "title": "Custom Domains",
-          "content": "For a professional touch, add a custom domain in Vercel settings. Point your DNS to Vercel's servers and your dApp will be live on your own domain!"
+          "content": "Create a github repo, and push your code there. Host your frontend on Vercel – it's free, fast, and integrates with Github. Head to https://vercel.com. Connect your github account, and deploy the project"
         },
         {
           "type": "subheader",
