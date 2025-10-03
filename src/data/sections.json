@@ -58,7 +58,7 @@
           "items": [
             "**Partially Homomorphic Encryption (PHE)**: This spell masters one type of operation, performed unlimited times. For example, it might handle endless additions (like Paillier encryption) or multiplications (like ElGamal). Ideal for simple brews, such as tallying votes without revealing individual choices. Think of it as a cauldron that only stirs clockwise—effective, but limited.",
             "**Somewhat Homomorphic Encryption (SHE)**: A step up, this allows both additions and multiplications, but only a finite number of times before the magic weakens (due to 'noise' buildup in the ciphertext). It's like a potion that ferments perfectly for a few mixes but sours if overworked.",
-            "**Fully Homomorphic Encryption (FHE)**: The pinnacle! Unlimited combinations of additions, multiplications, and beyond—enabling any computation. Zama's tfhe library powers this, turning theory into deployable dApps. With FHE, you can brew infinitely complex elixirs, from machine learning models to financial audits, all in secrecy."
+            "**Fully Homomorphic Encryption (FHE)**: The pinnacle! Unlimited combinations of additions, multiplications, and beyond—enabling any computation. Zama's fhe library powers this, turning theory into deployable dApps. With FHE, you can brew infinitely complex elixirs, from machine learning models to financial audits, all in secrecy."
           ]
         },
         {
@@ -147,7 +147,7 @@
       "description": "Hello again, privacy pioneers! We're stepping into the fhEVM realm – Zama's clever twist on the Ethereum Virtual Machine that lets you cast confidential spells on the blockchain. Picture it as an enchanted EVM where data stays hidden in ciphertexts, yet computations hum along seamlessly. No more exposing secrets during smart contract executions! This section builds on FHE basics, breaking down fhEVM's nuts and bolts in a straightforward way, with real examples to make it stick. We'll keep the magic light but engaging, focusing on clear explanations so you can confidently build privacy-preserving dApps like our Private Potion Guesser.",
       "learningObjectives": [
         "Explain what fhEVM is and how it integrates FHE into Ethereum-compatible smart contracts",
-        "Describe key cryptography concepts like keys, ciphertexts, the TFHE scheme, and noise management",
+        "Describe key cryptography concepts like keys, ciphertexts, the FHE scheme, and noise management",
         "Identify fhEVM's encrypted data types and how they differ from standard Solidity ones",
         "Perform basic operations on encrypted data, understanding examples, limitations, and best practices"
       ],
@@ -168,7 +168,7 @@
           "type": "note",
           "icon": "sparkles",
           "title": "Web3 Connection",
-          "content": "If you're familiar with Solidity, fhEVM adds a library (tfhe.sol) to your contracts, letting you mix encrypted ops with regular code. It's production-ready, quantum-resistant, and open-source on GitHub."
+          "content": "If you're familiar with Solidity, fhEVM adds a library (fhe.sol) to your contracts, letting you mix encrypted ops with regular code. It's production-ready, quantum-resistant, and open-source on GitHub."
         },
         {
           "type": "subheader",
@@ -183,8 +183,8 @@
           "items": [
             "**Public and Private Keys**: fhEVM uses a global public key (fetched via frontend libraries) for encrypting data client-side. The private key is split across a decentralized Key Management System (KMS) using threshold MPC – no single entity holds the full key. This ensures secure decryption only when authorized, with zero-knowledge proofs verifying inputs.",
             "**Ciphertexts**: Your encrypted data! Operations produce new ciphertexts without revealing plaintext. In contracts, they're handled as opaque references to prevent leaks.",
-            "**TFHE Scheme**: fhEVM is powered by Zama's TFHE (Threshold Fully Homomorphic Encryption), a lattice-based scheme that's fast for Boolean ops and supports unlimited computations. It's quantum-safe and handles integers up to 256 bits.",
-            "**Noise Management**: FHE adds 'noise' to ciphertexts during ops to maintain security. Too much noise? Data becomes undecryptable. TFHE uses programmable bootstrapping to 'refresh' ciphertexts, reducing noise and enabling deep computations without limits."
+            "**FHE Scheme**: fhEVM is powered by Zama's FHE (Threshold Fully Homomorphic Encryption), a lattice-based scheme that's fast for Boolean ops and supports unlimited computations. It's quantum-safe and handles integers up to 256 bits.",
+            "**Noise Management**: FHE adds 'noise' to ciphertexts during ops to maintain security. Too much noise? Data becomes undecryptable. FHE uses programmable bootstrapping to 'refresh' ciphertexts, reducing noise and enabling deep computations without limits."
           ]
         },
         {
@@ -262,7 +262,7 @@
         {
           "type": "list",
           "items": [
-            "fhEVM brings FHE to EVM via TFHE, using symbolic execution for private computations",
+            "fhEVM brings FHE to EVM via FHE, using symbolic execution for private computations",
             "Crypto essentials: Global keys, ciphertexts, noise refreshed via bootstrapping",
             "Data types like euintX enable encrypted logic; operations mirror Solidity but secure",
             "Master these for dApps where privacy wins – with awareness of gas and limits"
@@ -1386,13 +1386,13 @@
         },
         {
           "type": "text",
-          "content": "Find the empty `initializeFHE` and `getFhevmInstance` functions. Replace them with this implementation:"
+          "content": "Find the empty `initializeFHE` and `geFHEvmInstance` functions. Replace them with this implementation:"
         },
         {
           "type": "code",
           "language": "typescript",
           "title": "Initializing the FHE SDK",
-          "code": "export async function initializeFHE() {\n  try {\n    if (!relayer) {\n      await initSDK();\n      relayer = await createInstance(SepoliaConfig);\n    }\n    return relayer;\n  } catch (error) {\n    console.error(\"Failed to initialize FHEVM relayer SDK:\", error);\n    throw new Error(\"Failed to initialize FHE encryption\");\n  }\n}\n\nexport async function getFhevmInstance() {\n  if (!relayer) {\n    await initializeFHE();\n  }\n  return relayer;\n}"
+          "code": "export async function initializeFHE() {\n  try {\n    if (!relayer) {\n      await initSDK();\n      relayer = await createInstance(SepoliaConfig);\n    }\n    return relayer;\n  } catch (error) {\n    console.error(\"Failed to initialize FHEVM relayer SDK:\", error);\n    throw new Error(\"Failed to initialize FHE encryption\");\n  }\n}\n\nexport async function geFHEvmInstance() {\n  if (!relayer) {\n    await initializeFHE();\n  }\n  return relayer;\n}"
         },
         {
           "type": "note",
@@ -1412,7 +1412,7 @@
           "type": "code",
           "language": "typescript",
           "title": "App Component with FHE Initialization",
-          "code": "const App = () => {\n  const [fheReady, setFheReady] = useState(false);\n\n  useEffect(() => {\n    initializeFHE()\n      .then(() => {\n        console.log(\"FHE initialized successfully\");\n        setFheReady(true);\n      })\n      .catch((err) => {\n        console.error(\"Failed to initialize FHE:\", err);\n      });\n  }, []);\n\n  if (!fheReady) {\n    return (\n      <div className=\"min-h-screen bg-background flex items-center justify-center\">\n        <div className=\"text-center\">\n          <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-magic-purple mx-auto mb-4\"></div>\n          <p className=\"text-muted-foreground\">Initializing encryption...</p>\n        </div>\n      </div>\n    );\n  }\n\n  return (/* ... rest of your app UI */);\n};"
+          "code": "const App = () => {\n  const [fheReady, seFHEReady] = useState(false);\n\n  useEffect(() => {\n    initializeFHE()\n      .then(() => {\n        console.log(\"FHE initialized successfully\");\n        seFHEReady(true);\n      })\n      .catch((err) => {\n        console.error(\"Failed to initialize FHE:\", err);\n      });\n  }, []);\n\n  if (!fheReady) {\n    return (\n      <div className=\"min-h-screen bg-background flex items-center justify-center\">\n        <div className=\"text-center\">\n          <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-magic-purple mx-auto mb-4\"></div>\n          <p className=\"text-muted-foreground\">Initializing encryption...</p>\n        </div>\n      </div>\n    );\n  }\n\n  return (/* ... rest of your app UI */);\n};"
         },
         {
           "type": "note",
@@ -1842,9 +1842,9 @@
         {
           "type": "list",
           "items": [
-            "**FHE and fhEVM Foundations (Sections 1-2)**: We unveiled FHE's principles – computing on encrypted data without decryption – and explored fhEVM as Zama's EVM extension for onchain privacy. You learned crypto basics (keys, TFHE scheme), data types (euint8, ebool), and operations (add, eq) with examples.",
+            "**FHE and fhEVM Foundations (Sections 1-2)**: We unveiled FHE's principles – computing on encrypted data without decryption – and explored fhEVM as Zama's EVM extension for onchain privacy. You learned crypto basics (keys, FHE scheme), data types (euint8, ebool), and operations (add, eq) with examples.",
             "**Project Setup and Tools (Sections 3-5)**: We outlined the dApp (private brewing game), gathered tools (Hardhat, React, relayer-sdk, Wagmi), cloned the boilerplate repo, and configured environments – adding Sepolia to MetaMask, funding with faucets, and setting env vars for secure deploys.",
-            "**Contract Crafting (Section 6)**: Built PotionBrew.sol with encrypted target storage and private comparisons using TFHE.eq, testing via Hardhat to verify privacy.",
+            "**Contract Crafting (Section 6)**: Built PotionBrew.sol with encrypted target storage and private comparisons using FHE.eq, testing via Hardhat to verify privacy.",
             "**Deployment and Integration (Section 7)**: Deployed to Sepolia with scripts/deploy.ts, added ABI to frontend, and integrated Wagmi/RainbowKit in App.tsx for wallet connects and contract writes.",
             "**Encryption Magic (Section 8)**: Added relayer-sdk in lib/fhe.ts for init/encrypt/decrypt and handling client-side privacy "
           ]
@@ -1982,77 +1982,7 @@
         },
         {
           "type": "text",
-          "content": "Host your frontend on Vercel – it's free, fast, and integrates with GitHub."
-        },
-        {
-          "type": "text",
-          "content": "**Step 1: Install Vercel CLI**"
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Install Vercel CLI",
-          "code": "npm i -g vercel"
-        },
-        {
-          "type": "note",
-          "icon": "terminal",
-          "title": "Global Installation",
-          "content": "Installing globally with -g makes the vercel command available throughout your system for easy deployment."
-        },
-        {
-          "type": "text",
-          "content": "**Step 2: Configure Environment Variables**"
-        },
-        {
-          "type": "text",
-          "content": "In packages/site, create .env.production with CONTRACT_ADDRESS (your deployed PotionBrew.sol address). This ensures the live site points to the right contract."
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": ".env.production",
-          "code": "CONTRACT_ADDRESS=0xYourDeployedAddressHere\nCHAIN_ID=11155111"
-        },
-        {
-          "type": "text",
-          "content": "**Step 3: Build and Deploy**"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Navigate to your frontend folder: cd packages/site",
-            "Login to Vercel: vercel login (follow prompts with email/GitHub)",
-            "Deploy: vercel --prod",
-            "Handle prompts for scope/project name",
-            "Vercel builds your Next.js app, uploads, and assigns a URL (e.g., your-app.vercel.app)"
-          ]
-        },
-        {
-          "type": "code",
-          "language": "bash",
-          "title": "Deployment Commands",
-          "code": "cd packages/site\nvercel login\nvercel --prod"
-        },
-        {
-          "type": "tip",
-          "icon": "rocket",
-          "title": "Test After Deploy",
-          "content": "Visit your deployed URL, connect MetaMask (Sepolia), submit a guess, and verify decryption works. Check browser console if issues arise."
-        },
-        {
-          "type": "text",
-          "content": "**Advanced: GitHub Integration**"
-        },
-        {
-          "type": "text",
-          "content": "Link your GitHub repo for automatic deployments on pushes. In Vercel dashboard, connect your repository and enable auto-deploys. Each push to main will trigger a new deployment."
-        },
-        {
-          "type": "note",
-          "icon": "github",
-          "title": "Custom Domains",
-          "content": "For a professional touch, add a custom domain in Vercel settings. Point your DNS to Vercel's servers and your dApp will be live on your own domain!"
+          "content": "Create a github repo, and push your code there. Host your frontend on Vercel – it's free, fast, and integrates with Github. Head to https://vercel.com. Connect your github account, and deploy the project"
         },
         {
           "type": "subheader",
@@ -2065,7 +1995,7 @@
         {
           "type": "list",
           "items": [
-            "**Add Hints**: Use TFHE.gt/lt for 'too high/low' encrypted feedback without revealing the target",
+            "**Add Hints**: Use FHE.gt/lt for 'too high/low' encrypted feedback without revealing the target",
             "**Multiplayer Guesses**: Store multiple encrypted targets for different players, add leaderboards",
             "**Difficulty Levels**: Add ranges (euint16 for 0-65535) or time limits for challenges",
             "**UI Polish**: Add animations with Framer Motion, sound effects, particle effects for correct guesses",
@@ -2082,7 +2012,7 @@
           "items": [
             "**Push to GitHub**: Fork the boilerplate, add a comprehensive README with demo link, setup instructions, and video walkthrough",
             "**Social Media**: Tweet about your project with #fhEVM #ZamaAI #Web3Privacy hashtags",
-            "**Zama Bounties**: Submit to Zama's bounty program if active (check https://www.zama.ai/bounty) – include repo and demo video",
+            "**Zama Bounties**: Submit to Zama's bounty program if active (check https://www.zama.ai/programs/developer-program) – include repo and demo video",
             "**Community Engagement**: Join Zama's Discord/GitHub for feedback and collaboration",
             "**Developer Portfolio**: Showcase this unique privacy-focused project to potential employers or clients"
           ]
@@ -2106,7 +2036,7 @@
         {
           "type": "list",
           "items": [
-            "Explore Zama docs for advanced TFHE operations (conditional logic, encrypted comparisons)",
+            "Explore Zama docs for advanced FHE operations (conditional logic, encrypted comparisons)",
             "Build a private voting dApp as your next project",
             "Try confidential DeFi applications with encrypted balances",
             "Experiment with encrypted machine learning inference"
@@ -2124,11 +2054,11 @@
           "type": "list",
           "items": [
             "**Unmatched Privacy**: Computes on encrypted data onchain – no trusted third parties, unlike some ZK solutions",
-            "**Security and Future-Proofing**: Quantum-resistant TFHE using lattice-based cryptography",
+            "**Security and Future-Proofing**: Quantum-resistant FHE using lattice-based cryptography",
             "**Decentralized KMS**: Key management system prevents single-point failures",
             "**Web3 Innovation**: Enables confidential DeFi (private trades), secure AI (encrypted inference), private gaming, and more",
             "**EVM Composability**: Works seamlessly with existing Solidity knowledge and EVM tools",
-            "**Ease for Developers**: Familiar syntax with TFHE additions; no complex trusted setups",
+            "**Ease for Developers**: Familiar syntax with FHE additions; no complex trusted setups",
             "**Gas Optimizations**: Continuously improving performance makes FHE more practical"
           ]
         },
@@ -2137,25 +2067,6 @@
           "icon": "shield",
           "title": "The Privacy Revolution",
           "content": "fhEVM turns blockchain from a public ledger into a private computation engine. You're building the infrastructure for a privacy-first Web3 future!"
-        },
-        {
-          "type": "subheader",
-          "text": "Bounty Program and Recognition"
-        },
-        {
-          "type": "text",
-          "content": "Zama occasionally runs bounty programs for innovative fhEVM applications. Here's how to stand out:"
-        },
-        {
-          "type": "list",
-          "items": [
-            "Polish your repository with clear documentation and code comments",
-            "Create a professional demo video (2-3 minutes) showing the dApp in action",
-            "Explain the privacy guarantees and why FHE was necessary for your use case",
-            "Document challenges faced and how you solved them",
-            "Highlight innovative use of TFHE operations",
-            "Include comprehensive tests and security considerations"
-          ]
         },
         {
           "type": "subheader",
@@ -2224,19 +2135,15 @@
         },
         {
           "title": "Zama Community Discord",
-          "url": "https://discord.com/invite/fhe-org"
+          "url": "https://discord.com/invite/zama"
         },
         {
-          "title": "Zama Bounty Programs",
-          "url": "https://www.zama.ai/bounties"
-        },
-        {
-          "title": "fhEVM Use Cases",
-          "url": "https://www.zama.ai/use-cases"
+          "title": "Zama Developer Programs",
+          "url": "https://www.zama.ai/programs/developer-program"
         },
         {
           "title": "Advanced fhEVM Tutorials",
-          "url": "https://docs.zama.ai/fhevm/tutorials"
+          "url": "https://docs.zama.ai"
         }
       ]
     }
@@ -2316,9 +2223,9 @@
         {
           "id": 2,
           "type": "fill-blank",
-          "question": "To check equality of encrypted values, use: TFHE._____(a, b)",
+          "question": "To check equality of encrypted values, use: FHE._____(a, b)",
           "correctAnswer": "eq",
-          "explanation": "TFHE.eq performs equality comparison on encrypted values, returning an encrypted boolean (ebool)."
+          "explanation": "FHE.eq performs equality comparison on encrypted values, returning an encrypted boolean (ebool)."
         },
         {
           "id": 3,

@@ -1,4 +1,4 @@
-import { ExternalLink, Github, BookOpen } from 'lucide-react';
+import { ExternalLink, Github, BookOpen } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -7,18 +7,25 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
             <p className="text-sm font-cinzel">
-              Built for{' '}
+              An enchanted journey into Fully Homomorphic Encryption
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Created by{" "}
               <a
-                href="https://www.zama.ai/"
+                href="https://github.com/Destiny-01"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:text-primary-glow transition-colors"
               >
-                Zama Hello FHEVM Bounty
+                @Destiny-01
+              </a>{" "}
+              •{" "}
+              <a
+                href="aigbedestinyic@gmail.com"
+                className="text-primary hover:text-primary-glow transition-colors"
+              >
+                Get in touch
               </a>
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              An enchanted journey into Fully Homomorphic Encryption
             </p>
           </div>
 
@@ -40,15 +47,6 @@ export const Footer = () => {
             >
               <Github className="w-4 h-4" />
               GitHub
-            </a>
-            <a
-              href="https://www.zama.ai/fhevm"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              fhEVM
             </a>
           </div>
         </div>
