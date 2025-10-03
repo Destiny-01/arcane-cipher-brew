@@ -11,6 +11,7 @@ import { NoteBlock } from "@/components/content/NoteBlock";
 import { TipBlock } from "@/components/content/TipBlock";
 import { ResourceList } from "@/components/content/ResourceList";
 import { QuizModal } from "@/components/quiz/QuizModal";
+import { CelebrationModal } from "@/components/quiz/CelebrationModal";
 import sectionsData from "@/data/sections.json";
 import { processContent } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export const SectionTemplate = ({
   onSectionComplete,
 }: SectionTemplateProps) => {
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const section = sectionsData.sections.find((s) => s.id === sectionId);
   const quiz = sectionsData.quizzes.find((q) => q.sectionId === sectionId);
@@ -182,16 +184,25 @@ export const SectionTemplate = ({
       )}
 
       {quiz && (
-        <QuizModal
-          isOpen={isQuizOpen}
-          onClose={() => setIsQuizOpen(false)}
-          sectionId={sectionId}
-          questions={quiz.questions as any}
-          onComplete={() => {
-            setIsQuizOpen(false);
-            onSectionComplete?.();
-          }}
-        />
+        <>
+          <QuizModal
+            isOpen={isQuizOpen}
+            onClose={() => setIsQuizOpen(false)}
+            sectionId={sectionId}
+            questions={quiz.questions as any}
+            onComplete={() => {
+              setIsQuizOpen(false);
+              if (sectionId === 10) {
+                setShowCelebration(true);
+              }
+              onSectionComplete?.();
+            }}
+          />
+          <CelebrationModal
+            isOpen={showCelebration}
+            onClose={() => setShowCelebration(false)}
+          />
+        </>
       )}
     </motion.div>
   );

@@ -7,18 +7,25 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-center md:text-left">
             <p className="text-sm font-cinzel">
-              Built for{' '}
+              An enchanted journey into Fully Homomorphic Encryption
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Created by{' '}
               <a
-                href="https://www.zama.ai/"
+                href="https://github.com/Destiny-01"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:text-primary-glow transition-colors"
               >
-                Zama Hello FHEVM Bounty
+                @Destiny-01
               </a>
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              An enchanted journey into Fully Homomorphic Encryption
+              {' '}•{' '}
+              <a
+                href="mailto:your@email.com"
+                className="text-primary hover:text-primary-glow transition-colors"
+              >
+                Get in touch
+              </a>
             </p>
           </div>
 
